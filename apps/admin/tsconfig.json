@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@moderno/types": ["../../packages/types"],
+      "@moderno/config/*": ["../../packages/config/*"],
+      "@moderno/theme": ["../../packages/theme"],
+      "@moderno/ui": ["../../packages/ui"],
+      "@moderno/env": ["../../packages/env"],
+      "@moderno/logger": ["../../packages/logger"],
+      "@moderno/monitoring": ["../../packages/monitoring"],
+      "@moderno/feature-flags": ["../../packages/feature-flags"],
+      "@moderno/product-registry": ["../../packages/product-registry"],
+      "@moderno/api-client": ["../../packages/api-client"],
+      "@moderno/security": ["../../packages/security"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
