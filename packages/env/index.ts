@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test", "staging"]).default("development"),
-  NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+  NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3005"),
   SUPABASE_URL: z.string().url().default("https://your-supabase.supabase.co"),
   SUPABASE_ANON_KEY: z.string().min(1).default("demo-anon-key"),
   STRIPE_SECRET_KEY: z.string().min(1).default("sk_test_demo"),

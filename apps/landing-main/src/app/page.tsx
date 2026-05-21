@@ -290,7 +290,7 @@ export default function Home() {
         </div>
         <div className="hidden lg:block absolute -right-12 bottom-1/4 glossy-panel p-6 opacity-25 text-[9px] font-mono tracking-widest text-[#00a8ff] border-[#0052FF]/20 rotate-12 transform scale-90">
           <p>MODERNOACCESS: LAUNCHED</p>
-          <p className="mt-1 text-white/50">PORT: 3004 // EDGE NODE</p>
+          <p className="mt-1 text-white/50">PORT: 3009 // EDGE NODE</p>
         </div>
 
         {/* Luminous Title Halo behind MODERNO */}

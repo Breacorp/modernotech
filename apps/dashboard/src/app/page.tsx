@@ -157,7 +157,7 @@ export default function DashboardPage() {
               ✅ Suscripción Activa
             </span>
             <button
-              onClick={() => router.push("http://localhost:3001")}
+              onClick={() => router.push("http://localhost:3006")}
               className="text-xs px-4 py-2 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.05)] rounded-xl font-bold transition-all"
             >
               Ver Perfil ID
