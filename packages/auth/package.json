@@ -3,5 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "main": "./index.ts",
-  "types": "./index.ts"
+  "types": "./index.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moderno/moderno-hub.git"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.111.0"
+  }
 }

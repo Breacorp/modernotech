@@ -1,5 +1,12 @@
 {
   "name": "@moderno/database",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moderno/moderno-hub.git"
+  }
 }
