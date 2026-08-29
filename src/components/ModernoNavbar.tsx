@@ -50,9 +50,11 @@ export const ModernoNavbar: React.FC = () => {
               className="flex items-center gap-2.5 group shrink-0 focus:outline-none"
               aria-label="Moderno Tech - Home"
             >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00E5FF] to-[#157BFF] flex items-center justify-center text-black font-black text-xs shadow-[0_0_20px_rgba(0,229,255,0.4)] group-hover:scale-105 transition-transform duration-300">
-                MT
-              </div>
+              <img
+                src="/logo.png"
+                alt="Moderno Tech Logo"
+                className="w-8 h-8 rounded-full object-contain shadow-[0_0_20px_rgba(0,122,255,0.4)] group-hover:scale-105 transition-transform duration-300"
+              />
               <div className="flex flex-col leading-none">
                 <span className="text-[9px] font-extrabold tracking-[0.25em] text-white/50 uppercase">
                   MODERNO

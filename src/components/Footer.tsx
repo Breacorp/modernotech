@@ -13,9 +13,11 @@ export const Footer: React.FC = () => {
           <div className="col-span-2 md:col-span-2 flex flex-col justify-between">
             <div>
               <a className="flex items-center gap-2.5 group mb-4" href="/">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00E5FF] to-[#157BFF] flex items-center justify-center text-black font-black text-xs shadow-[0_0_20px_rgba(0,229,255,0.35)] group-hover:scale-105 transition-transform duration-300">
-                  MT
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="Moderno Tech Logo"
+                  className="w-8 h-8 rounded-full object-contain shadow-[0_0_20px_rgba(0,122,255,0.35)] group-hover:scale-105 transition-transform duration-300"
+                />
                 <div className="flex flex-col leading-none">
                   <span className="text-[9px] font-extrabold tracking-[0.25em] text-white/50 uppercase">
                     MODERNO
