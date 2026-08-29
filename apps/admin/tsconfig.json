@@ -19,27 +19,17 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@moderno/types": ["../../packages/types"],
-      "@moderno/config/*": ["../../packages/config/*"],
-      "@moderno/theme": ["../../packages/theme"],
-      "@moderno/ui": ["../../packages/ui"],
-      "@moderno/env": ["../../packages/env"],
-      "@moderno/logger": ["../../packages/logger"],
-      "@moderno/monitoring": ["../../packages/monitoring"],
-      "@moderno/feature-flags": ["../../packages/feature-flags"],
-      "@moderno/product-registry": ["../../packages/product-registry"],
-      "@moderno/api-client": ["../../packages/api-client"],
-      "@moderno/security": ["../../packages/security"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "*.ts",
+    "*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "apps", "packages", "product-boilerplate"]
 }

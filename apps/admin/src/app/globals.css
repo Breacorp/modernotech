@@ -1,30 +1,173 @@
 @import "tailwindcss";
+@import "../styles/design-tokens.css";
+@source "../**";
 
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.25s ease-out forwards;
-  }
-  .animate-pulse-slow {
-    animation: pulseSlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
+:root {
+  --bg: #050507;
+  --panel: rgba(11, 11, 16, 0.75);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(0, 229, 255, 0.4);
+  --primary: #00E5FF;
+  --primary-glow: rgba(0, 229, 255, 0.25);
+  --accent: #157BFF;
+  --text-muted: #94A3B8;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+html, body {
+  background-color: #050507 !important;
+  color: #ffffff !important;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-@keyframes pulseSlow {
-  0%, 100% {
-    opacity: 1;
+/* Layered active environment backgrounds matching access.moderno.com.ar */
+.ambient-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floating animated orbs in deep navy, cobalt and cian */
+.orb-1 {
+  position: absolute;
+  top: -100px;
+  left: 20%;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(0, 82, 255, 0.18) 0%, transparent 70%);
+  filter: blur(80px);
+  animation: orbFloat 25s ease-in-out infinite alternate;
+}
+
+.orb-2 {
+  position: absolute;
+  top: 300px;
+  right: 5%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 168, 255, 0.1) 0%, transparent 65%);
+  filter: blur(80px);
+  animation: orbFloat 20s ease-in-out infinite alternate-reverse;
+}
+
+.orb-3 {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(0, 82, 255, 0.08) 0%, transparent 70%);
+  filter: blur(90px);
+  animation: orbFloat 30s ease-in-out infinite alternate;
+}
+
+/* Interactive cursor spotlight that illuminates backgrounds and borders */
+.mouse-spotlight-global {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    700px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(0, 168, 255, 0.05),
+    transparent 80%
+  );
+  mix-blend-mode: screen;
+}
+
+/* Grid lines overlay */
+.cyber-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(0, 82, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 82, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  background-position: center top;
+  mask-image: radial-gradient(circle at 50% 30vh, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30vh, black 30%, transparent 80%);
+  pointer-events: none;
+}
+
+/* Ultra glossy card panels */
+.glossy-panel {
+  background: var(--panel);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--border);
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08), /* top glossy highlight */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 24px;
+}
+
+/* Halo behind the hero title */
+.title-halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(0, 82, 255, 0.35) 0%, transparent 60%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
+  animation: haloPulse 8s ease-in-out infinite alternate;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #050a15;
+}
+::-webkit-scrollbar-thumb {
+  background: #142144;
+  border: 2px solid #050a15;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1e3266;
+}
+
+/* Hide scrollbar for category filters */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes orbFloat {
+  0% {
+    transform: translate(0px, 0px) scale(1);
   }
   50% {
-    opacity: 0.5;
+    transform: translate(40px, -60px) scale(1.1);
+  }
+  100% {
+    transform: translate(-30px, 40px) scale(0.9);
   }
 }
+
+@keyframes haloPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 1;
+  }
+}
+
