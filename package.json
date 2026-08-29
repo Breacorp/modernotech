@@ -2,13 +2,16 @@
   "name": "modernotech",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "npm@11.12.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev -p 3005",
-    "build": "next build",
+    "build": "turbo run build --filter=landing-main --filter=@moderno/admin",
     "start": "next start",
-    "lint": "eslint",
-    "build:turbo": "turbo run build",
-    "dev:turbo": "turbo run dev"
+    "lint": "eslint"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",
