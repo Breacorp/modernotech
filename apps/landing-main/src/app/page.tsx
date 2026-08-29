@@ -1,18 +1,21 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { PRODUCTS_REGISTRY } from "../data/products";
 import { Navbar } from "../components/Navbar";
-import { EcosystemSection } from "../components/EcosystemSection";
-import { SolutionsSection } from "../components/SolutionsSection";
-import { AIHighlightSection } from "../components/AIHighlightSection";
-import { ServicesSection } from "../components/ServicesSection";
+import { Hero } from "../components/Hero";
+import { FeaturedProduct } from "../components/FeaturedProduct";
+import { ProductEcosystem } from "../components/ProductEcosystem";
+import { TechnologySection } from "../components/TechnologySection";
+import { AboutSection } from "../components/AboutSection";
+import { VisionSection } from "../components/VisionSection";
+import { FinalCTA } from "../components/FinalCTA";
 import { Footer } from "../components/Footer";
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Global mouse coordinates for the viewport glow spotlight
+  // Global mouse coordinates for viewport glow spotlight
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (containerRef.current) {
@@ -27,33 +30,16 @@ export default function Home() {
     };
   }, []);
 
-  // Subtle Hero Parallax scroll transformations
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 400], [0, 60]);
-  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
-
-  const handleExploreClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const target = document.getElementById("ecosistema");
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const handleSolutionsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const target = document.getElementById("soluciones");
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  // Configurable featured flagship product (defaults to first featured product or Moderno AI)
+  const featuredProduct =
+    PRODUCTS_REGISTRY.find((p) => p.featured) || PRODUCTS_REGISTRY[0];
 
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen selection:bg-[#0052FF] selection:text-white overflow-hidden bg-[#070d1e]"
+      className="relative min-h-screen selection:bg-[#0052FF] selection:text-white overflow-hidden bg-[#060B18]"
     >
-      {/* 3D Active Layered Ambient Backgrounds */}
+      {/* Dynamic Ambient Mesh Background */}
       <div className="ambient-container">
         <div className="orb-1" />
         <div className="orb-2" />
@@ -61,96 +47,36 @@ export default function Home() {
         <div className="cyber-grid" />
       </div>
 
-      {/* Global Mouse Tracking Spotlight */}
+      {/* Interactive Global Mouse Spotlight */}
       <div className="mouse-spotlight-global" />
 
-      {/* Translucent Navigation Header */}
+      {/* Navigation */}
       <Navbar />
 
-      {/* Hero Section */}
-      <section id="hero" className="relative z-10 max-w-7xl mx-auto px-6 pt-24 pb-28 text-center flex flex-col items-center justify-center min-h-[85vh] overflow-visible">
-        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="flex flex-col items-center max-w-4xl">
-          {/* Decorative floating system badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-8 glossy-panel px-5 py-2 border-[#0052FF]/30 inline-flex items-center gap-2.5 shadow-[0_0_20px_rgba(0,82,255,0.2)]"
-          >
-            <span className="w-2 h-2 rounded-full bg-[#00a8ff] animate-ping" />
-            <span className="text-[11px] font-mono tracking-widest text-white uppercase font-semibold">
-              MODERNO TECH &bull; ECOSISTEMA TECNOLÓGICO CENTRAL
-            </span>
-          </motion.div>
+      <main>
+        {/* 1. Hero Section (Heading, Copy, CTAs & Interconnected Node Mesh) */}
+        <Hero />
 
-          {/* Title Halo & Main Heading */}
-          <div className="relative mb-6">
-            <div className="title-halo" />
-            <motion.h1 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 text-6xl sm:text-8xl md:text-9xl font-black tracking-[0.15em] text-white leading-none drop-shadow-[0_0_40px_rgba(0,82,255,0.25)]"
-            >
-              MODERNO <span className="text-[#00a8ff]">TECH</span>
-            </motion.h1>
-          </div>
+        {/* 2. Featured Flagship Spotlight (The Future of Moderno / Moderno AI) */}
+        <FeaturedProduct product={featuredProduct} />
 
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="text-lg sm:text-2xl font-semibold text-white tracking-[0.05em] mt-4 mb-6 max-w-3xl"
-          >
-            Tecnología para crear, gestionar, automatizar y transformar.
-          </motion.h2>
+        {/* 3. Product Ecosystem Bento Grid & Category Filters ("Todo Moderno. En un solo lugar.") */}
+        <ProductEcosystem />
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
-            className="text-sm sm:text-base text-[#9ab0d3] font-light max-w-2xl leading-relaxed mb-12"
-          >
-            Una sola marca, un ecosistema de tecnología. Accede a nuestras plataformas de gestión empresarial, inteligencia artificial, control de acceso, videojuegos, e-commerce e infraestructura cloud.
-          </motion.p>
+        {/* 4. Technology Behind Moderno (Proprietary Stack & Architectural Pillars) */}
+        <TechnologySection />
 
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
-            className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto"
-          >
-            <a
-              href="#ecosistema"
-              onClick={handleExploreClick}
-              className="w-full sm:w-auto px-10 py-4 bg-[#0052FF] hover:bg-[#003ECC] text-white text-xs uppercase tracking-widest font-bold rounded-full transition-all hover:scale-[1.03] active:scale-[0.97] shadow-[0_0_30px_rgba(0,82,255,0.4)] border border-white/10"
-            >
-              Explorar el Ecosistema
-            </a>
-            <a
-              href="#soluciones"
-              onClick={handleSolutionsClick}
-              className="w-full sm:w-auto px-10 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs uppercase tracking-widest font-bold rounded-full transition-all hover:scale-[1.03] active:scale-[0.97]"
-            >
-              Conocer Moderno Tech
-            </a>
-          </motion.div>
-        </motion.div>
-      </section>
+        {/* 5. Institutional Manifesto & Mission ("Construimos tecnología para el mundo real") */}
+        <AboutSection />
 
-      {/* Section 1: Ecosistema & Productos Grid */}
-      <EcosystemSection />
+        {/* 6. Continuous Expansion & Roadmap ("Esto recién empieza") */}
+        <VisionSection />
 
-      {/* Section 2: Soluciones Orientadas al Cliente */}
-      <SolutionsSection />
+        {/* 7. Final Call to Action */}
+        <FinalCTA />
+      </main>
 
-      {/* Section 3: Inteligencia Artificial Estratégica */}
-      <AIHighlightSection />
-
-      {/* Section 4: Servicios Tecnológicos */}
-      <ServicesSection />
-
-      {/* Footer Completo del Ecosistema */}
+      {/* 8. Comprehensive Footer with System Status */}
       <Footer />
     </div>
   );

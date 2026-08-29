@@ -2,30 +2,49 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "600", "700", "800", "900"] });
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Moderno Tech — Ecosistema Tecnológico Central",
-  description: "Portal central de Moderno Tech. Descubre nuestro ecosistema de plataformas empresariales (Moderno One, Access), Inteligencia Artificial (Nova AI, Cinema Studio, Voice AI, Nova Home), Gaming (Moderno Play), E-commerce y servicios cloud.",
+  title: "Moderno Tech — Tecnología que conecta todo",
+  description:
+    "Descubrí el ecosistema Moderno Tech: inteligencia artificial, software empresarial, tecnología y soluciones diseñadas para el mundo real.",
   keywords: [
     "Moderno Tech",
+    "Moderno AI",
     "Moderno One",
-    "Moderno Access",
     "Moderno Play",
-    "Nova AI",
-    "Cinema Studio",
-    "Voice AI",
+    "Moderno Weather",
+    "Moderno AI Cleaner Pro",
+    "Moderno Pay",
+    "Moderno CRM",
     "WaTicket",
-    "Mercato",
+    "Moderno Access",
+    "Cinema Studio AI",
+    "Nova Home",
     "Ecosistema Tecnológico",
-    "Software Empresarial",
     "Inteligencia Artificial",
-    "Control de Acceso"
+    "Software Empresarial",
   ],
-  authors: [{ name: "Moderno Tech" }],
+  authors: [{ name: "Moderno Tech", url: "https://moderno.com.ar" }],
+  creator: "Moderno Tech",
+  publisher: "Moderno Tech",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://moderno.com.ar"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Moderno Tech — Ecosistema Tecnológico Central",
-    description: "Una sola marca. Un ecosistema de tecnología. Múltiples soluciones empresariales, IA, e-commerce y gaming.",
+    title: "Moderno Tech — Tecnología que conecta todo",
+    description:
+      "Descubrí el ecosistema Moderno Tech: inteligencia artificial, software empresarial, tecnología y soluciones diseñadas para el mundo real.",
     url: "https://moderno.com.ar",
     siteName: "Moderno Tech",
     locale: "es_AR",
@@ -33,12 +52,21 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Moderno Tech — Ecosistema Tecnológico",
-    description: "Tecnología para crear, gestionar, automatizar y transformar.",
+    title: "Moderno Tech — Tecnología que conecta todo",
+    description:
+      "Descubrí el ecosistema Moderno Tech: inteligencia artificial, software, tecnología y soluciones diseñadas para el mundo real.",
+    creator: "@modernotech",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -49,18 +77,30 @@ export default function RootLayout({
 }>) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Moderno Tech",
-    "url": "https://moderno.com.ar",
-    "logo": "https://moderno.com.ar/logo.png",
-    "description": "Ecosistema tecnológico de software empresarial, inteligencia artificial, control de acceso, e-commerce y servicios cloud.",
-    "subOrganization": [
-      { "@type": "SoftwareApplication", "name": "Moderno One", "url": "https://one.moderno.com.ar" },
-      { "@type": "SoftwareApplication", "name": "Moderno Access", "url": "https://access.moderno.com.ar" },
-      { "@type": "SoftwareApplication", "name": "Moderno Play", "url": "https://play.moderno.com.ar" },
-      { "@type": "SoftwareApplication", "name": "Nova AI", "url": "https://nova.moderno.com.ar" },
-      { "@type": "SoftwareApplication", "name": "Cinema Studio", "url": "https://cinema.moderno.com.ar" },
-      { "@type": "SoftwareApplication", "name": "Voice AI", "url": "https://voice.moderno.com.ar" }
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://moderno.com.ar/#organization",
+        "name": "Moderno Tech",
+        "url": "https://moderno.com.ar",
+        "logo": "https://moderno.com.ar/icon.png",
+        "description":
+          "Ecosistema tecnológico de software empresarial, inteligencia artificial, entretenimiento y servicios cloud.",
+        "sameAs": [
+          "https://github.com/Breacorp",
+          "https://instagram.com/modernotech",
+          "https://linkedin.com/company/modernotech"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://moderno.com.ar/#website",
+        "url": "https://moderno.com.ar",
+        "name": "Moderno Tech",
+        "publisher": {
+          "@id": "https://moderno.com.ar/#organization"
+        }
+      }
     ]
   };
 
@@ -72,9 +112,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={outfit.className}>
-        {children}
-      </body>
+      <body className={outfit.className}>{children}</body>
     </html>
   );
 }
