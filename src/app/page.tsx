@@ -4,6 +4,7 @@ import React from "react";
 import { ModernoBackground } from "../components/ModernoBackground";
 import { ModernoNavbar } from "../components/ModernoNavbar";
 import { Hero } from "../components/Hero";
+import { ProductShowcaseInteractive } from "../components/ProductShowcaseInteractive";
 import { ProductEcosystem } from "../components/ProductEcosystem";
 import { WhyModernoSection } from "../components/WhyModernoSection";
 import { BuiltByModernoSection } from "../components/BuiltByModernoSection";
@@ -24,7 +25,10 @@ export default function Home() {
         {/* 1. Hero Section ("Tecnología para un mundo más moderno") */}
         <Hero />
 
-        {/* 2. Product Ecosystem ("Todo Moderno, conectado" with Access & Play Spotlight) */}
+        {/* 2. Visual Interactive Product Showcase (Play, Access & Cleaner Pro) */}
+        <ProductShowcaseInteractive />
+
+        {/* 3. Product Ecosystem ("Todo Moderno, conectado" with Access & Play Spotlight) */}
         <ProductEcosystem />
 
         {/* 3. Architecture & Philosophy ("¿Por qué Moderno?") */}

@@ -45,17 +45,20 @@ export const Footer: React.FC = () => {
               MODERNO
             </h4>
             <nav className="flex flex-col gap-2.5 text-xs font-bold text-[#94A3B8]">
-              <a href="#nosotros" className="hover:text-[#00E5FF] transition-colors">
+              <a href="/#nosotros" className="hover:text-[#00E5FF] transition-colors">
                 Nosotros
               </a>
-              <a href="#tecnologia" className="hover:text-[#00E5FF] transition-colors">
+              <a href="/#tecnologia" className="hover:text-[#00E5FF] transition-colors">
                 Tecnología
               </a>
-              <a href="#ecosistema" className="hover:text-[#00E5FF] transition-colors">
+              <a href="/#ecosistema" className="hover:text-[#00E5FF] transition-colors">
                 Ecosistema
               </a>
-              <a href="mailto:contacto@moderno.com.ar" className="hover:text-[#00E5FF] transition-colors">
-                Contacto
+              <a href="/pricing" className="hover:text-[#00E5FF] transition-colors">
+                Planes & Precios
+              </a>
+              <a href="/ayuda" className="hover:text-[#00E5FF] transition-colors">
+                Centro de Ayuda
               </a>
             </nav>
           </div>
@@ -72,6 +75,9 @@ export const Footer: React.FC = () => {
               <a href="https://play.moderno.com.ar/" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
                 Moderno Play
               </a>
+              <a href="/pricing" className="hover:text-[#00E5FF] transition-colors">
+                Moderno AI Cleaner Pro
+              </a>
               <a href="https://ai.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
                 Moderno AI
               </a>
@@ -80,9 +86,6 @@ export const Footer: React.FC = () => {
               </a>
               <a href="https://one.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
                 Moderno One
-              </a>
-              <a href="https://pay.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
-                Moderno Pay
               </a>
               <a href="https://ticket.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
                 Moderno CRM
@@ -93,16 +96,16 @@ export const Footer: React.FC = () => {
           {/* Col 3: LEGAL & SOCIAL */}
           <div>
             <h4 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-4 font-sans">
-              LEGAL & SOCIAL
+              LEGAL & SEGURIDAD
             </h4>
             <nav className="flex flex-col gap-2.5 text-xs font-bold text-[#94A3B8]">
-              <a href="#privacidad" className="hover:text-[#00E5FF] transition-colors">
-                Privacidad
+              <a href="/privacidad" className="hover:text-[#00E5FF] transition-colors">
+                Política de Privacidad
               </a>
-              <a href="#terminos" className="hover:text-[#00E5FF] transition-colors">
-                Términos de Servicio
+              <a href="/terminos" className="hover:text-[#00E5FF] transition-colors">
+                Términos y Condiciones
               </a>
-              <a href="#seguridad" className="hover:text-[#00E5FF] transition-colors">
+              <a href="/seguridad" className="hover:text-[#00E5FF] transition-colors">
                 Seguridad Zero-Trust
               </a>
               <a href="https://github.com/Breacorp" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors flex items-center gap-1">

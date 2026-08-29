@@ -1,0 +1,322 @@
+"use client";
+
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export const ProductShowcaseInteractive: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"access" | "play" | "cleaner">("play");
+
+  return (
+    <section className="relative z-10 max-w-[1920px] mx-auto px-6 sm:px-10 lg:px-12 py-20 select-none">
+      <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-bold text-[#00E5FF] mb-3">
+          <span className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse" />
+          <span className="tracking-[0.2em] uppercase">EXPERIENCIA VISUAL & PRODUCT SHOWCASE</span>
+        </div>
+        <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-sans">
+          Diseñado para el mundo real.
+        </h2>
+        <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-2 max-w-xl mx-auto">
+          Explorá las interfaces reales de nuestras plataformas insignia: gaming en la nube, control de accesos corporativo y diagnóstico de hardware.
+        </p>
+
+        {/* Tab Switcher */}
+        <div className="mt-8 inline-flex items-center p-1.5 rounded-2xl bg-[#0B0B10] border border-white/[0.08] backdrop-blur-xl shadow-xl">
+          <button
+            onClick={() => setActiveTab("play")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "play"
+                ? "bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]"
+                : "text-[#94A3B8] hover:text-white"
+            }`}
+          >
+            <span>🎮</span>
+            <span>Moderno Play</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("access")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "access"
+                ? "bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]"
+                : "text-[#94A3B8] hover:text-white"
+            }`}
+          >
+            <span>🛡️</span>
+            <span>Moderno Access</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("cleaner")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "cleaner"
+                ? "bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]"
+                : "text-[#94A3B8] hover:text-white"
+            }`}
+          >
+            <span>⚡</span>
+            <span>AI Cleaner Pro</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Interactive Mockup Container */}
+      <div className="max-w-6xl mx-auto rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_25px_80px_rgba(0,0,0,0.95)] overflow-hidden">
+        {/* macOS Window Title Bar */}
+        <div className="px-6 py-4 bg-[#050507] border-b border-white/[0.06] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-rose-500/80" />
+            <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+            <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
+            <span className="ml-4 text-[11px] font-mono text-white/40">
+              {activeTab === "play" && "https://play.moderno.com.ar — Cloud Gaming Console 60 FPS"}
+              {activeTab === "access" && "https://access.moderno.com.ar — Security & Access Control Mesh"}
+              {activeTab === "cleaner" && "Moderno AI Cleaner Pro v2.4 (macOS Native Suite)"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse" />
+            <span className="text-[10px] font-mono text-[#00E5FF] font-bold">LIVE TELEMETRY</span>
+          </div>
+        </div>
+
+        {/* Tab Content Panes */}
+        <div className="p-6 sm:p-10 min-h-[480px] flex flex-col justify-between">
+          <AnimatePresence mode="wait">
+            {/* 1. MODERNO PLAY SHOWCASE */}
+            {activeTab === "play" && (
+              <motion.div
+                key="play"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-8"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/[0.06]">
+                  <div>
+                    <div className="flex items-center gap-2 text-xs text-[#00E5FF] font-bold mb-1">
+                      <span>CLOUD STREAMING ENGINE</span>
+                      <span>&bull;</span>
+                      <span className="text-emerald-400">12ms Buenos Aires Local Server</span>
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-white font-sans">
+                      Moderno Play Gaming Hub
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-1 max-w-xl">
+                      Biblioteca ultra-optimizada con más de 18,900 juegos retro y modernos listos para jugar al instante sin descargas.
+                    </p>
+                  </div>
+
+                  <a
+                    href="https://play.moderno.com.ar/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.4)] shrink-0 text-center"
+                  >
+                    Entrar a Moderno Play &rarr;
+                  </a>
+                </div>
+
+                {/* Simulated Game Cards Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[
+                    { title: "Retro Arcade 90s", category: "Arcade Classics", badge: "60 FPS", color: "#EC4899" },
+                    { title: "Cyber Horizon GP", category: "Racing Sim", badge: "Low Latency", color: "#00E5FF" },
+                    { title: "Shadow Stealth Ops", category: "Action & Strategy", badge: "Multiplayer", color: "#3B82F6" },
+                    { title: "Nova Stadium Football", category: "Sports Cloud", badge: "Gamepad Sync", color: "#10B981" }
+                  ].map((game, i) => (
+                    <div
+                      key={i}
+                      className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08] hover:border-[#00E5FF]/50 transition-all group flex flex-col justify-between h-44 relative overflow-hidden"
+                    >
+                      <div
+                        className="absolute top-0 right-0 w-24 h-24 blur-xl opacity-20 group-hover:opacity-40 transition-opacity"
+                        style={{ backgroundColor: game.color }}
+                      />
+                      <div>
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 border border-white/10">
+                          {game.badge}
+                        </span>
+                        <h4 className="text-sm font-black text-white mt-3 group-hover:text-[#00E5FF] transition-colors">
+                          {game.title}
+                        </h4>
+                        <p className="text-[10px] text-[#94A3B8] font-light mt-0.5">{game.category}</p>
+                      </div>
+                      <div className="text-[10px] font-mono text-[#00E5FF] flex items-center justify-between">
+                        <span>INSTANT PLAY</span>
+                        <span>&rarr;</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* 2. MODERNO ACCESS SHOWCASE */}
+            {activeTab === "access" && (
+              <motion.div
+                key="access"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-8"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/[0.06]">
+                  <div>
+                    <div className="flex items-center gap-2 text-xs text-[#3B82F6] font-bold mb-1">
+                      <span>CONTROL DE ACCESOS Y EDIFICIOS</span>
+                      <span>&bull;</span>
+                      <span className="text-emerald-400">Multi-Hardware Support</span>
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-white font-sans">
+                      Moderno Access Enterprise
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-1 max-w-xl">
+                      Aislamiento estructural por consorcio, compatibilidad con torniquetes y molinetes Hikvision, Dahua, ZKTeco y PCT con cifrado bancario.
+                    </p>
+                  </div>
+
+                  <a
+                    href="https://access.moderno.com.ar/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#00E5FF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_20px_rgba(59,130,246,0.4)] shrink-0 text-center"
+                  >
+                    Entrar a Moderno Access &rarr;
+                  </a>
+                </div>
+
+                {/* Telemetry Access Nodes Stream */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08]">
+                    <span className="text-[10px] text-white/40 font-mono block mb-1">NODO PRINCIPAL</span>
+                    <h4 className="text-base font-bold text-white mb-3">Puerta Principal Torre A</h4>
+                    <div className="space-y-2 text-xs text-[#94A3B8]">
+                      <div className="flex justify-between">
+                        <span>Lector RFID/NFC:</span>
+                        <span className="text-emerald-400 font-mono">ONLINE</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Aperturas Hoy:</span>
+                        <span className="text-white font-mono font-bold">1,248</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Latencia E2E:</span>
+                        <span className="text-[#00E5FF] font-mono">8ms</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08]">
+                    <span className="text-[10px] text-white/40 font-mono block mb-1">BARRERA VEHICULAR</span>
+                    <h4 className="text-base font-bold text-white mb-3">Acceso Cocheras Subsuelo</h4>
+                    <div className="space-y-2 text-xs text-[#94A3B8]">
+                      <div className="flex justify-between">
+                        <span>Cámara LPR Hikvision:</span>
+                        <span className="text-emerald-400 font-mono">ACTIVA</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Vehículos Registrados:</span>
+                        <span className="text-white font-mono font-bold">342</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Modo Autónomo:</span>
+                        <span className="text-emerald-400 font-mono">HABILITADO</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08]">
+                    <span className="text-[10px] text-white/40 font-mono block mb-1">SEGURIDAD ESTRUCTURAL</span>
+                    <h4 className="text-base font-bold text-white mb-3">Protocolo Zero-Trust</h4>
+                    <div className="space-y-2 text-xs text-[#94A3B8]">
+                      <div className="flex justify-between">
+                        <span>Cifrado:</span>
+                        <span className="text-white font-mono font-bold">AES-256 E2E</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Base de Datos:</span>
+                        <span className="text-[#00E5FF] font-mono">Zero-Shared DB</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Auditoría de Logs:</span>
+                        <span className="text-emerald-400 font-mono">IMMUTABLE</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 3. MODERNO AI CLEANER PRO SHOWCASE */}
+            {activeTab === "cleaner" && (
+              <motion.div
+                key="cleaner"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-8"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/[0.06]">
+                  <div>
+                    <div className="flex items-center gap-2 text-xs text-[#00C8FF] font-bold mb-1">
+                      <span>MACOS SYSTEM INTELLIGENCE</span>
+                      <span>&bull;</span>
+                      <span className="text-emerald-400">Apple Silicon & Intel</span>
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-white font-sans">
+                      Moderno AI Cleaner Pro
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-1 max-w-xl">
+                      Planes de limpieza heurísticos basados en telemetría de hardware, modo developer y snapshots atómicos.
+                    </p>
+                  </div>
+
+                  <a
+                    href="/pricing"
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.4)] shrink-0 text-center"
+                  >
+                    Ver Planes & Licencias &rarr;
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08]">
+                    <div className="text-xl mb-2">💡</div>
+                    <h4 className="text-xs font-bold text-white mb-1">AI Optimizer & Doctor</h4>
+                    <p className="text-[11px] text-[#94A3B8] font-light leading-relaxed">
+                      Telemetría predictiva de RAM y CPU en tiempo real.
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08]">
+                    <div className="text-xl mb-2">⚡</div>
+                    <h4 className="text-xs font-bold text-white mb-1">Entorno Developer Pro</h4>
+                    <p className="text-[11px] text-[#94A3B8] font-light leading-relaxed">
+                      Purga de DerivedData, node_modules, Rust y Gradle.
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08]">
+                    <div className="text-xl mb-2">🛡️</div>
+                    <h4 className="text-xs font-bold text-white mb-1">Rollback Center Total</h4>
+                    <p className="text-[11px] text-[#94A3B8] font-light leading-relaxed">
+                      Snapshots atómicos para revertir con 1 clic.
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-[#050507] border border-white/[0.08]">
+                    <div className="text-xl mb-2">🛑</div>
+                    <h4 className="text-xs font-bold text-white mb-1">Desinstalador Completo</h4>
+                    <p className="text-[11px] text-[#94A3B8] font-light leading-relaxed">
+                      Eliminación con mapeo de Containers y Caches.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  );
+};

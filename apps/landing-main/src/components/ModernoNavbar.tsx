@@ -17,18 +17,29 @@ export const ModernoNavbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { label: "Productos", href: "#productos" },
-    { label: "Ecosistema", href: "#ecosistema" },
-    { label: "Tecnología", href: "#tecnologia" },
-    { label: "Nosotros", href: "#nosotros" },
+    { label: "Productos", href: "/#productos" },
+    { label: "Ecosistema", href: "/#ecosistema" },
+    { label: "Precios", href: "/pricing" },
+    { label: "Tecnología", href: "/#tecnologia" },
+    { label: "Ayuda", href: "/ayuda" },
   ];
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLElement>, href: string) => {
-    e.preventDefault();
-    setMobileMenuOpen(false);
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
+    if (href.startsWith("/#") && window.location.pathname === "/") {
+      e.preventDefault();
+      setMobileMenuOpen(false);
+      const targetId = href.replace("/", "");
+      const target = document.querySelector(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (href.startsWith("#")) {
+      e.preventDefault();
+      setMobileMenuOpen(false);
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
     }
   };
 
