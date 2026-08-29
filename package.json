@@ -8,7 +8,9 @@
   ],
   "scripts": {
     "build": "turbo run build",
+    "build:landing": "turbo run build --filter=landing-main",
     "dev": "turbo run dev",
+    "dev:landing": "turbo run dev --filter=landing-main",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\""
   },
