@@ -11,7 +11,7 @@ export interface ProductMetadata {
   name: string;
   description: string;
   subdomain: string;
-  category: 'saas' | 'ai' | 'dev' | 'edu' | 'ecom';
+  category: 'saas' | 'ai' | 'dev' | 'edu' | 'ecom' | 'erp' | 'gaming';
   isActiveByDefault: boolean;
 }
 

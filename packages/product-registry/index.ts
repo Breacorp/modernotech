@@ -9,15 +9,19 @@ export interface ExtendedProductMetadata extends ProductMetadata {
 }
 
 export const REGISTRO_PRODUCTOS: ExtendedProductMetadata[] = ECOSISTEMA_PRODUCTOS.map(prod => {
-  // Enriquecemos la metadata básica con configuraciones avanzadas del registro
   const extensions: Record<string, Partial<ExtendedProductMetadata>> = {
-    access: { environmentStatus: 'production', pricingTier: 'enterprise', dependencies: [] },
-    cinema: { environmentStatus: 'beta', pricingTier: 'growth', requiredFlags: ['enableCinemaStudioBeta'], dependencies: ['local-llm'] },
-    support: { environmentStatus: 'production', pricingTier: 'growth', dependencies: ['access'] },
-    ticket: { environmentStatus: 'beta', pricingTier: 'growth', dependencies: [] },
-    hosting: { environmentStatus: 'production', pricingTier: 'free', dependencies: [] },
-    voice: { environmentStatus: 'alpha', pricingTier: 'growth', requiredFlags: ['enableVoiceAI'], dependencies: [] },
-    academy: { environmentStatus: 'production', pricingTier: 'free', dependencies: [] }
+    'moderno-one': { environmentStatus: 'production', pricingTier: 'enterprise', dependencies: [] },
+    'access': { environmentStatus: 'production', pricingTier: 'enterprise', dependencies: [] },
+    'moderno-play': { environmentStatus: 'production', pricingTier: 'free', dependencies: [] },
+    'mercato': { environmentStatus: 'beta', pricingTier: 'growth', dependencies: [] },
+    'cinema': { environmentStatus: 'beta', pricingTier: 'growth', requiredFlags: ['enableCinemaStudioBeta'], dependencies: [] },
+    'support': { environmentStatus: 'production', pricingTier: 'growth', dependencies: ['access'] },
+    'ticket': { environmentStatus: 'production', pricingTier: 'growth', dependencies: [] },
+    'hosting': { environmentStatus: 'production', pricingTier: 'free', dependencies: [] },
+    'voice': { environmentStatus: 'beta', pricingTier: 'growth', requiredFlags: ['enableVoiceAI'], dependencies: [] },
+    'nova-ai': { environmentStatus: 'production', pricingTier: 'growth', dependencies: [] },
+    'nova-home': { environmentStatus: 'beta', pricingTier: 'growth', dependencies: [] },
+    'academy': { environmentStatus: 'production', pricingTier: 'free', dependencies: [] }
   };
 
   const ext = extensions[prod.id] || { environmentStatus: 'beta', pricingTier: 'growth', dependencies: [] };

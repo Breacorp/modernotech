@@ -2,12 +2,36 @@ import { ProductMetadata } from '@moderno/types';
 
 export const ECOSISTEMA_PRODUCTOS: ProductMetadata[] = [
   {
+    id: 'moderno-one',
+    name: 'Moderno One',
+    description: 'Plataforma empresarial modular para gestionar ventas, clientes, finanzas, inventario, RRHH y operaciones.',
+    subdomain: 'one.moderno.com.ar',
+    category: 'erp',
+    isActiveByDefault: true
+  },
+  {
     id: 'access',
     name: 'Moderno Access',
     description: 'Control de acceso inteligente Multi-Tenant para edificios y oficinas corporativas.',
     subdomain: 'access.moderno.com.ar',
     category: 'saas',
     isActiveByDefault: true
+  },
+  {
+    id: 'moderno-play',
+    name: 'Moderno Play',
+    description: 'Ecosistema de entretenimiento interactivo y videojuegos de Moderno Tech.',
+    subdomain: 'play.moderno.com.ar',
+    category: 'gaming',
+    isActiveByDefault: true
+  },
+  {
+    id: 'mercato',
+    name: 'Mercato',
+    description: 'Solución integral de comercio digital y tiendas online dentro del ecosistema Moderno Tech.',
+    subdomain: 'mercato.moderno.com.ar',
+    category: 'ecom',
+    isActiveByDefault: false
   },
   {
     id: 'cinema',
@@ -27,7 +51,7 @@ export const ECOSISTEMA_PRODUCTOS: ProductMetadata[] = [
   },
   {
     id: 'ticket',
-    name: 'CRM Waticket',
+    name: 'WaTicket',
     description: 'Centralización de chats de WhatsApp, Instagram y Facebook multiagente.',
     subdomain: 'ticket.moderno.com.ar',
     category: 'saas',
@@ -58,43 +82,11 @@ export const ECOSISTEMA_PRODUCTOS: ProductMetadata[] = [
     isActiveByDefault: false
   },
   {
-    id: 'nova-life',
-    name: 'Nova Life',
-    description: 'Aplicación de biohacking, hábitos inteligentes y estilo de vida premium.',
-    subdomain: 'life.moderno.com.ar',
-    category: 'saas',
-    isActiveByDefault: false
-  },
-  {
-    id: 'code',
-    name: 'Moderno AI Code',
-    description: 'IDE en la nube e Inteligencia Artificial para generación de código avanzada.',
-    subdomain: 'code.moderno.com.ar',
-    category: 'dev',
-    isActiveByDefault: false
-  },
-  {
-    id: 'local-llm',
-    name: 'Local LLM',
-    description: 'Modelos de lenguaje ejecutándose localmente para privacidad de nivel militar.',
-    subdomain: 'local.moderno.com.ar',
+    id: 'nova-home',
+    name: 'Nova Home',
+    description: 'Solución de inteligencia artificial para la automatización y gestión inteligente del hogar.',
+    subdomain: 'home.moderno.com.ar',
     category: 'ai',
-    isActiveByDefault: false
-  },
-  {
-    id: 'gamestudio',
-    name: 'Game Studio',
-    description: 'Estudio de videojuegos en la nube y modelado 3D interactivo.',
-    subdomain: 'gamestudio.moderno.com.ar',
-    category: 'dev',
-    isActiveByDefault: false
-  },
-  {
-    id: 'catalog',
-    name: 'Catalog Cloner',
-    description: 'Duplicación y clonación automatizada de catálogos multitienda en un clic.',
-    subdomain: 'catalog.moderno.com.ar',
-    category: 'ecom',
     isActiveByDefault: false
   },
   {
