@@ -1,15 +1,17 @@
-export type ProductStatus = 'AVAILABLE' | 'BETA' | 'COMING SOON' | 'PRIVATE BETA' | 'DEPRECATED';
+export type ProductStatus = 'AVAILABLE' | 'BETA' | 'PRIVATE BETA' | 'COMING SOON' | 'DEPRECATED';
 
 export type ProductCategory = 
   | 'ALL'
-  | 'AI'
-  | 'SOFTWARE'
-  | 'BUSINESS'
-  | 'ENTERTAINMENT'
-  | 'WEATHER'
-  | 'PRODUCTIVITY'
-  | 'HARDWARE'
-  | 'SERVICES';
+  | 'security'
+  | 'entertainment'
+  | 'ai'
+  | 'business'
+  | 'weather'
+  | 'productivity'
+  | 'fintech'
+  | 'software'
+  | 'hardware'
+  | 'services';
 
 export interface ProductItem {
   id: string;
@@ -17,13 +19,15 @@ export interface ProductItem {
   tagline: string;
   description: string;
   category: ProductCategory;
+  categoryLabel: string;
   status: ProductStatus;
   url: string;
   ctaText: string;
   icon: string;
-  featured?: boolean;
+  featured: boolean;
+  order: number;
   bentoSpan?: 'normal' | 'wide' | 'tall' | 'heroic';
-  accentColor?: string;
+  accentColor: string;
   tags: string[];
   metrics?: {
     label: string;
@@ -39,19 +43,11 @@ export interface CategoryInfo {
   icon: string;
 }
 
-export interface TechnologyPillar {
+export interface WhyModernoItem {
   id: string;
   title: string;
+  tag: string;
   description: string;
   icon: string;
-  tag: string;
-  details: string[];
-}
-
-export interface VisionMilestone {
-  phase: string;
-  title: string;
-  status: 'ACTIVE' | 'DEPLOYING' | 'UPCOMING';
-  description: string;
-  items: string[];
+  badge: string;
 }

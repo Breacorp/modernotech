@@ -1,0 +1,146 @@
+:root {
+  /* Moderno Tech Official Design Tokens (Extracted directly from Access & Play) */
+  --moderno-background: #020617; /* Deep Navy Slate (Access) */
+  --moderno-background-alt: #050507; /* Cinematic Pitch Black (Play) */
+  --moderno-surface: rgba(11, 11, 16, 0.75); /* Dark Glass Panel */
+  --moderno-surface-elevated: rgba(255, 255, 255, 0.05); /* Hover Surface */
+  --moderno-surface-card: #0B0B10; /* Solid Card Base */
+  
+  --moderno-primary: #00E5FF; /* Electric Cyan (Play Accent / Moderno Pulse) */
+  --moderno-primary-light: #157BFF; /* Electric Cobalt Blue */
+  --moderno-primary-deep: #0052FF; /* Enterprise Deep Blue (Access) */
+  --moderno-secondary: #3B82F6; /* Moderno Blue */
+  --moderno-accent: #00E5FF; /* High-glow Cyan */
+  
+  --moderno-text: #FFFFFF; /* High-contrast white */
+  --moderno-text-muted: #94A3B8; /* Cool Slate Gray */
+  --moderno-text-subtle: rgba(255, 255, 255, 0.4);
+  
+  --moderno-border: rgba(255, 255, 255, 0.08); /* Precision 1px border */
+  --moderno-border-hover: rgba(0, 229, 255, 0.4); /* Cyan Glow border */
+  --moderno-border-access: rgba(59, 130, 246, 0.3); /* Blue Glow border */
+  
+  --moderno-glow: rgba(0, 229, 255, 0.25);
+  --moderno-glow-blue: rgba(0, 82, 255, 0.35);
+
+  --moderno-radius-sm: 0.5rem;   /* 8px */
+  --moderno-radius-md: 0.75rem;  /* 12px */
+  --moderno-radius-lg: 1rem;     /* 16px */
+  --moderno-radius-xl: 1.5rem;   /* 24px */
+  --moderno-radius-2xl: 2rem;    /* 32px */
+  --moderno-radius-full: 9999px;
+
+  --moderno-shadow-card: 0 10px 30px rgba(0, 0, 0, 0.7);
+  --moderno-shadow-card-hover: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 229, 255, 0.2);
+  --moderno-shadow-cta: 0 0 25px rgba(0, 229, 255, 0.35);
+}
+
+/* Deep Tech Mesh Background from Access & Play */
+.deep-tech-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background-color: var(--moderno-background-alt);
+}
+
+.deep-tech-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.85;
+  background: 
+    radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59, 130, 246, 0.25) 0%, transparent 55%),
+    radial-gradient(circle at 85% 15%, rgba(0, 229, 255, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 15% 85%, rgba(0, 82, 255, 0.18) 0%, transparent 50%);
+  transition: background 0.3s ease-out;
+}
+
+/* Precision Glass Card */
+.moderno-glass-card {
+  background: var(--moderno-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--moderno-border);
+  box-shadow: var(--moderno-shadow-card);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.moderno-glass-card:hover {
+  background: rgba(15, 17, 26, 0.85);
+  border-color: var(--moderno-border-hover);
+  box-shadow: var(--moderno-shadow-card-hover);
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* Neon Icon Container from Access */
+.moderno-neon-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--moderno-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* Gradient Primary Button */
+.moderno-btn-primary {
+  background: linear-gradient(135deg, var(--moderno-primary) 0%, var(--moderno-primary-light) 100%);
+  color: #000000;
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--moderno-radius-lg);
+  padding: 0.625rem 1.25rem;
+  box-shadow: var(--moderno-shadow-cta);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.moderno-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: scale(1.04);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+}
+
+.moderno-btn-primary:active {
+  transform: scale(0.96);
+}
+
+/* Glass Secondary Button */
+.moderno-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--moderno-radius-lg);
+  padding: 0.625rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.moderno-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.04);
+}
+
+.moderno-btn-secondary:active {
+  transform: scale(0.96);
+}

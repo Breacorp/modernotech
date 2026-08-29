@@ -6,187 +6,118 @@ export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative z-10 border-t border-white/10 bg-[#040711] pt-16 pb-12 text-white">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 pb-16 border-b border-white/5">
-          {/* Brand Col */}
-          <div className="col-span-2 md:col-span-1 flex flex-col justify-between">
+    <footer className="w-full bg-[#050507] border-t border-white/[0.06] text-white pt-16 pb-10 select-none">
+      <div className="max-w-[1920px] mx-auto px-6 sm:px-10 lg:px-12 flex flex-col gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 pb-10 border-b border-white/[0.04]">
+          {/* Brand Col matching Play/Access */}
+          <div className="col-span-2 md:col-span-2 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[#0052FF] to-[#00E5FF] flex items-center justify-center font-mono font-bold text-[10px] text-white">
+              <a className="flex items-center gap-2.5 group mb-4" href="/">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00E5FF] to-[#157BFF] flex items-center justify-center text-black font-black text-xs shadow-[0_0_20px_rgba(0,229,255,0.35)] group-hover:scale-105 transition-transform duration-300">
                   MT
                 </div>
-                <span className="font-bold text-sm tracking-wider uppercase">MODERNO TECH</span>
-              </div>
-              <p className="text-xs text-[#94A3B8] font-light leading-relaxed mb-6">
-                Ecosistema integrado de software empresarial, inteligencia artificial, entretenimiento y servicios cloud.
+                <div className="flex flex-col leading-none">
+                  <span className="text-[9px] font-extrabold tracking-[0.25em] text-white/50 uppercase">
+                    MODERNO
+                  </span>
+                  <span className="text-base font-black tracking-wider text-white font-sans">
+                    TECH
+                  </span>
+                </div>
+              </a>
+              <p className="text-xs text-[#94A3B8] font-light max-w-sm leading-relaxed mb-6">
+                El portal central del ecosistema tecnológico Moderno. Software empresarial, control de accesos, inteligencia artificial, entretenimiento cloud e infraestructura unificada.
               </p>
             </div>
 
-            {/* Live Status Indicator */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-[#38BDF8] w-fit">
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              <span>SISTEMAS OPERATIVOS</span>
+            {/* Live Service Status Pill matching Play & Access */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-[11px] font-mono text-emerald-400 font-semibold w-fit">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>ESTADO DEL SERVICIO: ONLINE</span>
             </div>
           </div>
 
           {/* Col 1: MODERNO */}
           <div>
-            <h4 className="text-xs font-mono font-bold text-[#94A3B8] tracking-widest uppercase mb-4">
+            <h4 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-4 font-sans">
               MODERNO
             </h4>
-            <ul className="space-y-2.5 text-xs text-[#94A3B8]">
-              <li>
-                <a href="#nosotros" className="hover:text-white transition-colors">
-                  Nosotros
-                </a>
-              </li>
-              <li>
-                <a href="#tecnologia" className="hover:text-white transition-colors">
-                  Tecnología
-                </a>
-              </li>
-              <li>
-                <a href="#contacto" className="hover:text-white transition-colors">
-                  Contacto
-                </a>
-              </li>
-              <li>
-                <a href="https://moderno.com.ar" className="hover:text-white transition-colors">
-                  Hub Principal
-                </a>
-              </li>
-            </ul>
+            <nav className="flex flex-col gap-2.5 text-xs font-bold text-[#94A3B8]">
+              <a href="#nosotros" className="hover:text-[#00E5FF] transition-colors">
+                Nosotros
+              </a>
+              <a href="#tecnologia" className="hover:text-[#00E5FF] transition-colors">
+                Tecnología
+              </a>
+              <a href="#ecosistema" className="hover:text-[#00E5FF] transition-colors">
+                Ecosistema
+              </a>
+              <a href="mailto:contacto@moderno.com.ar" className="hover:text-[#00E5FF] transition-colors">
+                Contacto
+              </a>
+            </nav>
           </div>
 
           {/* Col 2: PRODUCTOS */}
           <div>
-            <h4 className="text-xs font-mono font-bold text-[#94A3B8] tracking-widest uppercase mb-4">
+            <h4 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-4 font-sans">
               PRODUCTOS
             </h4>
-            <ul className="space-y-2.5 text-xs text-[#94A3B8]">
-              <li>
-                <a href="https://ai.moderno.com.ar" className="hover:text-white transition-colors">
-                  Moderno AI
-                </a>
-              </li>
-              <li>
-                <a href="https://one.moderno.com.ar" className="hover:text-white transition-colors">
-                  Moderno One
-                </a>
-              </li>
-              <li>
-                <a href="https://play.moderno.com.ar" className="hover:text-white transition-colors">
-                  Moderno Play
-                </a>
-              </li>
-              <li>
-                <a href="https://weather.moderno.com.ar" className="hover:text-white transition-colors">
-                  Moderno Weather
-                </a>
-              </li>
-              <li>
-                <a href="https://ticket.moderno.com.ar" className="hover:text-white transition-colors">
-                  Moderno CRM (WaTicket)
-                </a>
-              </li>
-              <li>
-                <a href="https://access.moderno.com.ar" className="hover:text-white transition-colors">
-                  Moderno Access
-                </a>
-              </li>
-            </ul>
+            <nav className="flex flex-col gap-2.5 text-xs font-bold text-[#94A3B8]">
+              <a href="https://access.moderno.com.ar/" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
+                Moderno Access
+              </a>
+              <a href="https://play.moderno.com.ar/" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
+                Moderno Play
+              </a>
+              <a href="https://ai.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
+                Moderno AI
+              </a>
+              <a href="https://weather.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
+                Moderno Weather
+              </a>
+              <a href="https://one.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
+                Moderno One
+              </a>
+              <a href="https://pay.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
+                Moderno Pay
+              </a>
+              <a href="https://ticket.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors">
+                Moderno CRM
+              </a>
+            </nav>
           </div>
 
-          {/* Col 3: EMPRESA */}
+          {/* Col 3: LEGAL & SOCIAL */}
           <div>
-            <h4 className="text-xs font-mono font-bold text-[#94A3B8] tracking-widest uppercase mb-4">
-              EMPRESA
+            <h4 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-4 font-sans">
+              LEGAL & SOCIAL
             </h4>
-            <ul className="space-y-2.5 text-xs text-[#94A3B8]">
-              <li>
-                <a href="#privacidad" className="hover:text-white transition-colors">
-                  Privacidad
-                </a>
-              </li>
-              <li>
-                <a href="#terminos" className="hover:text-white transition-colors">
-                  Términos & Condiciones
-                </a>
-              </li>
-              <li>
-                <a href="#seguridad" className="hover:text-white transition-colors">
-                  Seguridad Zero-Trust
-                </a>
-              </li>
-              <li>
-                <a href="mailto:soporte@moderno.com.ar" className="hover:text-white transition-colors">
-                  Soporte Técnico
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: SOCIAL */}
-          <div>
-            <h4 className="text-xs font-mono font-bold text-[#94A3B8] tracking-widest uppercase mb-4">
-              SOCIAL & CÓDIGO
-            </h4>
-            <ul className="space-y-2.5 text-xs text-[#94A3B8]">
-              <li>
-                <a
-                  href="https://github.com/Breacorp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-1.5"
-                >
-                  <span>GitHub</span>
-                  <span className="text-[10px] text-[#64748B]">&nearr;</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://instagram.com/modernotech"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-1.5"
-                >
-                  <span>Instagram</span>
-                  <span className="text-[10px] text-[#64748B]">&nearr;</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://tiktok.com/@modernotech"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-1.5"
-                >
-                  <span>TikTok</span>
-                  <span className="text-[10px] text-[#64748B]">&nearr;</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://linkedin.com/company/modernotech"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-1.5"
-                >
-                  <span>LinkedIn</span>
-                  <span className="text-[10px] text-[#64748B]">&nearr;</span>
-                </a>
-              </li>
-            </ul>
+            <nav className="flex flex-col gap-2.5 text-xs font-bold text-[#94A3B8]">
+              <a href="#privacidad" className="hover:text-[#00E5FF] transition-colors">
+                Privacidad
+              </a>
+              <a href="#terminos" className="hover:text-[#00E5FF] transition-colors">
+                Términos de Servicio
+              </a>
+              <a href="#seguridad" className="hover:text-[#00E5FF] transition-colors">
+                Seguridad Zero-Trust
+              </a>
+              <a href="https://github.com/Breacorp" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors flex items-center gap-1">
+                <span>GitHub Oficial</span>
+                <span className="text-[10px]">&nearr;</span>
+              </a>
+            </nav>
           </div>
         </div>
 
-        {/* Bottom copyright & attribution */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[#64748B]">
+        {/* Bottom Lockup */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40 font-light">
           <p>&copy; {currentYear} Moderno Tech. Todos los derechos reservados.</p>
-          <div className="flex items-center gap-6">
-            <span>MODERNO ECOSYSTEM OS v4.2</span>
-            <span>BUILT WITH PRECISION</span>
+          <div className="flex items-center gap-2 text-[11px]">
+            <span>Buenos Aires, Argentina</span>
+            <span>&bull;</span>
+            <span className="text-[#00E5FF] font-medium">Ecosistema Unificado</span>
           </div>
         </div>
       </div>
