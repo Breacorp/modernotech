@@ -18,11 +18,11 @@ interface EcosystemNode {
 }
 
 const NODES: EcosystemNode[] = [
-  { id: "access", name: "Moderno Access", tagline: "Control de Acceso & Consorcios", category: "Seguridad", icon: "shield", color: "#3B82F6", x: 20, y: 24, status: "AVAILABLE", url: "https://access.moderno.com.ar/" },
-  { id: "play", name: "Moderno Play", tagline: "Cloud Gaming 60 FPS", category: "Gaming", icon: "gamepad", color: "#00E5FF", x: 80, y: 22, status: "AVAILABLE", url: "https://play.moderno.com.ar/" },
+  { id: "cloud", name: "Moderno Cloud", tagline: "Almacenamiento & Bóveda Familiar", category: "Cloud", icon: "cloud", color: "#00E5FF", x: 18, y: 22, status: "AVAILABLE", url: "https://cloud.moderno.com.ar/" },
+  { id: "access", name: "Moderno Access", tagline: "Control de Acceso & Consorcios", category: "Seguridad", icon: "shield", color: "#3B82F6", x: 82, y: 22, status: "AVAILABLE", url: "https://access.moderno.com.ar/" },
+  { id: "play", name: "Moderno Play", tagline: "Cloud Gaming 60 FPS", category: "Gaming", icon: "gamepad", color: "#00E5FF", x: 84, y: 74, status: "AVAILABLE", url: "https://play.moderno.com.ar/" },
   { id: "ai", name: "Moderno AI", tagline: "Motor Cognitivo & Agentes", category: "IA", icon: "sparkles", color: "#0052FF", x: 50, y: 10, status: "AVAILABLE", url: "https://ai.moderno.com.ar" },
-  { id: "one", name: "Moderno One", tagline: "ERP & Operaciones", category: "Empresas", icon: "building", color: "#157BFF", x: 84, y: 74, status: "AVAILABLE", url: "https://one.moderno.com.ar" },
-  { id: "weather", name: "Moderno Weather", tagline: "Radar & Clima HD", category: "Clima", icon: "cloud-sun", color: "#38BDF8", x: 16, y: 76, status: "BETA", url: "https://weather.moderno.com.ar" },
+  { id: "one", name: "Moderno One", tagline: "ERP & Operaciones", category: "Empresas", icon: "building", color: "#157BFF", x: 16, y: 76, status: "AVAILABLE", url: "https://one.moderno.com.ar" },
   { id: "cleaner", name: "Moderno Cleaner", tagline: "Optimización de Hardware", category: "Productividad", icon: "cpu", color: "#00C8FF", x: 50, y: 88, status: "AVAILABLE", url: "https://cleaner.moderno.com.ar" },
 ];
 

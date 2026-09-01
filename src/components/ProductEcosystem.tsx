@@ -19,6 +19,7 @@ export const ProductEcosystem: React.FC = () => {
   const categoryCounts = useMemo(() => {
     const counts: Record<ProductCategory, number> = {
       ALL: PRODUCTS_REGISTRY.length,
+      cloud: 0,
       security: 0,
       entertainment: 0,
       ai: 0,

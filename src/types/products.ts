@@ -2,6 +2,7 @@ export type ProductStatus = 'AVAILABLE' | 'BETA' | 'PRIVATE BETA' | 'COMING SOON
 
 export type ProductCategory = 
   | 'ALL'
+  | 'cloud'
   | 'security'
   | 'entertainment'
   | 'ai'

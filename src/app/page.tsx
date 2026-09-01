@@ -4,6 +4,7 @@ import React from "react";
 import { ModernoBackground } from "../components/ModernoBackground";
 import { ModernoNavbar } from "../components/ModernoNavbar";
 import { Hero } from "../components/Hero";
+import { AuthenticatedEcosystemBanner } from "../components/AuthenticatedEcosystemBanner";
 import { ProductShowcaseInteractive } from "../components/ProductShowcaseInteractive";
 import { ProductEcosystem } from "../components/ProductEcosystem";
 import { WhyModernoSection } from "../components/WhyModernoSection";
@@ -24,6 +25,9 @@ export default function Home() {
       <main className="relative z-10">
         {/* 1. Hero Section ("Tecnología para un mundo más moderno") */}
         <Hero />
+
+        {/* Dynamic Authenticated User Banner (Moderno ID Portal) */}
+        <AuthenticatedEcosystemBanner />
 
         {/* 2. Visual Interactive Product Showcase (Play, Access & Cleaner Pro) */}
         <ProductShowcaseInteractive />

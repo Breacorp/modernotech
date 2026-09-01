@@ -1,22 +1,35 @@
-# Guía de Conexión OIDC para Nuevos Subdominios
+# Arquitectura de Autenticación y Conexión al Supabase Central
 
-Cada nueva plataforma SaaS en el ecosistema (ej. `cinema.moderno.com.ar`) utiliza su propio Supabase independiente. Para integrar la sesión unificada mediante `id.moderno.com.ar`, se debe configurar el inicio de sesión federado.
+Todo el ecosistema de Moderno Tech (**Moderno Access, Moderno Cloud, Moderno Play, Cinema Studio, Mercatto**, etc.) utiliza **la misma base de datos e instancia central de Supabase**:
+- **Project ID**: `rcskjdksimcfkdjzxara`
+- **Supabase URL**: `https://rcskjdksimcfkdjzxara.supabase.co`
 
-## 1. Registro de Cliente en Moderno ID
-El nuevo subdominio debe estar registrado en el IdP central. Registra estos valores en `id.moderno.com.ar`:
-*   `client_id`: `cinema-studio` (nombre único del producto)
-*   `client_secret`: Un hash seguro de 32 caracteres
-*   `redirect_uris`: `["https://cinema.moderno.com.ar/api/auth/callback"]`
+## 1. Conexión Directa a la Instancia Central
+Cada aplicación frontend o microservicio inicializa su cliente de Supabase apuntando a la instancia compartida:
 
-## 2. Configuración en Supabase del Subdominio
-Si la aplicación utiliza Supabase, configura el Custom OAuth Provider en la consola de Supabase:
+```typescript
+import { createClient } from '@supabase/supabase-js';
 
-1.  Ve a **Authentication** -> **Providers** -> **Custom OAuth**.
-2.  Introduce los siguientes parámetros:
-    *   **Client ID:** El `client_id` registrado (ej. `cinema-studio`).
-    *   **Client Secret:** El `client_secret` provisto.
-    *   **OpenID Connect Discovery URL:** `https://id.moderno.com.ar/.well-known/openid-configuration`
-3.  Habilita el proveedor.
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rcskjdksimcfkdjzxara.supabase.co';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+```
+
+## 2. Validación de Permisos y Tiers (Entitlements)
+Al iniciar sesión con la cuenta global (`auth.users`), cada producto consulta la tabla central `user_product_entitlements` mediante RLS:
+
+```typescript
+// Ejemplo en Moderno Play o Moderno Cloud
+const { data: entitlement } = await supabase
+  .from('user_product_entitlements')
+  .select('tier, status, quota_limit_bytes')
+  .eq('product_id', 'play') // o 'cloud', 'cinema-studio', 'mercatto', etc.
+  .single();
+
+// entitlement.tier === 'free' -> Catálogo gratuito habilitado
+// entitlement.tier === 'vip'  -> Catálogo completo desbloqueado
+```
 
 ## 3. Flujo en el Frontend
 En tu frontend (React/Next.js):

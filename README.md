@@ -1,6 +1,6 @@
-# Moderno Style & Tech - Ecosistema SaaS
+# Moderno Tech - Ecosistema Digital Unificado
 
-Este es el monorepo oficial del ecosistema Moderno Style & Tech, impulsado por Turborepo, Next.js, y diseñado para escalar a millones de usuarios con una arquitectura Multi-Tenant totalmente desacoplada (Zero Shared Database).
+Este es el repositorio oficial del ecosistema Moderno Tech, impulsado por Next.js y Turborepo, diseñado para escalar con una arquitectura de **Identidad y Facturación Centralizada** combinada con **Aislamiento Lógico Multi-Tenant y Row-Level Security (RLS)** por producto (Moderno Cloud, Moderno Access, Moderno AI, Moderno Play, Moderno One).
 
 ## Organización del Ecosistema
 

@@ -7,7 +7,11 @@ Este documento detalla la infraestructura operativa, la organización del monore
 
 ## 1. Diseño de Arquitectura General
 
-El monorepo está construido sobre una arquitectura **Modular y Desacoplada (Loose Coupling / Zero Shared Database)**. A diferencia de las arquitecturas SaaS monolíticas tradicionales, cada aplicación de Moderno funciona de forma autónoma con su propio frontend, sus propios microservicios, bases de datos aisladas e integraciones de pagos individuales.
+El monorepo y el ecosistema completo (**Moderno Access, Moderno Cloud, Moderno Play, Cinema Studio, Mercatto**, etc.) operan sobre una **Única Base de Datos e Instancia Central de Supabase**:
+* **Supabase Project ID**: `rcskjdksimcfkdjzxara`
+* **URL Base**: `https://rcskjdksimcfkdjzxara.supabase.co`
+
+La autenticación (`auth.users`), la identidad global, la facturación central y el catálogo de productos se coordinan en esta instancia unificada, mientras que los datos y dominios de cada producto están estrictamente aislados y protegidos mediante **Row-Level Security (RLS)** y la tabla de **Entitlements por Producto (`user_product_entitlements`)**.
 
 El plano central del monorepo (`packages/`) actúa como el **tejido conectivo** proporcionando estándares técnicos unificados de nivel enterprise (DX, branding, seguridad, entorno y observabilidad).
 

@@ -25,7 +25,7 @@ export const BuiltByModernoSection: React.FC = () => {
               Tecnología creada por Moderno para resolver problemas reales.
             </p>
             <p className="text-xs sm:text-sm text-[#94A3B8] font-light leading-relaxed max-w-2xl mb-8">
-              En lugar de ensamblar herramientas desconectadas de terceros, construimos nuestras propias aplicaciones, protocolos de seguridad, servidores de streaming y motores de IA para garantizar una experiencia sin fricciones.
+              Un ecosistema digital conectado para tu vida, tu hogar y tu empresa. Desarrollamos nuestras propias aplicaciones, bóvedas en la nube, protocolos de acceso, servidores de streaming y motores de IA para operar con fluidez y coherencia total.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -49,15 +49,15 @@ export const BuiltByModernoSection: React.FC = () => {
           {/* Right Highlights */}
           <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-xs font-bold text-white block mb-1">100% Desarrollo Propio</span>
+              <span className="text-xs font-bold text-white block mb-1">Ingeniería & Ecosistema Propio</span>
               <p className="text-[11px] text-[#94A3B8] font-light">
-                Arquitectura y código mantenido internamente sin dependencias opacas.
+                Arquitectura modular y código diseñado internamente para garantizar máxima velocidad y control.
               </p>
             </div>
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-xs font-bold text-white block mb-1">Aislamiento & Privacidad</span>
+              <span className="text-xs font-bold text-white block mb-1">Aislamiento Lógico & Privacidad</span>
               <p className="text-[11px] text-[#94A3B8] font-light">
-                Zero Shared DB y cifrado de extremo a extremo para cada consorcio y usuario.
+                Arquitectura multi-tenant con permisos RLS independientes y cifrado TLS 1.3 / AES-256 para cada cuenta.
               </p>
             </div>
           </div>

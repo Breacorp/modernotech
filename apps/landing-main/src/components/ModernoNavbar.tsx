@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ModernoButton } from "./ModernoButton";
+import { useModernoAuth } from "../hooks/useModernoAuth";
 
 export const ModernoNavbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, signOut } = useModernoAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,13 +102,46 @@ export const ModernoNavbar: React.FC = () => {
               <span>ONLINE</span>
             </div>
 
-            <ModernoButton
-              variant="primary"
-              href="#productos"
-              onClick={(e: React.MouseEvent<HTMLElement>) => handleSmoothScroll(e, "#productos")}
-            >
-              Explorar
-            </ModernoButton>
+            {/* Moderno ID Conditional Action */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <a
+                  href="/cuenta"
+                  className="px-4 py-1.5 rounded-xl bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/40 text-xs font-bold text-white transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(0,229,255,0.2)]"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Mi Cuenta</span>
+                  {user?.name && <span className="text-white/60 font-normal">({user.name})</span>}
+                </a>
+                <button
+                  onClick={signOut}
+                  title="Cerrar sesión"
+                  className="p-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <a
+                  href="/login"
+                  className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-white transition-all flex items-center gap-1.5 hover:border-[#00E5FF]/40"
+                >
+                  <svg className="w-3.5 h-3.5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Iniciar Sesión</span>
+                </a>
+                <ModernoButton
+                  variant="primary"
+                  href="/registro"
+                >
+                  Crear Cuenta
+                </ModernoButton>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Toggle Button */}
@@ -148,6 +183,48 @@ export const ModernoNavbar: React.FC = () => {
                   {link.label}
                 </a>
               ))}
+              {isAuthenticated ? (
+                <>
+                  <a
+                    href="/cuenta"
+                    className="text-sm font-bold text-[#00E5FF] hover:text-white py-2 border-b border-white/[0.04] transition-colors flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>🔑</span>
+                      <span>Mi Cuenta ({user?.name || "Activa"})</span>
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+                      ONLINE
+                    </span>
+                  </a>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="text-left text-xs font-bold text-rose-400 hover:text-white py-2 border-b border-white/[0.04] transition-colors"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </>
+              ) : (
+                <>
+                  <a
+                    href="/login"
+                    className="text-sm font-bold text-white hover:text-[#00E5FF] py-2 border-b border-white/[0.04] transition-colors flex items-center gap-2"
+                  >
+                    <span>🔑</span>
+                    <span>Iniciar Sesión (Moderno ID)</span>
+                  </a>
+                  <a
+                    href="/registro"
+                    className="text-sm font-bold text-[#00E5FF] hover:text-white py-2 border-b border-white/[0.04] transition-colors flex items-center gap-2"
+                  >
+                    <span>✨</span>
+                    <span>Crear Cuenta Global</span>
+                  </a>
+                </>
+              )}
               <div className="pt-2">
                 <ModernoButton
                   variant="primary"

@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Cliente de Supabase centralizado para Moderno ID
-// Estos valores deben proveerse desde el entorno del Hub
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+// Cliente de Supabase centralizado para todo el ecosistema Moderno Tech (Moderno ID)
+// Instancia única compartida: rcskjdksimcfkdjzxara (Moderno Access, Cloud, Play, Cinema, Mercatto)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rcskjdksimcfkdjzxara.supabase.co';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
 
 export const supabaseAuthClient = createClient(supabaseUrl, supabaseKey);
