@@ -18,16 +18,17 @@ interface EcosystemNode {
 }
 
 const NODES: EcosystemNode[] = [
-  { id: "cloud", name: "Moderno Cloud", tagline: "Almacenamiento & Bóveda Familiar", category: "Cloud", icon: "cloud", color: "#00E5FF", x: 18, y: 22, status: "AVAILABLE", url: "https://cloud.moderno.com.ar/" },
-  { id: "access", name: "Moderno Access", tagline: "Control de Acceso & Consorcios", category: "Seguridad", icon: "shield", color: "#3B82F6", x: 82, y: 22, status: "AVAILABLE", url: "https://access.moderno.com.ar/" },
-  { id: "play", name: "Moderno Play", tagline: "Cloud Gaming 60 FPS", category: "Gaming", icon: "gamepad", color: "#00E5FF", x: 84, y: 74, status: "AVAILABLE", url: "https://play.moderno.com.ar/" },
+  { id: "cloud", name: "Moderno Cloud", tagline: "Almacenamiento & Bóveda Familiar", category: "Cloud", icon: "cloud", color: "#00E5FF", x: 18, y: 20, status: "AVAILABLE", url: "https://cloud.moderno.com.ar/" },
+  { id: "access", name: "Moderno Access", tagline: "Control de Acceso & Consorcios", category: "Seguridad", icon: "shield", color: "#3B82F6", x: 82, y: 20, status: "AVAILABLE", url: "https://access.moderno.com.ar/" },
+  { id: "play", name: "Moderno Play", tagline: "Cloud Gaming 60 FPS", category: "Gaming", icon: "gamepad", color: "#00E5FF", x: 86, y: 72, status: "AVAILABLE", url: "https://play.moderno.com.ar/" },
+  { id: "cinema", name: "Cinema Studio", tagline: "Generación Video & Render 4K", category: "IA Cine", icon: "film", color: "#EC4899", x: 68, y: 88, status: "AVAILABLE", url: "https://cinema.moderno.com.ar" },
+  { id: "mercatto", name: "Mercatto", tagline: "Marketplace & Checkout 1-Click", category: "Comercio", icon: "credit-card", color: "#10B981", x: 32, y: 88, status: "AVAILABLE", url: "https://mercatto.moderno.com.ar" },
   { id: "ai", name: "Moderno AI", tagline: "Motor Cognitivo & Agentes", category: "IA", icon: "sparkles", color: "#0052FF", x: 50, y: 10, status: "AVAILABLE", url: "https://ai.moderno.com.ar" },
-  { id: "one", name: "Moderno One", tagline: "ERP & Operaciones", category: "Empresas", icon: "building", color: "#157BFF", x: 16, y: 76, status: "AVAILABLE", url: "https://one.moderno.com.ar" },
-  { id: "cleaner", name: "Moderno Cleaner", tagline: "Optimización de Hardware", category: "Productividad", icon: "cpu", color: "#00C8FF", x: 50, y: 88, status: "AVAILABLE", url: "https://cleaner.moderno.com.ar" },
+  { id: "one", name: "Moderno One", tagline: "ERP & Operaciones", category: "Empresas", icon: "building", color: "#157BFF", x: 14, y: 72, status: "AVAILABLE", url: "https://one.moderno.com.ar" },
 ];
 
 export const HeroEcosystemVisual: React.FC = () => {
-  const [activeNode, setActiveNode] = useState<string>("cloud");
+  const [activeNode, setActiveNode] = useState<string>("access");
 
   const selected = NODES.find((n) => n.id === activeNode) || NODES[0];
 
