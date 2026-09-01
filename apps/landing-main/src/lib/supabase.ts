@@ -3,10 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 // ==============================================================================
 // CLIENTE PÚBLICO DE SUPABASE PARA BROWSER (MODERNO ID)
 // ==============================================================================
-// REGLA CRÍTICA DE SEGURIDAD:
-// - Solo expone NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY.
-// - NUNCA expone SUPABASE_SERVICE_ROLE_KEY en el cliente.
-// - Todas las consultas están sujetas a políticas de Row-Level Security (RLS).
+// Instancia Central: https://rcskjdksimcfkdjzxara.supabase.co
+// Unifica: Moderno Tech (Hub), Moderno Access, Moderno Cloud, Moderno Play, Moderno One, etc.
+// ==============================================================================
 
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL || "https://rcskjdksimcfkdjzxara.supabase.co";
