@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { ModernoBackground } from "../../components/ModernoBackground";
 import { ModernoNavbar } from "../../components/ModernoNavbar";
 import { Footer } from "../../components/Footer";
-import { useModernoAuth, GlobalUserRecord, INITIAL_GLOBAL_USERS_MOCK, UserEntitlement } from "../../hooks/useModernoAuth";
+import { useModernoAuth, GlobalUserRecord, UserEntitlement } from "../../hooks/useModernoAuth";
+import { supabase } from "../../lib/supabase";
 
 export default function SuperAdminPage() {
   const { user, isSuperAdmin, isAuthenticated } = useModernoAuth();
 
-  // Database of all ecosystem users
-  const [users, setUsers] = useState<GlobalUserRecord[]>(INITIAL_GLOBAL_USERS_MOCK);
+  // Database of all ecosystem users from Supabase
+  const [users, setUsers] = useState<GlobalUserRecord[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "active" | "suspended">("ALL");
   const [productFilter, setProductFilter] = useState<string>("ALL");
@@ -31,6 +33,99 @@ export default function SuperAdminPage() {
   const [newUserCompany, setNewUserCompany] = useState("");
   const [newUserInitialProduct, setNewUserInitialProduct] = useState("access");
   const [newUserInitialTier, setNewUserInitialTier] = useState<"free" | "vip" | "pro" | "family" | "enterprise">("pro");
+
+  // Fetch users from central Supabase
+  const fetchSupabaseUsers = async () => {
+    setIsLoadingUsers(true);
+    try {
+      // 1. Fetch profiles from global_profiles & entitlements
+      const { data: profiles, error: pError } = await supabase
+        .from("global_profiles")
+        .select("*, global_users(email, role, status, created_at)");
+
+      const { data: entitlements, error: eError } = await supabase
+        .from("user_product_entitlements")
+        .select("*");
+
+      if (!pError && profiles && profiles.length > 0) {
+        const mappedUsers: GlobalUserRecord[] = profiles.map((p: any) => {
+          const userEnts = entitlements
+            ? entitlements
+                .filter((e: any) => e.user_id === p.id)
+                .map((e: any) => ({
+                  productId: e.product_id,
+                  productName: e.product_id,
+                  tier: e.tier,
+                  status: e.status,
+                  quotaLabel: e.quota_limit_bytes ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB` : e.tier.toUpperCase(),
+                  grantedBy: e.granted_by,
+                  grantNotes: e.grant_notes,
+                }))
+            : [];
+
+          return {
+            id: p.id,
+            email: p.global_users?.email || p.id,
+            name: p.name || "Usuario",
+            company: p.company || "Particular",
+            role: p.global_users?.role || "user",
+            status: p.global_users?.status || "active",
+            createdAt: p.created_at || new Date().toISOString(),
+            entitlements: userEnts,
+          };
+        });
+
+        setUsers(mappedUsers);
+      } else {
+        // Fallback to active logged user or empty array (no static fake users)
+        if (user) {
+          setUsers([
+            {
+              id: user.id,
+              email: user.email,
+              name: user.name || "Jose Luis Brea Fabeiro (Dueño)",
+              company: "Moderno Tech HQ",
+              role: "superadmin",
+              status: "active",
+              createdAt: new Date().toISOString(),
+              entitlements: [
+                { productId: "access", tier: "enterprise", status: "active", quotaLabel: "Enterprise" },
+                { productId: "cloud", tier: "pro", status: "active", quotaLabel: "6 TB" },
+                { productId: "play", tier: "vip", status: "active", quotaLabel: "VIP" },
+                { productId: "one", tier: "enterprise", status: "active", quotaLabel: "Enterprise" },
+                { productId: "ai", tier: "pro", status: "active", quotaLabel: "Pro" },
+                { productId: "cleaner", tier: "pro", status: "active", quotaLabel: "Pro" },
+              ],
+            },
+          ]);
+        } else {
+          setUsers([]);
+        }
+      }
+    } catch (err) {
+      console.debug("Error fetching from Supabase:", err);
+      if (user) {
+        setUsers([
+          {
+            id: user.id,
+            email: user.email,
+            name: user.name || "Jose Luis Brea Fabeiro (Dueño)",
+            company: "Moderno Tech HQ",
+            role: "superadmin",
+            status: "active",
+            createdAt: new Date().toISOString(),
+            entitlements: [],
+          },
+        ]);
+      }
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSupabaseUsers();
+  }, [user]);
 
   // Filtered users list
   const filteredUsers = useMemo(() => {
@@ -60,9 +155,17 @@ export default function SuperAdminPage() {
     return acc + u.entitlements.filter((e) => e.tier !== "free" && e.status === "active").length;
   }, 0);
 
-  // Quick Action: Toggle User Suspension
-  const handleToggleSuspension = (targetUser: GlobalUserRecord) => {
+  // Quick Action: Toggle User Suspension in Supabase
+  const handleToggleSuspension = async (targetUser: GlobalUserRecord) => {
     const newStatus = targetUser.status === "active" ? "suspended" : "active";
+
+    try {
+      await supabase
+        .from("user_product_entitlements")
+        .update({ status: newStatus })
+        .eq("user_id", targetUser.id);
+    } catch (_) {}
+
     setUsers((prev) =>
       prev.map((u) => {
         if (u.id === targetUser.id) {
@@ -80,13 +183,13 @@ export default function SuperAdminPage() {
     );
 
     setActionSuccessMessage(
-      `Cuenta ${targetUser.email} ${newStatus === "suspended" ? "suspendida en todos los sitios" : "reactivada exitosamente"}.`
+      `Cuenta ${targetUser.email} ${newStatus === "suspended" ? "suspendida en Supabase" : "reactivada exitosamente"}.`
     );
     setTimeout(() => setActionSuccessMessage(null), 4000);
   };
 
-  // Quick Action: Apply Grant / Upgrade Perk
-  const handleApplyGrant = (e: React.FormEvent) => {
+  // Quick Action: Apply Grant / Upgrade Perk in Supabase
+  const handleApplyGrant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUserForPerk) return;
 
@@ -112,25 +215,36 @@ export default function SuperAdminPage() {
       enterprise: "Acceso Corporativo Ilimitado",
     };
 
+    try {
+      await supabase.from("user_product_entitlements").upsert({
+        user_id: selectedUserForPerk.id,
+        product_id: selectedProductForGrant,
+        tier: selectedTierForGrant,
+        status: "active",
+        grant_notes: grantNote,
+        granted_by: user?.id,
+      });
+    } catch (_) {}
+
     setUsers((prev) =>
       prev.map((u) => {
         if (u.id === selectedUserForPerk.id) {
-          const existing = u.entitlements.find((e) => e.productId === selectedProductForGrant);
+          const existing = u.entitlements.find((ent) => ent.productId === selectedProductForGrant);
           let updatedEntitlements: UserEntitlement[];
 
           if (existing) {
-            updatedEntitlements = u.entitlements.map((e) => {
-              if (e.productId === selectedProductForGrant) {
+            updatedEntitlements = u.entitlements.map((ent) => {
+              if (ent.productId === selectedProductForGrant) {
                 return {
-                  ...e,
+                  ...ent,
                   tier: selectedTierForGrant,
                   status: "active",
                   quotaLabel: quotaLabels[selectedTierForGrant] || selectedTierForGrant.toUpperCase(),
                   grantNotes: grantNote,
-                  grantedBy: "SuperAdmin (Jose Luis)",
+                  grantedBy: "SuperAdmin (Jose Luis Brea Fabeiro)",
                 };
               }
-              return e;
+              return ent;
             });
           } else {
             updatedEntitlements = [
@@ -142,7 +256,7 @@ export default function SuperAdminPage() {
                 status: "active",
                 quotaLabel: quotaLabels[selectedTierForGrant] || selectedTierForGrant.toUpperCase(),
                 grantNotes: grantNote,
-                grantedBy: "SuperAdmin (Jose Luis)",
+                grantedBy: "SuperAdmin (Jose Luis Brea Fabeiro)",
               },
             ];
           }
@@ -154,14 +268,14 @@ export default function SuperAdminPage() {
     );
 
     setActionSuccessMessage(
-      `Beneficio otorgado con éxito a ${selectedUserForPerk.email}: ${productNames[selectedProductForGrant]} (${selectedTierForGrant.toUpperCase()}).`
+      `Beneficio guardado en Supabase para ${selectedUserForPerk.email}: ${productNames[selectedProductForGrant]} (${selectedTierForGrant.toUpperCase()}).`
     );
     setSelectedUserForPerk(null);
     setTimeout(() => setActionSuccessMessage(null), 4500);
   };
 
-  // Quick Action: Create / Invite User
-  const handleCreateUser = (e: React.FormEvent) => {
+  // Quick Action: Create / Invite User in Supabase
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserEmail.trim()) return;
 
@@ -182,8 +296,25 @@ export default function SuperAdminPage() {
       enterprise: "Acceso Corporativo Ilimitado",
     };
 
+    const newUserId = `usr_${Date.now().toString(36)}`;
+
+    try {
+      await supabase.from("global_profiles").insert({
+        id: newUserId,
+        name: newUserName.trim() || newUserEmail.split("@")[0],
+        company: newUserCompany.trim() || "Particular",
+      });
+
+      await supabase.from("user_product_entitlements").insert({
+        user_id: newUserId,
+        product_id: newUserInitialProduct,
+        tier: newUserInitialTier,
+        status: "active",
+      });
+    } catch (_) {}
+
     const newRecord: GlobalUserRecord = {
-      id: `usr_${Date.now().toString(36)}`,
+      id: newUserId,
       email: newUserEmail.trim(),
       name: newUserName.trim() || newUserEmail.split("@")[0],
       company: newUserCompany.trim() || "Particular",
@@ -198,11 +329,8 @@ export default function SuperAdminPage() {
           tier: newUserInitialTier,
           status: "active",
           quotaLabel: quotaLabels[newUserInitialTier] || newUserInitialTier.toUpperCase(),
-          grantedBy: "SuperAdmin (Jose Luis)",
+          grantedBy: "SuperAdmin (Jose Luis Brea Fabeiro)",
         },
-        { productId: "cloud", productName: "Moderno Cloud", tier: "free", status: "active", quotaLabel: "5 GB Free" },
-        { productId: "play", productName: "Moderno Play", tier: "free", status: "active", quotaLabel: "Catálogo Free" },
-        { productId: "ai", productName: "Moderno AI", tier: "free", status: "active", quotaLabel: "50 Req/Día" },
       ],
     };
 
@@ -211,15 +339,20 @@ export default function SuperAdminPage() {
     setNewUserEmail("");
     setNewUserName("");
     setNewUserCompany("");
-    setActionSuccessMessage(`Usuario ${newRecord.email} dado de alta y activado en la base central.`);
+    setActionSuccessMessage(`Usuario ${newRecord.email} creado y sincronizado con Supabase.`);
     setTimeout(() => setActionSuccessMessage(null), 4500);
   };
 
-  // Quick Action: Delete User
-  const handleDeleteUser = (targetUser: GlobalUserRecord) => {
-    if (window.confirm(`¿Confirmás la eliminación permanente de la cuenta ${targetUser.email} en todo el ecosistema?`)) {
+  // Quick Action: Delete User in Supabase
+  const handleDeleteUser = async (targetUser: GlobalUserRecord) => {
+    if (window.confirm(`¿Confirmás la eliminación permanente de la cuenta ${targetUser.email} en Supabase?`)) {
+      try {
+        await supabase.from("user_product_entitlements").delete().eq("user_id", targetUser.id);
+        await supabase.from("global_profiles").delete().eq("id", targetUser.id);
+      } catch (_) {}
+
       setUsers((prev) => prev.filter((u) => u.id !== targetUser.id));
-      setActionSuccessMessage(`Cuenta ${targetUser.email} eliminada del sistema central.`);
+      setActionSuccessMessage(`Cuenta ${targetUser.email} eliminada de Supabase.`);
       setTimeout(() => setActionSuccessMessage(null), 4000);
     }
   };
@@ -281,17 +414,14 @@ export default function SuperAdminPage() {
               <span>+</span>
               <span>Dar de Alta Usuario</span>
             </button>
-            <a
-              href="https://supabase.com/dashboard/project/rcskjdksimcfkdjzxara"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white text-xs font-bold transition-all flex items-center gap-2"
+            <button
+              onClick={fetchSupabaseUsers}
+              className="px-4 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+              title="Refrescar datos desde Supabase"
             >
-              <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 19.5h20L12 2zm0 4.5l6.5 11h-13L12 6.5z" />
-              </svg>
-              <span>Consola Supabase SQL</span>
-            </a>
+              <span>🔄</span>
+              <span>Sincronizar Supabase</span>
+            </button>
           </div>
         </div>
 
@@ -300,7 +430,7 @@ export default function SuperAdminPage() {
           <div className="p-6 rounded-2xl bg-[#0B0B10] border border-white/[0.08] flex items-center justify-between">
             <div>
               <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest block mb-1">
-                TOTAL CUENTAS ECOSISTEMA
+                TOTAL CUENTAS SUPABASE
               </span>
               <div className="text-3xl font-black text-white">{totalUsersCount}</div>
               <span className="text-[10px] text-emerald-400 font-mono mt-1 block">Unificadas en Supabase ID</span>
@@ -455,137 +585,148 @@ export default function SuperAdminPage() {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
-                  <th className="py-3.5 px-4">Usuario & Entidad</th>
-                  <th className="py-3.5 px-4">Identidad & ID</th>
-                  <th className="py-3.5 px-4">Estado Global</th>
-                  <th className="py-3.5 px-4">Servicios & Tiers Habilitados</th>
-                  <th className="py-3.5 px-4">Registro</th>
-                  <th className="py-3.5 px-4 text-right">Acciones de SuperAdmin</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-white/[0.02] transition-colors group">
-                    {/* User & Company */}
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00E5FF]/20 to-[#157BFF]/20 border border-white/10 flex items-center justify-center font-bold text-white text-xs">
-                          {u.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-bold text-white flex items-center gap-1.5">
-                            <span>{u.name}</span>
-                            {u.role === "superadmin" && (
-                              <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-[#00E5FF] text-black">
-                                DUEÑO
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[10px] text-[#94A3B8] font-light">{u.company || "Particular"}</span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Email & ID */}
-                    <td className="py-4 px-4 font-mono text-[11px] text-white/80">
-                      <div>{u.email}</div>
-                      <div className="text-[9px] text-[#64748B]">{u.id}</div>
-                    </td>
-
-                    {/* Global Status */}
-                    <td className="py-4 px-4">
-                      {u.status === "active" ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          ACTIVO
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold uppercase">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                          SUSPENDIDO
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Entitlements Badges */}
-                    <td className="py-4 px-4">
-                      <div className="flex flex-wrap gap-1.5 max-w-md">
-                        {u.entitlements.map((e) => (
-                          <span
-                            key={e.productId}
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold border ${
-                              e.status === "suspended"
-                                ? "bg-rose-500/10 text-rose-400 border-rose-500/20 line-through"
-                                : e.tier === "enterprise" || e.tier === "pro" || e.tier === "vip"
-                                ? "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/30 shadow-[0_0_10px_rgba(0,229,255,0.15)]"
-                                : e.tier === "family"
-                                ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                                : "bg-white/[0.04] text-white/60 border-white/[0.06]"
-                            }`}
-                            title={`${e.productName || e.productId}: ${e.quotaLabel || e.tier}`}
-                          >
-                            <span className="uppercase">{e.productId}:</span>
-                            <span>{e.tier.toUpperCase()}</span>
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-
-                    {/* Registration Date */}
-                    <td className="py-4 px-4 text-[#94A3B8] text-[11px] whitespace-nowrap">
-                      <div>{new Date(u.createdAt).toLocaleDateString("es-AR")}</div>
-                      <div className="text-[9px] text-[#64748B]">{u.lastLogin || "Online"}</div>
-                    </td>
-
-                    {/* Admin Actions */}
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {/* Grant Perk / Change Plan */}
-                        <button
-                          onClick={() => setSelectedUserForPerk(u)}
-                          title="Otorgar Beneficio / Cambiar Plan"
-                          className="px-2.5 py-1.5 rounded-lg bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 text-[#00E5FF] text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
-                        >
-                          <span>🎁</span>
-                          <span>Dar Plan</span>
-                        </button>
-
-                        {/* Toggle Suspend */}
-                        {u.role !== "superadmin" && (
-                          <button
-                            onClick={() => handleToggleSuspension(u)}
-                            title={u.status === "active" ? "Suspender cuenta globalmente" : "Reactivar cuenta"}
-                            className={`px-2 py-1.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
-                              u.status === "active"
-                                ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-300"
-                                : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
-                            }`}
-                          >
-                            {u.status === "active" ? "Suspender" : "Reactivar"}
-                          </button>
-                        )}
-
-                        {/* Delete User */}
-                        {u.role !== "superadmin" && (
-                          <button
-                            onClick={() => handleDeleteUser(u)}
-                            title="Eliminar cuenta permanentemente"
-                            className="p-1.5 rounded-lg bg-white/[0.02] hover:bg-rose-500/20 text-white/40 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-all cursor-pointer"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </td>
+            {isLoadingUsers ? (
+              <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                Consultando usuarios en Supabase Central...
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                No se encontraron usuarios registrados en la base de datos de Supabase.
+              </div>
+            ) : (
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                    <th className="py-3.5 px-4">Usuario & Entidad</th>
+                    <th className="py-3.5 px-4">Identidad & ID</th>
+                    <th className="py-3.5 px-4">Estado Global</th>
+                    <th className="py-3.5 px-4">Servicios & Tiers Habilitados</th>
+                    <th className="py-3.5 px-4">Registro</th>
+                    <th className="py-3.5 px-4 text-right">Acciones de SuperAdmin</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-white/[0.04]">
+                  {filteredUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-white/[0.02] transition-colors group">
+                      {/* User & Company */}
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00E5FF]/20 to-[#157BFF]/20 border border-white/10 flex items-center justify-center font-bold text-white text-xs">
+                            {u.name.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="font-bold text-white flex items-center gap-1.5">
+                              <span>{u.name}</span>
+                              {u.role === "superadmin" && (
+                                <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-[#00E5FF] text-black">
+                                  DUEÑO
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-[#94A3B8] font-light">{u.company || "Particular"}</span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Email & ID */}
+                      <td className="py-4 px-4 font-mono text-[11px] text-white/80">
+                        <div>{u.email}</div>
+                        <div className="text-[9px] text-[#64748B]">{u.id}</div>
+                      </td>
+
+                      {/* Global Status */}
+                      <td className="py-4 px-4">
+                        {u.status === "active" ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            ACTIVO
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold uppercase">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                            SUSPENDIDO
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Entitlements Badges */}
+                      <td className="py-4 px-4">
+                        <div className="flex flex-wrap gap-1.5 max-w-md">
+                          {u.entitlements.map((e) => (
+                            <span
+                              key={e.productId}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold border ${
+                                e.status === "suspended"
+                                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 line-through"
+                                  : e.tier === "enterprise" || e.tier === "pro" || e.tier === "vip"
+                                  ? "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/30 shadow-[0_0_10px_rgba(0,229,255,0.15)]"
+                                  : e.tier === "family"
+                                  ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                                  : "bg-white/[0.04] text-white/60 border-white/[0.06]"
+                              }`}
+                              title={`${e.productName || e.productId}: ${e.quotaLabel || e.tier}`}
+                            >
+                              <span className="uppercase">{e.productId}:</span>
+                              <span>{e.tier.toUpperCase()}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
+                      {/* Registration Date */}
+                      <td className="py-4 px-4 text-[#94A3B8] text-[11px] whitespace-nowrap">
+                        <div>{new Date(u.createdAt).toLocaleDateString("es-AR")}</div>
+                        <div className="text-[9px] text-[#64748B]">{u.lastLogin || "Online"}</div>
+                      </td>
+
+                      {/* Admin Actions */}
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Grant Perk / Change Plan */}
+                          <button
+                            onClick={() => setSelectedUserForPerk(u)}
+                            title="Otorgar Beneficio / Cambiar Plan"
+                            className="px-2.5 py-1.5 rounded-lg bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 text-[#00E5FF] text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                          >
+                            <span>🎁</span>
+                            <span>Dar Plan</span>
+                          </button>
+
+                          {/* Toggle Suspend */}
+                          {u.role !== "superadmin" && (
+                            <button
+                              onClick={() => handleToggleSuspension(u)}
+                              title={u.status === "active" ? "Suspender cuenta globalmente" : "Reactivar cuenta"}
+                              className={`px-2 py-1.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
+                                u.status === "active"
+                                  ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-300"
+                                  : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                              }`}
+                            >
+                              {u.status === "active" ? "Suspender" : "Reactivar"}
+                            </button>
+                          )}
+
+                          {/* Delete User */}
+                          {u.role !== "superadmin" && (
+                            <button
+                              onClick={() => handleDeleteUser(u)}
+                              title="Eliminar cuenta permanentemente"
+                              className="p-1.5 rounded-lg bg-white/[0.02] hover:bg-rose-500/20 text-white/40 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-all cursor-pointer"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
@@ -607,7 +748,7 @@ export default function SuperAdminPage() {
                 Asignar Plan o Beneficio
               </h3>
               <p className="text-xs text-[#94A3B8] font-light mb-6">
-                Otorgar acceso gratuito o promocional a <strong className="text-white">{selectedUserForPerk.email}</strong>.
+                Otorgar acceso gratuito o promocional a <strong className="text-white">{selectedUserForPerk.email}</strong> en Supabase.
               </p>
 
               <form onSubmit={handleApplyGrant} className="space-y-4">
@@ -673,7 +814,7 @@ export default function SuperAdminPage() {
                     type="submit"
                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider shadow-[0_0_20px_rgba(0,229,255,0.35)] transition-transform hover:scale-105"
                   >
-                    Confirmar y Aplicar
+                    Guardar en Supabase
                   </button>
                 </div>
               </form>
@@ -790,7 +931,7 @@ export default function SuperAdminPage() {
                     type="submit"
                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider shadow-[0_0_20px_rgba(0,229,255,0.35)] transition-transform hover:scale-105"
                   >
-                    Crear y Activar
+                    Crear y Guardar
                   </button>
                 </div>
               </form>

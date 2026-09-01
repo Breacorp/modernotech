@@ -11,8 +11,8 @@ export default function CuentaPage() {
   const [mfaEnabled, setMfaEnabled] = useState(true);
   const { user, isAuthenticated, signOut } = useModernoAuth();
 
-  const userName = user?.name || "Juan Pérez";
-  const userEmail = user?.email || "juan@moderno.com.ar";
+  const userName = user?.name || "Jose Luis Brea Fabeiro";
+  const userEmail = user?.email || "jlbrea89@gmail.com";
   const userInitials = userName.slice(0, 2).toUpperCase();
 
   return (

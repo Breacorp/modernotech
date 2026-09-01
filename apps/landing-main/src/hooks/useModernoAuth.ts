@@ -36,108 +36,9 @@ export interface GlobalUserRecord {
   entitlements: UserEntitlement[];
 }
 
-export const INITIAL_GLOBAL_USERS_MOCK: GlobalUserRecord[] = [
-  {
-    id: "usr_joseluis_admin_01",
-    email: "jlbrea89@gmail.com",
-    name: "Jose Luis Brea Fabeiro (Dueño)",
-    company: "Moderno Tech HQ",
-    role: "superadmin",
-    status: "active",
-    createdAt: "2025-08-10T12:00:00Z",
-    lastLogin: "Hace 5 minutos",
-    entitlements: [
-      { productId: "access", productName: "Moderno Access", tier: "enterprise", status: "active", quotaLabel: "Multi-Sede Ilimitado" },
-      { productId: "cloud", productName: "Moderno Cloud", tier: "pro", status: "active", quotaLabel: "6 TB Pro Studio" },
-      { productId: "play", productName: "Moderno Play", tier: "vip", status: "active", quotaLabel: "VIP Pass 4K 60FPS" },
-      { productId: "one", productName: "Moderno One", tier: "enterprise", status: "active", quotaLabel: "ERP Completo RLS" },
-      { productId: "ai", productName: "Moderno AI", tier: "pro", status: "active", quotaLabel: "Tokens Ilimitados" },
-      { productId: "cleaner", productName: "AI Cleaner Pro", tier: "pro", status: "active", quotaLabel: "Licencia Team Studio" },
-      { productId: "crm", productName: "Moderno CRM (WaTicket)", tier: "enterprise", status: "active", quotaLabel: "Inbox Multiagente" },
-      { productId: "weather", productName: "Moderno Weather", tier: "pro", status: "active", quotaLabel: "Radar Doppler HQ" }
-    ]
-  },
-  {
-    id: "usr_martinez_access_02",
-    email: "carlos.martinez@consorcioalberdi.com.ar",
-    name: "Carlos Martínez",
-    company: "Consorcio Torre Alberdi",
-    role: "user",
-    status: "active",
-    createdAt: "2026-08-20T14:30:00Z",
-    lastLogin: "Hoy, 10:15",
-    entitlements: [
-      { productId: "access", productName: "Moderno Access", tier: "enterprise", status: "active", quotaLabel: "3 Edificios / 140 Unidades" },
-      { productId: "cloud", productName: "Moderno Cloud", tier: "family", status: "active", quotaLabel: "2 TB Bóveda Compartida" },
-      { productId: "play", productName: "Moderno Play", tier: "free", status: "active", quotaLabel: "Catálogo Free" },
-      { productId: "ai", productName: "Moderno AI", tier: "free", status: "active", quotaLabel: "50 Req/Día" }
-    ]
-  },
-  {
-    id: "usr_valeria_cloud_03",
-    email: "valeria.diseno@studioba.ar",
-    name: "Valeria Gómez",
-    company: "Studio BA Audiovisual",
-    role: "user",
-    status: "active",
-    createdAt: "2026-08-25T09:12:00Z",
-    lastLogin: "Ayer, 18:40",
-    entitlements: [
-      { productId: "cloud", productName: "Moderno Cloud", tier: "pro", status: "active", quotaLabel: "6 TB Pro Studio" },
-      { productId: "cinema", productName: "Cinema Studio AI", tier: "vip", status: "active", quotaLabel: "Beta Privada 4K" },
-      { productId: "cleaner", productName: "AI Cleaner Pro", tier: "pro", status: "active", quotaLabel: "Licencia Lifetime" },
-      { productId: "play", productName: "Moderno Play", tier: "free", status: "active", quotaLabel: "Catálogo Free" }
-    ]
-  },
-  {
-    id: "usr_lucas_play_04",
-    email: "lucas.gamer99@gmail.com",
-    name: "Lucas Rossi",
-    company: "Particular",
-    role: "user",
-    status: "active",
-    createdAt: "2026-08-28T19:05:00Z",
-    lastLogin: "Hoy, 01:20",
-    entitlements: [
-      { productId: "play", productName: "Moderno Play", tier: "vip", status: "active", quotaLabel: "VIP Pass 60 FPS" },
-      { productId: "cloud", productName: "Moderno Cloud", tier: "free", status: "active", quotaLabel: "5 GB Free" },
-      { productId: "ai", productName: "Moderno AI", tier: "free", status: "active", quotaLabel: "50 Req/Día" }
-    ]
-  },
-  {
-    id: "usr_esteban_susp_05",
-    email: "esteban.morales@tempmail.com",
-    name: "Esteban Morales",
-    company: "Freelance",
-    role: "user",
-    status: "suspended",
-    createdAt: "2026-08-15T11:00:00Z",
-    lastLogin: "Hace 10 días",
-    entitlements: [
-      { productId: "access", productName: "Moderno Access", tier: "free", status: "suspended", quotaLabel: "Bloqueado" },
-      { productId: "cloud", productName: "Moderno Cloud", tier: "free", status: "suspended", quotaLabel: "Suspendido" },
-      { productId: "play", productName: "Moderno Play", tier: "free", status: "suspended", quotaLabel: "Suspendido" }
-    ]
-  },
-  {
-    id: "usr_ana_one_06",
-    email: "ana.logistica@distribuidorasur.com",
-    name: "Ana Laura Beltrán",
-    company: "Distribuidora Sur Logística",
-    role: "user",
-    status: "active",
-    createdAt: "2026-08-29T16:20:00Z",
-    lastLogin: "Hoy, 08:00",
-    entitlements: [
-      { productId: "one", productName: "Moderno One", tier: "pro", status: "active", quotaLabel: "ERP Inventario & Ventas" },
-      { productId: "crm", productName: "Moderno CRM (WaTicket)", tier: "pro", status: "active", quotaLabel: "WhatsApp API 5 Agentes" },
-      { productId: "cloud", productName: "Moderno Cloud", tier: "family", status: "active", quotaLabel: "2 TB Empresa" }
-    ]
-  }
-];
-
 export function useModernoAuth() {
   const [user, setUser] = useState<ModernoUser | null>(null);
+  const [entitlements, setEntitlements] = useState<UserEntitlement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -149,6 +50,7 @@ export function useModernoAuth() {
         if (!error && data?.session?.user) {
           const u = data.session.user;
           const isOwner = u.email === "jlbrea89@gmail.com" || u.email?.includes("breacorp");
+          
           if (isMounted) {
             setUser({
               id: u.id,
@@ -158,6 +60,29 @@ export function useModernoAuth() {
               role: isOwner ? "superadmin" : (u.user_metadata?.role || "user"),
               status: "active"
             });
+          }
+
+          // Consultar entitlements reales desde Supabase
+          try {
+            const { data: entData, error: entError } = await supabase
+              .from("user_product_entitlements")
+              .select("*")
+              .eq("user_id", u.id);
+
+            if (!entError && entData && entData.length > 0 && isMounted) {
+              setEntitlements(
+                entData.map((e: any) => ({
+                  productId: e.product_id,
+                  tier: e.tier,
+                  status: e.status,
+                  quotaLabel: e.quota_limit_bytes ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB` : e.tier.toUpperCase(),
+                  grantedBy: e.granted_by,
+                  grantNotes: e.grant_notes,
+                }))
+              );
+            }
+          } catch (e) {
+            console.debug("Supabase entitlements query fallback");
           }
           return;
         }
@@ -183,7 +108,7 @@ export function useModernoAuth() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const u = session.user;
         const isOwner = u.email === "jlbrea89@gmail.com" || u.email?.includes("breacorp");
@@ -195,9 +120,30 @@ export function useModernoAuth() {
           role: isOwner ? "superadmin" : (u.user_metadata?.role || "user"),
           status: "active"
         });
+
+        try {
+          const { data: entData } = await supabase
+            .from("user_product_entitlements")
+            .select("*")
+            .eq("user_id", u.id);
+
+          if (entData && entData.length > 0) {
+            setEntitlements(
+              entData.map((e: any) => ({
+                productId: e.product_id,
+                tier: e.tier,
+                status: e.status,
+                quotaLabel: e.quota_limit_bytes ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB` : e.tier.toUpperCase(),
+                grantedBy: e.granted_by,
+                grantNotes: e.grant_notes,
+              }))
+            );
+          }
+        } catch (_) {}
       } else {
         if (typeof window !== "undefined" && !localStorage.getItem("moderno_auth_session")) {
           setUser(null);
+          setEntitlements([]);
         }
       }
     });
@@ -216,6 +162,7 @@ export function useModernoAuth() {
       localStorage.removeItem("moderno_auth_session");
     }
     setUser(null);
+    setEntitlements([]);
   };
 
   const setDemoSession = (demoUser: ModernoUser) => {
@@ -227,21 +174,12 @@ export function useModernoAuth() {
 
   const isSuperAdmin = user?.role === "superadmin" || user?.role === "admin" || user?.email === "jlbrea89@gmail.com";
 
-  const defaultEntitlements: UserEntitlement[] = [
-    { productId: "access", tier: "premium" as any, status: "active", quotaLabel: "Consorcio Activo" },
-    { productId: "cloud", tier: "free", status: "active", quotaLabel: "5 GB Free" },
-    { productId: "play", tier: "free", status: "active", quotaLabel: "Free Catalog" },
-    { productId: "cinema", tier: "free", status: "active", quotaLabel: "Free Tier" },
-    { productId: "mercatto", tier: "free", status: "active", quotaLabel: "Free Tier" },
-    { productId: "ai", tier: "free", status: "active", quotaLabel: "50 Req/Día" },
-  ];
-
   return {
     user,
     isAuthenticated: !!user,
     isSuperAdmin,
     isLoading,
-    entitlements: defaultEntitlements,
+    entitlements,
     signOut,
     setDemoSession,
   };
