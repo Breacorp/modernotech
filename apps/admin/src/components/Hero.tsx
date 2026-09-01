@@ -27,7 +27,7 @@ export const Hero: React.FC = () => {
         className="mb-5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-bold text-white/80 shadow-sm"
       >
         <span className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse" />
-        <span className="tracking-[0.2em] uppercase">MODERNO TECH &bull; PORTAL CENTRAL</span>
+        <span className="tracking-[0.2em] uppercase">MODERNO TECH &bull; ECOSISTEMA INTEGRADO</span>
       </motion.div>
 
       {/* Main Hero Heading */}
@@ -48,9 +48,9 @@ export const Hero: React.FC = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="mt-6 text-sm sm:text-base md:text-lg text-[#94A3B8] font-light max-w-2xl leading-relaxed"
+        className="mt-6 text-sm sm:text-base md:text-lg text-[#94A3B8] font-light max-w-3xl leading-relaxed"
       >
-        Un ecosistema de software, inteligencia artificial, entretenimiento y seguridad física diseñados para operar de forma fluida y conectada.
+        Software empresarial, automatización con IA y sistemas de control para operaciones reales, complementado por un ecosistema conectado de almacenamiento, entretenimiento y productividad.
       </motion.p>
 
       {/* CTAs */}
@@ -71,7 +71,7 @@ export const Hero: React.FC = () => {
             </svg>
           }
         >
-          Explorar Ecosistema
+          Ver productos
         </ModernoButton>
 
         <ModernoButton

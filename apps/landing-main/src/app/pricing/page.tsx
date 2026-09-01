@@ -586,7 +586,7 @@ export default function PricingPage() {
           </div>
         )}
 
-        {/* 5. SECCIÓN: MODERNO AI CLEANER PRO (PRODUCTIVIDAD MACOS) */}
+        {/* 4. SECCIÓN: MODERNO AI CLEANER PRO (PRODUCTIVIDAD MACOS) */}
         {(activeCategory === "all" || activeCategory === "cleaner") && (
           <div className="mb-20">
             <div className="flex items-center gap-2 mb-6">

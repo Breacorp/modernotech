@@ -25,7 +25,7 @@ export const BuiltByModernoSection: React.FC = () => {
               Tecnología creada por Moderno para resolver problemas reales.
             </p>
             <p className="text-xs sm:text-sm text-[#94A3B8] font-light leading-relaxed max-w-2xl mb-8">
-              En lugar de ensamblar herramientas desconectadas de terceros, construimos nuestras propias aplicaciones, protocolos de seguridad, servidores de streaming y motores de IA para garantizar una experiencia sin fricciones.
+              Un ecosistema digital creado para operaciones de empresas, consorcios y vida digital. Desarrollamos soluciones de gestión ERP, control de accesos, almacenamiento privado y herramientas de IA para operar con fluidez y coherencia técnica.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -33,7 +33,7 @@ export const BuiltByModernoSection: React.FC = () => {
                 variant="primary"
                 href="#productos"
               >
-                Ver Todas las Plataformas
+                Ver Catálogo de Productos
               </ModernoButton>
               <a
                 href="https://github.com/Breacorp"
@@ -49,15 +49,15 @@ export const BuiltByModernoSection: React.FC = () => {
           {/* Right Highlights */}
           <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-xs font-bold text-white block mb-1">100% Desarrollo Propio</span>
+              <span className="text-xs font-bold text-white block mb-1">Arquitectura & Ecosistema Modular</span>
               <p className="text-[11px] text-[#94A3B8] font-light">
-                Arquitectura y código mantenido internamente sin dependencias opacas.
+                Arquitectura modular y código propio diseñado para garantizar escalabilidad, velocidad y mantenimiento centralizado.
               </p>
             </div>
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-xs font-bold text-white block mb-1">Aislamiento & Privacidad</span>
+              <span className="text-xs font-bold text-white block mb-1">Aislamiento Lógico & Privacidad</span>
               <p className="text-[11px] text-[#94A3B8] font-light">
-                Zero Shared DB y cifrado de extremo a extremo para cada consorcio y usuario.
+                Arquitectura multi-tenant con permisos RLS independientes y cifrado TLS 1.3 / AES-256 para cada cuenta.
               </p>
             </div>
           </div>

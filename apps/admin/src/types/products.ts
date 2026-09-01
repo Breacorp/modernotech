@@ -2,15 +2,15 @@ export type ProductStatus = 'AVAILABLE' | 'BETA' | 'PRIVATE BETA' | 'COMING SOON
 
 export type ProductCategory = 
   | 'ALL'
-  | 'business'
-  | 'security'
   | 'cloud'
-  | 'ai'
-  | 'software'
+  | 'security'
   | 'entertainment'
-  | 'productivity'
+  | 'ai'
+  | 'business'
   | 'weather'
+  | 'productivity'
   | 'fintech'
+  | 'software'
   | 'hardware'
   | 'services';
 
