@@ -378,7 +378,7 @@ export default function PricingPage() {
                     </div>
                     <div className="flex items-center gap-2.5 text-white/30">
                       <span>✕</span>
-                      <span className="line-through">Catálogo completo de 18,900+ títulos</span>
+                      <span className="line-through">Catálogo completo de títulos retro & arcade</span>
                     </div>
                   </div>
                 </div>
@@ -407,7 +407,7 @@ export default function PricingPage() {
                   </div>
                   <h3 className="text-2xl font-black text-white mb-2">Play VIP Pass</h3>
                   <p className="text-xs text-[#94A3B8] font-light mb-6">
-                    Desbloqueo total de la biblioteca, calidad 4K 60 FPS, slots prioritarios y guardado ilimitado en la nube.
+                    Desbloqueo total de la biblioteca, streaming a 60 FPS, slots prioritarios y guardado en la nube.
                   </p>
 
                   <div className="mb-6 flex items-baseline gap-1">
@@ -420,7 +420,7 @@ export default function PricingPage() {
                   <div className="space-y-3 text-xs text-white/90 font-medium border-t border-white/[0.08] pt-6 mb-8">
                     <div className="flex items-center gap-2.5">
                       <span className="text-[#00E5FF] font-bold">✓</span>
-                      <span><strong>Más de 18,900 juegos</strong> sin restricciones</span>
+                      <span><strong>Catálogo completo de títulos</strong> sin restricciones</span>
                     </div>
                     <div className="flex items-center gap-2.5">
                       <span className="text-[#00E5FF] font-bold">✓</span>

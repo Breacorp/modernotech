@@ -25,7 +25,7 @@ export const BuiltByModernoSection: React.FC = () => {
               Tecnología creada por Moderno para resolver problemas reales.
             </p>
             <p className="text-xs sm:text-sm text-[#94A3B8] font-light leading-relaxed max-w-2xl mb-8">
-              Un ecosistema digital conectado para tu vida, tu hogar y tu empresa. Desarrollamos nuestras propias aplicaciones, bóvedas en la nube, protocolos de acceso, servidores de streaming y motores de IA para operar con fluidez y coherencia total.
+              Un ecosistema digital creado para operaciones de empresas, consorcios y vida digital. Desarrollamos soluciones de gestión ERP, control de accesos, almacenamiento privado y herramientas de IA para operar con fluidez y coherencia técnica.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -33,7 +33,7 @@ export const BuiltByModernoSection: React.FC = () => {
                 variant="primary"
                 href="#productos"
               >
-                Ver Todas las Plataformas
+                Ver Catálogo de Productos
               </ModernoButton>
               <a
                 href="https://github.com/Breacorp"
@@ -49,9 +49,9 @@ export const BuiltByModernoSection: React.FC = () => {
           {/* Right Highlights */}
           <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-xs font-bold text-white block mb-1">Ingeniería & Ecosistema Propio</span>
+              <span className="text-xs font-bold text-white block mb-1">Arquitectura & Ecosistema Modular</span>
               <p className="text-[11px] text-[#94A3B8] font-light">
-                Arquitectura modular y código diseñado internamente para garantizar máxima velocidad y control.
+                Arquitectura modular y código propio diseñado para garantizar escalabilidad, velocidad y mantenimiento centralizado.
               </p>
             </div>
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">

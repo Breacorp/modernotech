@@ -18,7 +18,7 @@ export const FinalCTA: React.FC = () => {
             Descubrí Moderno.
           </h2>
           <p className="text-sm sm:text-lg text-[#94A3B8] font-light max-w-lg mx-auto mb-8">
-            Explorá todo nuestro ecosistema y conectá tus operaciones, seguridad y entretenimiento en un solo lugar.
+            Conectá tus operaciones empresariales, seguridad, inteligencia artificial y servicios digitales en un solo ecosistema integrado.
           </p>
 
           <ModernoButton
@@ -31,7 +31,7 @@ export const FinalCTA: React.FC = () => {
               </svg>
             }
           >
-            Explorar Productos
+            Ver Catálogo de Productos
           </ModernoButton>
         </div>
       </div>

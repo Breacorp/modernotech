@@ -28,14 +28,14 @@ export const Footer: React.FC = () => {
                 </div>
               </a>
               <p className="text-xs text-[#94A3B8] font-light max-w-sm leading-relaxed mb-6">
-                El Ecosystem Hub y sistema operativo web de Moderno. Conectamos almacenamiento privado, seguridad física, cloud gaming, IA generativa, comercio electrónico y software empresarial bajo una sola identidad.
+                El Ecosystem Hub de Moderno. Conectamos software empresarial, control de accesos, inteligencia artificial, almacenamiento privado y servicios digitales bajo una sola identidad.
               </p>
             </div>
 
-            {/* Live Service Status Pill matching Play & Access */}
+            {/* Live Service Status Pill */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-[11px] font-mono text-emerald-400 font-semibold w-fit">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>ECOSISTEMA ONLINE // SUPABASE CENTRAL</span>
+              <span>ECOSISTEMA ONLINE // SERVIDORES OPERATIVOS</span>
             </div>
           </div>
 
@@ -106,13 +106,13 @@ export const Footer: React.FC = () => {
                 <span>🛡️</span>
                 <span>Moderno Access</span>
               </a>
-              <a href="https://mercatto.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors flex items-center gap-1">
-                <span>🛍️</span>
-                <span>Mercatto</span>
-              </a>
               <a href="https://one.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors flex items-center gap-1">
                 <span>🏢</span>
                 <span>Moderno One</span>
+              </a>
+              <a href="https://mercatto.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors flex items-center gap-1">
+                <span>🛍️</span>
+                <span>Mercatto</span>
               </a>
               <a href="https://ticket.moderno.com.ar" target="_blank" rel="noopener noreferrer" className="hover:text-[#00E5FF] transition-colors flex items-center gap-1">
                 <span>💬</span>

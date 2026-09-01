@@ -16,7 +16,7 @@ export const WhyModernoSection: React.FC = () => {
           ¿Por qué Moderno?
         </h2>
         <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-1 max-w-xl">
-          Construimos capas de software, inteligencia artificial, entretenimiento y seguridad física diseñadas bajo un único sistema operativo visual y técnico.
+          Construimos capas de software empresarial, automatización con IA, control de accesos y servicios digitales diseñadas bajo un ecosistema coherente y conectado.
         </p>
       </div>
 

@@ -5,10 +5,10 @@ import { ModernoBadge } from "./ModernoBadge";
 
 export const VisionSection: React.FC = () => {
   const futureNodes = [
-    { title: "Moderno Pay", tag: "FINTECH & CHECKOUT", status: "COMING SOON" as const },
+    { title: "Moderno Pay", tag: "FINANZAS & PAGOS", status: "COMING SOON" as const },
     { title: "Nova Home", tag: "DOMÓTICA RESIDENCIAL", status: "COMING SOON" as const },
-    { title: "Moderno Style & Tech", tag: "HARDWARE & ACCESORIOS", status: "PRIVATE BETA" as const },
-    { title: "Moderno Mesh v2", tag: "SINCRONIZACIÓN DE DISPOSITIVOS", status: "COMING SOON" as const },
+    { title: "Moderno Style & Tech", tag: "HARDWARE & DISEÑO", status: "PRIVATE BETA" as const },
+    { title: "Moderno Voice AI", tag: "TELEFONÍA & VOZ IA", status: "BETA" as const },
   ];
 
   return (
@@ -21,7 +21,7 @@ export const VisionSection: React.FC = () => {
           Esto recién empieza.
         </h2>
         <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-2">
-          Nuevas plataformas, herramientas y dispositivos físicos se integran de forma continua a la red de Moderno.
+          Nuevas plataformas, herramientas y desarrollos se integran de forma continua a la red de Moderno Tech.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export const VisionSection: React.FC = () => {
               </h3>
             </div>
             <div className="pt-4 border-t border-white/[0.04] text-[11px] font-mono text-white/30">
-              MODERNO PROTOCOL
+              MODERNO ROADMAP
             </div>
           </div>
         ))}

@@ -10,7 +10,7 @@ export const ProductEcosystem: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Featured flagship products: Access & Play
+  // Flagship featured products
   const featuredProducts = useMemo(() => {
     return PRODUCTS_REGISTRY.filter((p) => p.featured).sort((a, b) => a.order - b.order);
   }, []);
@@ -19,15 +19,15 @@ export const ProductEcosystem: React.FC = () => {
   const categoryCounts = useMemo(() => {
     const counts: Record<ProductCategory, number> = {
       ALL: PRODUCTS_REGISTRY.length,
-      cloud: 0,
-      security: 0,
-      entertainment: 0,
-      ai: 0,
       business: 0,
-      weather: 0,
-      productivity: 0,
-      fintech: 0,
+      security: 0,
+      cloud: 0,
+      ai: 0,
       software: 0,
+      entertainment: 0,
+      productivity: 0,
+      weather: 0,
+      fintech: 0,
       hardware: 0,
       services: 0,
     };
@@ -55,6 +55,14 @@ export const ProductEcosystem: React.FC = () => {
     });
   }, [selectedCategory, searchQuery]);
 
+  // When viewing ALL with no search, show non-featured in the bento grid to prevent card duplication
+  const displayProducts = useMemo(() => {
+    if (selectedCategory === "ALL" && searchQuery.trim() === "") {
+      return filteredProducts.filter((p) => !p.featured);
+    }
+    return filteredProducts;
+  }, [selectedCategory, searchQuery, filteredProducts]);
+
   return (
     <section id="productos" className="relative z-10 max-w-[1920px] mx-auto px-6 sm:px-10 lg:px-12 py-20 scroll-mt-20 select-none">
       {/* Section Header */}
@@ -74,13 +82,13 @@ export const ProductEcosystem: React.FC = () => {
               <path d="M20 2v4M22 4h-4" />
               <circle cx="4" cy="20" r="2" />
             </svg>
-            <span>HUB CENTRAL DE APLICACIONES</span>
+            <span>CATÁLOGO DEL ECOSISTEMA</span>
           </div>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight font-sans">
             Todo Moderno, conectado.
           </h2>
           <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-1 max-w-xl">
-            Lanzador unificado para acceder directamente a todas las plataformas activas y en desarrollo del ecosistema.
+            Lanzador unificado para acceder directamente a las plataformas activas, en beta y en desarrollo del ecosistema.
           </p>
         </div>
 
@@ -115,12 +123,12 @@ export const ProductEcosystem: React.FC = () => {
         </div>
       </div>
 
-      {/* Featured Flagship Spotlight (Access & Play) */}
+      {/* Featured Flagship Spotlight (Access & One) */}
       {selectedCategory === "ALL" && searchQuery.trim() === "" && (
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[10px] font-black tracking-widest text-[#00E5FF] uppercase">
-              PRODUCTOS PRINCIPALES DEL ECOSISTEMA
+              LÍNEAS PRINCIPALES DEL ECOSISTEMA
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,9 +150,9 @@ export const ProductEcosystem: React.FC = () => {
       </div>
 
       {/* Bento Grid */}
-      {filteredProducts.length > 0 ? (
+      {displayProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-          {filteredProducts.map((product) => (
+          {displayProducts.map((product) => (
             <ModernoProductCard key={product.id} product={product} />
           ))}
         </div>
