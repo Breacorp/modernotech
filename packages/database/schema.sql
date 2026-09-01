@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS user_product_entitlements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES global_users(id) ON DELETE CASCADE,
     product_id VARCHAR(50) NOT NULL REFERENCES ecosystem_products(id) ON DELETE CASCADE,
-    tier VARCHAR(50) NOT NULL DEFAULT 'free', -- 'free', 'individual', 'family', 'vip', 'pro', 'enterprise', 'custom_grant'
+    tier VARCHAR(50) NOT NULL DEFAULT 'free', -- 'free', 'individual', 'family', 'vip', 'pro', 'enterprise', 'reseller', 'custom_grant'
     status VARCHAR(50) NOT NULL DEFAULT 'active', -- 'active', 'suspended', 'past_due', 'canceled'
     quota_limit_bytes BIGINT DEFAULT 5368709120, -- 5 GB default para tier free en cloud
     granted_by UUID REFERENCES global_users(id), -- SuperAdmin que otorgó el beneficio especial
@@ -66,7 +66,7 @@ VALUES
     ('crm', 'Moderno CRM (WaTicket)', 'Centralización Omnicanal', 'https://ticket.moderno.com.ar', TRUE),
     ('cleaner', 'Moderno AI Cleaner Pro', 'Diagnóstico & Optimización macOS', 'https://cleaner.moderno.com.ar', TRUE),
     ('weather', 'Moderno Weather', 'Radar Doppler & Telemetría', 'https://weather.moderno.com.ar', TRUE),
-    ('cinema', 'Cinema Studio AI', 'Generación Audiovisual AI', 'https://cinema.moderno.com.ar', FALSE),
+    ('cinema', 'Cinema Studio AI', 'Generación Audiovisual AI', 'https://cinema.moderno.com.ar', TRUE),
     ('voice', 'Moderno Voice AI', 'Telefonía & Agentes de Voz', 'https://voice.moderno.com.ar', FALSE),
     ('mercatto', 'Mercatto', 'Marketplace & E-Commerce', 'https://mercatto.moderno.com.ar', TRUE),
     ('academy', 'Moderno Academy', 'Capacitación Técnica', 'https://academy.moderno.com.ar', TRUE),
@@ -76,32 +76,34 @@ VALUES
 ON CONFLICT (id) DO UPDATE SET 
     name = EXCLUDED.name,
     tagline = EXCLUDED.tagline,
-    subdomain = EXCLUDED.subdomain;
+    subdomain = EXCLUDED.subdomain,
+    has_free_tier = EXCLUDED.has_free_tier;
 
--- 6. Trigger para Inicialización de Nuevos Usuarios
+-- 6. Trigger Universal para Inicialización de Nuevos Usuarios (Capa Gratuita por Defecto en TODO el Ecosistema)
 CREATE OR REPLACE FUNCTION handle_new_user_registration()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- 1. Crear perfil por defecto
     INSERT INTO global_profiles (id, name)
     VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)))
     ON CONFLICT (id) DO NOTHING;
 
-    -- Asignación automática de tiers gratuitos
+    -- 2. Asignación automática de cuenta gratuita (Free Tier) en TODOS los sitios y servicios del ecosistema
     INSERT INTO user_product_entitlements (user_id, product_id, tier, status)
-    VALUES
-        (NEW.id, 'play', 'free', 'active'),
-        (NEW.id, 'cloud', 'free', 'active'),
-        (NEW.id, 'ai', 'free', 'active'),
-        (NEW.id, 'access', 'free', 'active'),
-        (NEW.id, 'weather', 'free', 'active'),
-        (NEW.id, 'cleaner', 'free', 'active'),
-        (NEW.id, 'mercatto', 'free', 'active'),
-        (NEW.id, 'academy', 'free', 'active')
+    SELECT NEW.id, ep.id, 'free', 'active'
+    FROM ecosystem_products ep
+    WHERE ep.has_free_tier = TRUE
     ON CONFLICT (user_id, product_id) DO NOTHING;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Disparador en Supabase Auth
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION handle_new_user_registration();
 
 -- 7. Funciones Administrativas para el SuperAdmin (Jose Luis Brea Fabeiro)
 -- Permite al superadmin cambiar el tier de cualquier usuario en cualquier producto
@@ -114,7 +116,6 @@ CREATE OR REPLACE FUNCTION admin_grant_product_tier(
 )
 RETURNS VOID AS $$
 BEGIN
-    -- Verifica que el admin ejecutor tenga rol superadmin o admin
     IF NOT EXISTS (SELECT 1 FROM global_users WHERE id = p_admin_id AND role IN ('admin', 'superadmin')) THEN
         RAISE EXCEPTION 'Acceso no autorizado: Solo SuperAdmin puede otorgar beneficios.';
     END IF;

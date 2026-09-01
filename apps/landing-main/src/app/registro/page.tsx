@@ -36,6 +36,37 @@ export default function RegistroPage() {
       });
 
       if (!error && data.user) {
+        // Inicializar perfil y capa gratuita en todos los productos con free tier
+        try {
+          await supabase.from("global_profiles").upsert({
+            id: data.user.id,
+            name: name,
+          });
+
+          const defaultFreeProducts = [
+            "play",
+            "cloud",
+            "ai",
+            "access",
+            "weather",
+            "cleaner",
+            "mercatto",
+            "academy",
+            "cinema",
+          ];
+
+          const entitlementsToInsert = defaultFreeProducts.map((pId) => ({
+            user_id: data.user!.id,
+            product_id: pId,
+            tier: pId === selectedService && selectedService !== "general" ? "free" : "free",
+            status: "active",
+          }));
+
+          await supabase.from("user_product_entitlements").upsert(entitlementsToInsert, {
+            onConflict: "user_id,product_id",
+          });
+        } catch (_) {}
+
         setDemoSession({
           id: data.user.id,
           email: data.user.email || email,
