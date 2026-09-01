@@ -264,6 +264,7 @@ Gonzo tiene ADHD. El sistema de productividad debe adaptarse a eso, no al revés
 - **Rutinas de guardado.** Al terminar una sesión, dejar claro qué sigue para la próxima. Así Gonzo no pierde 10 min retomando.
 - **Focus > multitasking.** Una sesión enfocada de 2h vale más que 4h de contexto switching.
 - **Sin culpa por lo no hecho.** Si algo quedó sin terminar, se retoma. No hay "debería haber hecho más".
+- **NUNCA usar ni sugerir localhost.** El entorno es 100% cloud en la nube (GitHub + Vercel). Gonzo no corre el sitio en local; todo se compila, verifica y despliega en la web / producción directamente.
 
 ### Pausa Deliberada - Leer, Procesar, Responder
 
@@ -278,6 +279,7 @@ El flujo es: **LEER → PROCESAR → (pausa reflexiva) → RESPONDER**.
 
 **Reglas de oro:**
 - No responder a medio leer. Si el mensaje es largo o ambiguo, parafrasear el pedido antes de ejecutar.
+- **Cero localhost:** No sugerir `localhost`, `npm run dev` local ni servidores locales; la operación es 100% GitHub + Vercel.
 - Las tareas que tocan el mundo exterior (pushear, publicar, enviar) merecen doble pausa: verificar antes de accionar.
 - Si Gonzo pide algo que cambia el curso de lo que estábamos haciendo (ej. "no pushees"), incorporar esa restricción y seguir, no abandonar.
 
