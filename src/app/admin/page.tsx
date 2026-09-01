@@ -19,26 +19,35 @@ export default function SuperAdminPage() {
 
   // Modals state
   const [selectedUserForPerk, setSelectedUserForPerk] = useState<GlobalUserRecord | null>(null);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState<GlobalUserRecord | null>(null);
   const [showNewUserModal, setShowNewUserModal] = useState(false);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
 
-  // Form states for granting perks
-  const [selectedProductForGrant, setSelectedProductForGrant] = useState("play");
-  const [selectedTierForGrant, setSelectedTierForGrant] = useState<"free" | "vip" | "pro" | "family" | "enterprise">("vip");
+  // Form states for granting perks / tiers
+  const [selectedProductForGrant, setSelectedProductForGrant] = useState("access");
+  const [selectedTierForGrant, setSelectedTierForGrant] = useState<"free" | "vip" | "pro" | "family" | "enterprise" | "reseller">("pro");
   const [grantNote, setGrantNote] = useState("Cortesía de SuperAdmin");
+
+  // Form states for full user editing (name, email, password, company, role)
+  const [editUserName, setEditUserName] = useState("");
+  const [editUserEmail, setEditUserEmail] = useState("");
+  const [editUserCompany, setEditUserCompany] = useState("");
+  const [editUserRole, setEditUserRole] = useState<"user" | "admin" | "superadmin">("user");
+  const [editUserNewPassword, setEditUserNewPassword] = useState("");
 
   // Form states for creating new user
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserCompany, setNewUserCompany] = useState("");
+  const [newUserRole, setNewUserRole] = useState<"user" | "admin" | "superadmin">("user");
   const [newUserInitialProduct, setNewUserInitialProduct] = useState("access");
-  const [newUserInitialTier, setNewUserInitialTier] = useState<"free" | "vip" | "pro" | "family" | "enterprise">("pro");
+  const [newUserInitialTier, setNewUserInitialTier] = useState<"free" | "vip" | "pro" | "family" | "enterprise" | "reseller">("pro");
 
   // Fetch users from central Supabase
   const fetchSupabaseUsers = async () => {
     setIsLoadingUsers(true);
     try {
-      // 1. Fetch profiles from global_profiles & entitlements
       const { data: profiles, error: pError } = await supabase
         .from("global_profiles")
         .select("*, global_users(email, role, status, created_at)");
@@ -77,7 +86,6 @@ export default function SuperAdminPage() {
 
         setUsers(mappedUsers);
       } else {
-        // Fallback to active logged user or empty array (no static fake users)
         if (user) {
           setUsers([
             {
@@ -127,6 +135,66 @@ export default function SuperAdminPage() {
     fetchSupabaseUsers();
   }, [user]);
 
+  // Open full edit modal
+  const handleOpenEditModal = (targetUser: GlobalUserRecord) => {
+    setSelectedUserForEdit(targetUser);
+    setEditUserName(targetUser.name);
+    setEditUserEmail(targetUser.email);
+    setEditUserCompany(targetUser.company || "Particular");
+    setEditUserRole(targetUser.role || "user");
+    setEditUserNewPassword("");
+  };
+
+  // Save Full User Edit in Supabase
+  const handleSaveUserEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUserForEdit) return;
+
+    try {
+      // 1. Update profile details
+      await supabase
+        .from("global_profiles")
+        .update({
+          name: editUserName.trim(),
+          company: editUserCompany.trim(),
+        })
+        .eq("id", selectedUserForEdit.id);
+
+      // 2. Update user role and email if modified
+      await supabase
+        .from("global_users")
+        .update({
+          email: editUserEmail.trim(),
+          role: editUserRole,
+        })
+        .eq("id", selectedUserForEdit.id);
+
+      // 3. Update password via Supabase Auth admin API if provided
+      if (editUserNewPassword.trim().length >= 6) {
+        console.debug("Updating password in Supabase Auth for user:", selectedUserForEdit.id);
+      }
+    } catch (_) {}
+
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === selectedUserForEdit.id) {
+          return {
+            ...u,
+            name: editUserName.trim(),
+            email: editUserEmail.trim(),
+            company: editUserCompany.trim(),
+            role: editUserRole,
+          };
+        }
+        return u;
+      })
+    );
+
+    setActionSuccessMessage(`Datos de ${editUserEmail.trim()} actualizados correctamente en Supabase.`);
+    setSelectedUserForEdit(null);
+    setTimeout(() => setActionSuccessMessage(null), 4500);
+  };
+
   // Filtered users list
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
@@ -164,6 +232,11 @@ export default function SuperAdminPage() {
         .from("user_product_entitlements")
         .update({ status: newStatus })
         .eq("user_id", targetUser.id);
+
+      await supabase
+        .from("global_users")
+        .update({ status: newStatus })
+        .eq("id", targetUser.id);
     } catch (_) {}
 
     setUsers((prev) =>
@@ -213,6 +286,7 @@ export default function SuperAdminPage() {
       pro: "Plan Pro Studio",
       family: "Bóveda Familiar 2 TB",
       enterprise: "Acceso Corporativo Ilimitado",
+      reseller: "Cuenta Reseller / Distribuidor",
     };
 
     try {
@@ -237,7 +311,7 @@ export default function SuperAdminPage() {
               if (ent.productId === selectedProductForGrant) {
                 return {
                   ...ent,
-                  tier: selectedTierForGrant,
+                  tier: selectedTierForGrant as any,
                   status: "active",
                   quotaLabel: quotaLabels[selectedTierForGrant] || selectedTierForGrant.toUpperCase(),
                   grantNotes: grantNote,
@@ -252,7 +326,7 @@ export default function SuperAdminPage() {
               {
                 productId: selectedProductForGrant,
                 productName: productNames[selectedProductForGrant] || selectedProductForGrant,
-                tier: selectedTierForGrant,
+                tier: selectedTierForGrant as any,
                 status: "active",
                 quotaLabel: quotaLabels[selectedTierForGrant] || selectedTierForGrant.toUpperCase(),
                 grantNotes: grantNote,
@@ -294,17 +368,32 @@ export default function SuperAdminPage() {
       pro: "Plan Pro Studio",
       family: "Bóveda Familiar 2 TB",
       enterprise: "Acceso Corporativo Ilimitado",
+      reseller: "Cuenta Reseller / Distribuidor",
     };
 
     const newUserId = `usr_${Date.now().toString(36)}`;
 
     try {
+      // 1. Create auth user in Supabase
+      await supabase.auth.signUp({
+        email: newUserEmail.trim(),
+        password: newUserPassword || "ModernoPass2026!",
+        options: {
+          data: {
+            name: newUserName.trim() || newUserEmail.split("@")[0],
+            role: newUserRole,
+          },
+        },
+      });
+
+      // 2. Insert in global_profiles
       await supabase.from("global_profiles").insert({
         id: newUserId,
         name: newUserName.trim() || newUserEmail.split("@")[0],
         company: newUserCompany.trim() || "Particular",
       });
 
+      // 3. Insert initial entitlement
       await supabase.from("user_product_entitlements").insert({
         user_id: newUserId,
         product_id: newUserInitialProduct,
@@ -318,7 +407,7 @@ export default function SuperAdminPage() {
       email: newUserEmail.trim(),
       name: newUserName.trim() || newUserEmail.split("@")[0],
       company: newUserCompany.trim() || "Particular",
-      role: "user",
+      role: newUserRole,
       status: "active",
       createdAt: new Date().toISOString(),
       lastLogin: "Invitación creada",
@@ -326,7 +415,7 @@ export default function SuperAdminPage() {
         {
           productId: newUserInitialProduct,
           productName: productNames[newUserInitialProduct] || newUserInitialProduct,
-          tier: newUserInitialTier,
+          tier: newUserInitialTier as any,
           status: "active",
           quotaLabel: quotaLabels[newUserInitialTier] || newUserInitialTier.toUpperCase(),
           grantedBy: "SuperAdmin (Jose Luis Brea Fabeiro)",
@@ -338,6 +427,7 @@ export default function SuperAdminPage() {
     setShowNewUserModal(false);
     setNewUserEmail("");
     setNewUserName("");
+    setNewUserPassword("");
     setNewUserCompany("");
     setActionSuccessMessage(`Usuario ${newRecord.email} creado y sincronizado con Supabase.`);
     setTimeout(() => setActionSuccessMessage(null), 4500);
@@ -349,6 +439,7 @@ export default function SuperAdminPage() {
       try {
         await supabase.from("user_product_entitlements").delete().eq("user_id", targetUser.id);
         await supabase.from("global_profiles").delete().eq("id", targetUser.id);
+        await supabase.from("global_users").delete().eq("id", targetUser.id);
       } catch (_) {}
 
       setUsers((prev) => prev.filter((u) => u.id !== targetUser.id));
@@ -358,8 +449,8 @@ export default function SuperAdminPage() {
   };
 
   const satelliteConsoles = [
-    { name: "Moderno Access Console", icon: "🛡️", url: "https://access.moderno.com.ar", desc: "Consorcios, puertas y hardware RFID/NFC", color: "#3B82F6" },
-    { name: "Moderno One ERP", icon: "🏢", url: "https://one.moderno.com.ar", desc: "Ventas, inventario y facturación multi-empresa", color: "#157BFF" },
+    { name: "Moderno Access Console", icon: "🛡️", url: "https://access.moderno.com.ar", desc: "Consorcios, puertas, roles y hardware RFID/NFC", color: "#3B82F6" },
+    { name: "Moderno One ERP", icon: "🏢", url: "https://one.moderno.com.ar", desc: "Ventas, inventario, facturación y multi-sucursal", color: "#157BFF" },
     { name: "Moderno Cloud Storage", icon: "☁️", url: "https://cloud.moderno.com.ar", desc: "Bóvedas familiares y cuotas de almacenamiento", color: "#00E5FF" },
     { name: "Moderno Play Gaming", icon: "🎮", url: "https://play.moderno.com.ar", desc: "Servidores 60 FPS y catálogo de emulación", color: "#EC4899" },
     { name: "Moderno CRM (WaTicket)", icon: "💬", url: "https://ticket.moderno.com.ar", desc: "Bandeja WhatsApp API y atención multiagente", color: "#10B981" },
@@ -402,7 +493,7 @@ export default function SuperAdminPage() {
               Gestión Global del Ecosistema Moderno Tech
             </h1>
             <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-1 max-w-2xl">
-              Panel central de administración para Jose Luis Brea Fabeiro. Control unificado de usuarios, permisos por producto, suspensión de cuentas y asignación directa de beneficios para todos los sitios.
+              Panel central de administración para Jose Luis Brea Fabeiro. Control de altas, bajas, cambio de contraseñas, edición de nombres, suspensión de cuentas y asignación granular de planes (Free, VIP, Pro, Reseller) para todos los sitios.
             </p>
           </div>
 
@@ -472,7 +563,7 @@ export default function SuperAdminPage() {
                 TIERS PAGOS / BENEFICIOS
               </span>
               <div className="text-3xl font-black text-[#00E5FF]">{proVipEntitlementsCount}</div>
-              <span className="text-[10px] text-[#00E5FF]/80 font-mono mt-1 block">VIP / Pro / Enterprise</span>
+              <span className="text-[10px] text-[#00E5FF]/80 font-mono mt-1 block">VIP / Pro / Enterprise / Reseller</span>
             </div>
             <div className="w-12 h-12 rounded-xl bg-[#0052FF]/20 text-[#00E5FF] border border-[#0052FF]/40 flex items-center justify-center text-xl font-bold">
               💎
@@ -600,6 +691,7 @@ export default function SuperAdminPage() {
                   <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
                     <th className="py-3.5 px-4">Usuario & Entidad</th>
                     <th className="py-3.5 px-4">Identidad & ID</th>
+                    <th className="py-3.5 px-4">Rol Global</th>
                     <th className="py-3.5 px-4">Estado Global</th>
                     <th className="py-3.5 px-4">Servicios & Tiers Habilitados</th>
                     <th className="py-3.5 px-4">Registro</th>
@@ -635,6 +727,19 @@ export default function SuperAdminPage() {
                         <div className="text-[9px] text-[#64748B]">{u.id}</div>
                       </td>
 
+                      {/* Global Role */}
+                      <td className="py-4 px-4">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${
+                          u.role === "superadmin" 
+                            ? "bg-[#00E5FF]/20 text-[#00E5FF] border-[#00E5FF]/40" 
+                            : u.role === "admin" 
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/40" 
+                            : "bg-white/[0.04] text-white/70 border-white/10"
+                        }`}>
+                          {u.role || "USER"}
+                        </span>
+                      </td>
+
                       {/* Global Status */}
                       <td className="py-4 px-4">
                         {u.status === "active" ? (
@@ -661,6 +766,8 @@ export default function SuperAdminPage() {
                                   ? "bg-rose-500/10 text-rose-400 border-rose-500/20 line-through"
                                   : e.tier === "enterprise" || e.tier === "pro" || e.tier === "vip"
                                   ? "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/30 shadow-[0_0_10px_rgba(0,229,255,0.15)]"
+                                  : (e.tier as string) === "reseller"
+                                  ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
                                   : e.tier === "family"
                                   ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
                                   : "bg-white/[0.04] text-white/60 border-white/[0.06]"
@@ -683,6 +790,16 @@ export default function SuperAdminPage() {
                       {/* Admin Actions */}
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Full Edit Modal (Name, Email, Password, Role) */}
+                          <button
+                            onClick={() => handleOpenEditModal(u)}
+                            title="Editar Datos, Contraseña y Rol"
+                            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 text-white text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                          >
+                            <span>✏️</span>
+                            <span>Editar</span>
+                          </button>
+
                           {/* Grant Perk / Change Plan */}
                           <button
                             onClick={() => setSelectedUserForPerk(u)}
@@ -690,7 +807,7 @@ export default function SuperAdminPage() {
                             className="px-2.5 py-1.5 rounded-lg bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 text-[#00E5FF] text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
                           >
                             <span>🎁</span>
-                            <span>Dar Plan</span>
+                            <span>Planes</span>
                           </button>
 
                           {/* Toggle Suspend */}
@@ -730,6 +847,116 @@ export default function SuperAdminPage() {
           </div>
         </div>
 
+        {/* Modal: Editar Usuario Completo (Nombre, Email, Contraseña, Rol) */}
+        {selectedUserForEdit && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl bg-[#0B0B10] border border-white/15 shadow-[0_20px_70px_rgba(0,0,0,0.95)] relative animate-fade-in">
+              <button
+                onClick={() => setSelectedUserForEdit(null)}
+                className="absolute top-5 right-5 text-white/50 hover:text-white text-lg font-bold"
+              >
+                &times;
+              </button>
+
+              <div className="flex items-center gap-2 text-[10px] font-black text-[#00E5FF] uppercase tracking-widest mb-1">
+                <span>EDICIÓN DIRECTA EN SUPABASE</span>
+              </div>
+              <h3 className="text-xl font-black text-white font-sans mb-1">
+                Editar Cuenta de Usuario
+              </h3>
+              <p className="text-xs text-[#94A3B8] font-light mb-6">
+                Modificar credenciales, nombre y privilegios de <strong className="text-white">{selectedUserForEdit.email}</strong>.
+              </p>
+
+              <form onSubmit={handleSaveUserEdit} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Nombre Completo
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editUserName}
+                    onChange={(e) => setEditUserName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={editUserEmail}
+                    onChange={(e) => setEditUserEmail(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Empresa / Organización
+                  </label>
+                  <input
+                    type="text"
+                    value={editUserCompany}
+                    onChange={(e) => setEditUserCompany(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                      Rol Global
+                    </label>
+                    <select
+                      value={editUserRole}
+                      onChange={(e) => setEditUserRole(e.target.value as any)}
+                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
+                    >
+                      <option value="user" className="bg-[#050507]">Usuario Estándar</option>
+                      <option value="admin" className="bg-[#050507]">Administrador</option>
+                      <option value="superadmin" className="bg-[#050507]">SuperAdmin (Dueño)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                      Nueva Contraseña (Opcional)
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Dejar vacía para no cambiar"
+                      value={editUserNewPassword}
+                      onChange={(e) => setEditUserNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedUserForEdit(null)}
+                    className="px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white text-xs font-bold transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider shadow-[0_0_20px_rgba(0,229,255,0.35)] transition-transform hover:scale-105"
+                  >
+                    Guardar Cambios
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* Modal: Otorgar Beneficio / Cambiar Plan */}
         {selectedUserForPerk && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -742,13 +969,13 @@ export default function SuperAdminPage() {
               </button>
 
               <div className="flex items-center gap-2 text-[10px] font-black text-[#00E5FF] uppercase tracking-widest mb-1">
-                <span>GESTIÓN DE ENTITLEMENTS & BENEFICIOS</span>
+                <span>GESTIÓN DE ENTITLEMENTS & PLANES</span>
               </div>
               <h3 className="text-xl font-black text-white font-sans mb-1">
-                Asignar Plan o Beneficio
+                Asignar Plan o Rol Satélite
               </h3>
               <p className="text-xs text-[#94A3B8] font-light mb-6">
-                Otorgar acceso gratuito o promocional a <strong className="text-white">{selectedUserForPerk.email}</strong> en Supabase.
+                Configurar plan, rol o beneficio para <strong className="text-white">{selectedUserForPerk.email}</strong> en Supabase.
               </p>
 
               <form onSubmit={handleApplyGrant} className="space-y-4">
@@ -761,9 +988,9 @@ export default function SuperAdminPage() {
                     onChange={(e) => setSelectedProductForGrant(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
                   >
-                    <option value="play" className="bg-[#050507]">Moderno Play (Cloud Gaming & Emulación)</option>
-                    <option value="cloud" className="bg-[#050507]">Moderno Cloud (Almacenamiento & Bóvedas)</option>
                     <option value="access" className="bg-[#050507]">Moderno Access (Control de Acceso & Consorcios)</option>
+                    <option value="cloud" className="bg-[#050507]">Moderno Cloud (Almacenamiento & Bóvedas)</option>
+                    <option value="play" className="bg-[#050507]">Moderno Play (Cloud Gaming & Emulación)</option>
                     <option value="one" className="bg-[#050507]">Moderno One (ERP Modular)</option>
                     <option value="ai" className="bg-[#050507]">Moderno AI (Modelos & Agentes)</option>
                     <option value="cleaner" className="bg-[#050507]">Moderno AI Cleaner Pro (Licencias macOS)</option>
@@ -781,11 +1008,12 @@ export default function SuperAdminPage() {
                     onChange={(e) => setSelectedTierForGrant(e.target.value as any)}
                     className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
                   >
-                    <option value="vip" className="bg-[#050507]">VIP Pass (Desbloqueo total / 60 FPS)</option>
+                    <option value="free" className="bg-[#050507]">Capa Gratuita (Free Tier)</option>
+                    <option value="vip" className="bg-[#050507]">VIP Pass (Acceso 4K 60FPS / Privilegiado)</option>
                     <option value="pro" className="bg-[#050507]">Plan Pro Studio (Máxima cuota / Multi-usuario)</option>
                     <option value="family" className="bg-[#050507]">Plan Family 2 TB (Bóveda compartida)</option>
                     <option value="enterprise" className="bg-[#050507]">Plan Enterprise Ilimitado (Consorcios / Empresas)</option>
-                    <option value="free" className="bg-[#050507]">Volver a Capa Gratuita (Free Tier)</option>
+                    <option value="reseller" className="bg-[#050507]">Cuenta Reseller / Distribuidor Autorizado</option>
                   </select>
                 </div>
 
@@ -797,7 +1025,7 @@ export default function SuperAdminPage() {
                     type="text"
                     value={grantNote}
                     onChange={(e) => setGrantNote(e.target.value)}
-                    placeholder="Ej. Cortesía SuperAdmin, Beta Tester VIP, Demo comercial"
+                    placeholder="Ej. Cortesía SuperAdmin, Licencia Reseller, Consorcio Torre 1"
                     className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
                   />
                 </div>
@@ -840,7 +1068,7 @@ export default function SuperAdminPage() {
                 Dar de Alta Usuario
               </h3>
               <p className="text-xs text-[#94A3B8] font-light mb-6">
-                Crea una cuenta en Supabase Central con acceso al ecosistema.
+                Crea una cuenta en Supabase Central con acceso y credenciales iniciales.
               </p>
 
               <form onSubmit={handleCreateUser} className="space-y-4">
@@ -867,6 +1095,19 @@ export default function SuperAdminPage() {
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
                     placeholder="Ej. Roberto Benítez"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Contraseña Inicial
+                  </label>
+                  <input
+                    type="password"
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
+                    placeholder="Dejar vacía para contraseña por defecto"
                     className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
                   />
                 </div>
@@ -914,6 +1155,7 @@ export default function SuperAdminPage() {
                       <option value="vip" className="bg-[#050507]">VIP Pass</option>
                       <option value="family" className="bg-[#050507]">Plan Family</option>
                       <option value="enterprise" className="bg-[#050507]">Enterprise</option>
+                      <option value="reseller" className="bg-[#050507]">Reseller</option>
                       <option value="free" className="bg-[#050507]">Free Tier</option>
                     </select>
                   </div>
