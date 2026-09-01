@@ -31,13 +31,13 @@ Gestión del ciclo de vida completo de una sesión de trabajo con IA.
 
 ### 1. Inicio - cargar contexto, memoria, handoff del proyecto activo
 
-El inicio de sesión se activa **solo cuando Gonzo lo pide explícitamente** ("iniciar sesión", "arrancar", "empezar a trabajar", etc.). No correr el ritual de inicio en consultas sueltas.
+El inicio de sesión se activa **solo cuando Jose Luis lo pide explícitamente** ("iniciar sesión", "arrancar", "empezar a trabajar", etc.). No correr el ritual de inicio en consultas sueltas.
 
 **Modos de inicio:**
 
 #### A. Inicio con proyecto explícito
 
-Si Gonzo dice `"iniciar sesión en a11y-fixer"` o similar:
+Si Jose Luis dice `"iniciar sesión en a11y-fixer"` o similar:
 
 1. Resolver el proyecto por nombre: `node skills/session-context/commands/resume.mjs <nombre>`.
 2. Si no existe, ofrecer `session-context:init`.
@@ -46,17 +46,17 @@ Si Gonzo dice `"iniciar sesión en a11y-fixer"` o similar:
 
 #### B. Inicio con auto-detección por cwd
 
-Si Gonzo dice `"iniciar sesión"` y el `cwd` actual está registrado en `session-context`:
+Si Jose Luis dice `"iniciar sesión"` y el `cwd` actual está registrado en `session-context`:
 
 1. Detectar el proyecto con `resume.mjs` sin argumento.
 2. Mostrar el briefing.
 3. Preguntar: `"¿Seguimos en <proyecto> o querés cambiar de proyecto?"`
-4. Si Gonzo quiere otro proyecto → ir al modo A.
+4. Si Jose Luis quiere otro proyecto → ir al modo A.
 5. Si quiere brainstorming sin proyecto fijo → ir al modo C.
 
 #### C. Inicio sin proyecto definido (brainstorming / triage)
 
-Si Gonzo dice `"iniciar sesión"`, `"brainstorming"`, `"aún no sé en qué proyecto"`, etc.:
+Si Jose Luis dice `"iniciar sesión"`, `"brainstorming"`, `"aún no sé en qué proyecto"`, etc.:
 
 1. No correr `session-context:resume` de ningún proyecto.
 2. Cargar memoria general: `MEMORY.md`, `memory/YYYY-MM-DD.md` de hoy, lista de proyectos recientes opcionalmente con `session-context:list`.
@@ -84,7 +84,7 @@ Si Gonzo dice `"iniciar sesión"`, `"brainstorming"`, `"aún no sé en qué proy
 - Mostrar borrador al usuario para confirmación o edición antes de persistir.
 - **Revisar sesiones anteriores del día:** antes de cerrar, leer los archivos `memory/YYYY-MM-DD-*.md` del día para asegurarse de que no hubo sesiones previas que el daily note resumido no capture. No confiar solo en el daily note ni en la memoria.
 - **Consolidar archivos sueltos del día:** si hay archivos `memory/YYYY-MM-DD-HHMM.md` (sesiones individuales), moverlos a `memory/archive/`. El daily consolidado `memory/YYYY-MM-DD.md` ya tiene toda la info.
-- **Self-reflection obligatoria:** si hubo correcciones de Gonzo, cambios estructurales, o aprendizajes significativos, registrar en LEARNINGS.md antes de cerrar. No esperar a que Gonzo pregunte "¿revisamos lecciones?"
+- **Self-reflection obligatoria:** si hubo correcciones de Jose Luis, cambios estructurales, o aprendizajes significativos, registrar en LEARNINGS.md antes de cerrar. No esperar a que Jose Luis pregunte "¿revisamos lecciones?"
 - Si se modificó CONTRIBUTING.md, skills, o AGENTS.md, verificar que el cambio esté completo y no falten adaptaciones en skills relacionadas
 
 ### 5. Tareas - convertir pendientes en tareas accionables. Crear cron jobs para follow-ups, o escribir en TODO.md del proyecto. No dejar pendientes en el aire
@@ -98,7 +98,7 @@ Scripts en `skills/session-lifecycle/scripts/`:
 | Script | Uso |
 |---|---|
 | `session-start.sh --project <name> --objective <obj>` | Carga HANDOFF previo y crea/actualiza el log diario en `memory/YYYY-MM-DD.md`. Usar al inicio de sesion con proyecto. |
-| `session-end.sh --project <name> --summary <text>` | Genera/actualiza HANDOFF, escribe el guardado en el log diario. Los PRs los revisa Gonzo manualmente (2026-08-25). Usar al guardar sesion. |
+| `session-end.sh --project <name> --summary <text>` | Genera/actualiza HANDOFF, escribe el guardado en el log diario. Los PRs los revisa Jose Luis manualmente (2026-08-25). Usar al guardar sesion. |
 
 Si la sesion toca scripts de skill del workspace, correr `npm test` antes del commit final.
 
@@ -140,13 +140,13 @@ Si APARECE ALGUNO de estos:
 
 1. **STOP** - No empieces a redactar tu respuesta
 2. **WRITE** - Actualizá `memory/YYYY-MM-DD.md` o el archivo relevante con el detalle
-3. **THEN** - Respondé a Gonzo
+3. **THEN** - Respondé a Jose Luis
 
 El impulso de responder es el enemigo. El detalle se siente tan claro en contexto que parece innecesario escribirlo. Pero el contexto se va a perder. Escribí primero.
 
 **Ejemplo:**
 
-Gonzo dice: "Usá el tema azul, no el rojo"
+Jose Luis dice: "Usá el tema azul, no el rojo"
 
 ❌ MAL: "Dale, azul!" (parece obvio, para qué escribirlo)
 ✅ BIEN: Escribir a `memory/YYYY-MM-DD.md`: "Tema: azul (no rojo)" → LUEGO responder
@@ -156,7 +156,7 @@ Gonzo dice: "Usá el tema azul, no el rojo"
 Cuando el contexto de sesión llegue al ~60% (verificable con `session_status`), activar el buffer:
 
 1. Crear o limpiar `memory/working-buffer.md`
-2. A partir de ese punto, **cada exchange** se loggea: mensaje de Gonzo + resumen de tu respuesta
+2. A partir de ese punto, **cada exchange** se loggea: mensaje de Jose Luis + resumen de tu respuesta
 3. **Flush ANTES de compactar** (idea de Honcho): cuando se acerque la compactación, asegurar que el buffer esté completo y al día ANTES de perder contexto - no después. Si la sesión está por compactar (cerca del límite), hacer un flush final del buffer con lo último importante.
 4. Después de compactación, leer el buffer primero antes de cualquier otra cosa
 
@@ -169,7 +169,7 @@ Cuando el contexto de sesión llegue al ~60% (verificable con `session_status`),
 
 ---
 
-## 2026-07-22T12:01:00 Gonzo
+## 2026-07-22T12:01:00 Jose Luis
 [mensaje]
 
 ## 2026-07-22T12:01:05 Kanam (resumen)
@@ -221,7 +221,7 @@ El plugin no captura todo: solo las últimas 20 mensajes truncados a 500 chars, 
 
 ### C. Flujo de recuperación post-compactación (consolidado)
 
-Al despertar sin contexto (compactación, reinicio, o Gonzo dice "dónde estábamos?"):
+Al despertar sin contexto (compactación, reinicio, o Jose Luis dice "dónde estábamos?"):
 
 1. **Revisar el `prependContext` inyectado** (el plugin ya lo reinyectó). Es la fuente inmediata - las últimas 20 mensajes.
 2. **Leer `memory/working-buffer.md`** - exchanges crudos de la zona de peligro que el snapshot no cubre
@@ -253,22 +253,22 @@ Cuando un subagente pasa trabajo a otro (o devuelve resultados al main), el hand
 
 ## Productividad & ADHD - Cómo Trabajamos
 
-Gonzo tiene ADHD. El sistema de productividad debe adaptarse a eso, no al revés.
+Jose Luis tiene ADHD. El sistema de productividad debe adaptarse a eso, no al revés.
 
 ### Principios
 
 - **Una cosa a la vez.** No mezclar proyectos en una misma sesión. Cada sesión de OpenClaw = un proyecto.
-- **Inbox capture.** Si a Gonzo se le ocurre algo mientras trabajamos en otra cosa, lo atrapo en `inbox.md` y sigo con lo que estábamos.
+- **Inbox capture.** Si a Jose Luis se le ocurre algo mientras trabajamos en otra cosa, lo atrapo en `inbox.md` y sigo con lo que estábamos.
 - **Overload triage.** Si hay demasiadas cosas abiertas, parar y priorizar antes de seguir. Preguntar: "¿Qué es lo más importante AHORA?"
 - **Rutinas de inicio.** Al arrancar una sesión, revisar qué quedó pendiente de la sesión anterior antes de meter cosas nuevas.
-- **Rutinas de guardado.** Al terminar una sesión, dejar claro qué sigue para la próxima. Así Gonzo no pierde 10 min retomando.
+- **Rutinas de guardado.** Al terminar una sesión, dejar claro qué sigue para la próxima. Así Jose Luis no pierde 10 min retomando.
 - **Focus > multitasking.** Una sesión enfocada de 2h vale más que 4h de contexto switching.
 - **Sin culpa por lo no hecho.** Si algo quedó sin terminar, se retoma. No hay "debería haber hecho más".
-- **NUNCA usar ni sugerir localhost.** El entorno es 100% cloud en la nube (GitHub + Vercel). Gonzo no corre el sitio en local; todo se compila, verifica y despliega en la web / producción directamente.
+- **NUNCA usar ni sugerir localhost.** El entorno es 100% cloud en la nube (GitHub + Vercel). Jose Luis no corre el sitio en local; todo se compila, verifica y despliega en la web / producción directamente.
 
 ### Pausa Deliberada - Leer, Procesar, Responder
 
-Gonzo pide que nuestras respuestas tengan una **demora deliberada** entre leer el mensaje y actuar. No responder con la primera reacción.
+Jose Luis pide que nuestras respuestas tengan una **demora deliberada** entre leer el mensaje y actuar. No responder con la primera reacción.
 
 El flujo es: **LEER → PROCESAR → (pausa reflexiva) → RESPONDER**.
 
@@ -281,22 +281,22 @@ El flujo es: **LEER → PROCESAR → (pausa reflexiva) → RESPONDER**.
 - No responder a medio leer. Si el mensaje es largo o ambiguo, parafrasear el pedido antes de ejecutar.
 - **Cero localhost:** No sugerir `localhost`, `npm run dev` local ni servidores locales; la operación es 100% GitHub + Vercel.
 - Las tareas que tocan el mundo exterior (pushear, publicar, enviar) merecen doble pausa: verificar antes de accionar.
-- Si Gonzo pide algo que cambia el curso de lo que estábamos haciendo (ej. "no pushees"), incorporar esa restricción y seguir, no abandonar.
+- Si Jose Luis pide algo que cambia el curso de lo que estábamos haciendo (ej. "no pushees"), incorporar esa restricción y seguir, no abandonar.
 
 ### Señales de sobrecarga
 
 Si detecto alguna de estas, paro y pregunto antes de seguir:
-- Gonzo menciona 3+ proyectos diferentes en la misma conversación
+- Jose Luis menciona 3+ proyectos diferentes en la misma conversación
 - Hay tareas abiertas de sesiones anteriores sin resolver
 - El daily log del día tiene entradas de 3+ temas distintos
-- Gonzo dice "estoy en mil cosas" o similar
+- Jose Luis dice "estoy en mil cosas" o similar
 
 ### Cómo Ayudo
 
 - **Recordatorio suave:** "Antes de arrancar con esto, acordate que tenías X pendiente de ayer. ¿Seguimos con eso o arrancamos nuevo?"
 - **Triage rápido:** "Tenés 4 cosas abiertas. ¿Cuál es la prioritaria ahora?"
 - **Guardado explícito:** Al final de cada sesión, dejo un resumen de qué se hizo y qué sigue.
-- **Sin presión:** Si Gonzo quiere cambiar de tema, cambiamos. El sistema se adapta.
+- **Sin presión:** Si Jose Luis quiere cambiar de tema, cambiamos. El sistema se adapta.
 
 ## Outputs
 - `.data/session-context.db` (proyectos, sesiones, decisiones)

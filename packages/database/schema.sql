@@ -103,7 +103,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 7. Funciones Administrativas para el SuperAdmin (Gonzo)
+-- 7. Funciones Administrativas para el SuperAdmin (Jose Luis Brea Fabeiro)
 -- Permite al superadmin cambiar el tier de cualquier usuario en cualquier producto
 CREATE OR REPLACE FUNCTION admin_grant_product_tier(
     p_admin_id UUID,

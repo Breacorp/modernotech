@@ -127,7 +127,7 @@ export default function SuperAdminPage() {
                   status: "active",
                   quotaLabel: quotaLabels[selectedTierForGrant] || selectedTierForGrant.toUpperCase(),
                   grantNotes: grantNote,
-                  grantedBy: "SuperAdmin (Gonzo)",
+                  grantedBy: "SuperAdmin (Jose Luis)",
                 };
               }
               return e;
@@ -142,7 +142,7 @@ export default function SuperAdminPage() {
                 status: "active",
                 quotaLabel: quotaLabels[selectedTierForGrant] || selectedTierForGrant.toUpperCase(),
                 grantNotes: grantNote,
-                grantedBy: "SuperAdmin (Gonzo)",
+                grantedBy: "SuperAdmin (Jose Luis)",
               },
             ];
           }
@@ -198,7 +198,7 @@ export default function SuperAdminPage() {
           tier: newUserInitialTier,
           status: "active",
           quotaLabel: quotaLabels[newUserInitialTier] || newUserInitialTier.toUpperCase(),
-          grantedBy: "SuperAdmin (Gonzo)",
+          grantedBy: "SuperAdmin (Jose Luis)",
         },
         { productId: "cloud", productName: "Moderno Cloud", tier: "free", status: "active", quotaLabel: "5 GB Free" },
         { productId: "play", productName: "Moderno Play", tier: "free", status: "active", quotaLabel: "Catálogo Free" },
@@ -269,7 +269,7 @@ export default function SuperAdminPage() {
               Gestión Global del Ecosistema Moderno Tech
             </h1>
             <p className="text-xs sm:text-sm text-[#94A3B8] font-light mt-1 max-w-2xl">
-              Panel central de administración para Gonzo. Control unificado de usuarios, permisos por producto, suspensión de cuentas y asignación directa de beneficios para todos los sitios.
+              Panel central de administración para Jose Luis Brea Fabeiro. Control unificado de usuarios, permisos por producto, suspensión de cuentas y asignación directa de beneficios para todos los sitios.
             </p>
           </div>
 

@@ -80,7 +80,7 @@ echo "   ¿Qué aprendimos? ¿Algún patrón nuevo?"
 echo "   ¿Es global (🌍) o de proyecto (🏗️)?"
 echo "   Si hay algo, registrarlo en docs/LEARNINGS.md"
 echo ""
-# PRs (2026-08-25): Gonzo los revisa manualmente en GitHub y pasa los URLs a revisar.
+# PRs (2026-08-25): Jose Luis los revisa manualmente en GitHub y pasa los URLs a revisar.
 # No se chequean PRs automáticamente al cerrar sesión.
 echo "📋 Don't forget to:"
 echo "   1. Review HANDOFF.md"

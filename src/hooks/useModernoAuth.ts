@@ -38,9 +38,9 @@ export interface GlobalUserRecord {
 
 export const INITIAL_GLOBAL_USERS_MOCK: GlobalUserRecord[] = [
   {
-    id: "usr_gonzo_admin_01",
+    id: "usr_joseluis_admin_01",
     email: "jlbrea89@gmail.com",
-    name: "Gonzo Blasco (Dueño)",
+    name: "Jose Luis Brea Fabeiro (Dueño)",
     company: "Moderno Tech HQ",
     role: "superadmin",
     status: "active",
@@ -153,7 +153,7 @@ export function useModernoAuth() {
             setUser({
               id: u.id,
               email: u.email || "",
-              name: u.user_metadata?.name || (isOwner ? "Gonzo Blasco (Dueño)" : u.email?.split("@")[0] || "Usuario"),
+              name: u.user_metadata?.name || (isOwner ? "Jose Luis Brea Fabeiro (Dueño)" : u.email?.split("@")[0] || "Usuario"),
               avatarUrl: u.user_metadata?.avatar_url,
               role: isOwner ? "superadmin" : (u.user_metadata?.role || "user"),
               status: "active"
@@ -190,7 +190,7 @@ export function useModernoAuth() {
         setUser({
           id: u.id,
           email: u.email || "",
-          name: u.user_metadata?.name || (isOwner ? "Gonzo Blasco (Dueño)" : u.email?.split("@")[0] || "Usuario"),
+          name: u.user_metadata?.name || (isOwner ? "Jose Luis Brea Fabeiro (Dueño)" : u.email?.split("@")[0] || "Usuario"),
           avatarUrl: u.user_metadata?.avatar_url,
           role: isOwner ? "superadmin" : (u.user_metadata?.role || "user"),
           status: "active"
