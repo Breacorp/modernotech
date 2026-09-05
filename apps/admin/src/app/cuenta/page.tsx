@@ -52,23 +52,123 @@ export default function CuentaPage() {
     loadInvoices();
   }, [isAuthenticated, user?.id]);
 
-  useEffect(() => {
-    async function loadMfaStatus() {
-      if (isAuthenticated) {
-        try {
-          const { data, error } = await supabase.auth.mfa.listFactors();
-          if (!error && data?.totp) {
-            setMfaFactorsCount(data.totp.length);
-          } else {
-            setMfaFactorsCount(0);
-          }
-        } catch {
+  const [factors, setFactors] = useState<any[]>([]);
+  const [enrollData, setEnrollData] = useState<{ id: string; qr_code: string; secret: string; uri: string } | null>(null);
+  const [verifyCode, setVerifyCode] = useState("");
+  const [mfaError, setMfaError] = useState<string | null>(null);
+  const [mfaSuccess, setMfaSuccess] = useState<string | null>(null);
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [unenrollFactorId, setUnenrollFactorId] = useState<string | null>(null);
+
+  const loadMfaStatus = async () => {
+    if (isAuthenticated) {
+      try {
+        const { data, error } = await supabase.auth.mfa.listFactors();
+        if (!error && data?.all) {
+          const verifiedFactors = data.all.filter((f) => f.status === "verified");
+          setFactors(verifiedFactors);
+          setMfaFactorsCount(verifiedFactors.length);
+        } else {
+          setFactors([]);
           setMfaFactorsCount(0);
         }
+      } catch {
+        setFactors([]);
+        setMfaFactorsCount(0);
       }
     }
+  };
+
+  useEffect(() => {
     loadMfaStatus();
   }, [isAuthenticated]);
+
+  const handleStartEnroll = async () => {
+    setMfaError(null);
+    setMfaSuccess(null);
+    setIsEnrolling(true);
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: "totp",
+        friendlyName: "Authenticator App (Moderno ID)",
+      });
+
+      if (error) {
+        setMfaError(error.message);
+      } else if (data) {
+        setEnrollData({
+          id: data.id,
+          qr_code: data.totp.qr_code,
+          secret: data.totp.secret,
+          uri: data.totp.uri,
+        });
+      }
+    } catch (err: any) {
+      setMfaError(err?.message || "Error al iniciar enrolamiento MFA.");
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
+
+  const handleVerifyEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!enrollData || !verifyCode) return;
+    setIsVerifying(true);
+    setMfaError(null);
+    setMfaSuccess(null);
+
+    try {
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: enrollData.id,
+      });
+
+      if (challengeError) {
+        setMfaError(challengeError.message);
+        setIsVerifying(false);
+        return;
+      }
+
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: enrollData.id,
+        challengeId: challengeData.id,
+        code: verifyCode.trim(),
+      });
+
+      if (verifyError) {
+        setMfaError(verifyError.message);
+      } else {
+        setMfaSuccess("Autenticación de Dos Factores (TOTP) configurada y verificada exitosamente.");
+        setEnrollData(null);
+        setVerifyCode("");
+        await loadMfaStatus();
+      }
+    } catch (err: any) {
+      setMfaError(err?.message || "Error al verificar código TOTP.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleUnenroll = async (factorId: string) => {
+    if (!confirm("¿Estás seguro de que deseas desactivar este factor de doble autenticación?")) return;
+    setUnenrollFactorId(factorId);
+    setMfaError(null);
+    setMfaSuccess(null);
+    try {
+      const { error } = await supabase.auth.mfa.unenroll({ factorId });
+      if (error) {
+        setMfaError(error.message);
+      } else {
+        setMfaSuccess("Factor MFA eliminado correctamente.");
+        await loadMfaStatus();
+      }
+    } catch (err: any) {
+      setMfaError(err?.message || "Error al desvincular factor MFA.");
+    } finally {
+      setUnenrollFactorId(null);
+    }
+  };
 
   const handlePasswordReset = async () => {
     if (!user?.email) return;
@@ -453,25 +553,160 @@ export default function CuentaPage() {
                 Configuración de seguridad administrada mediante Supabase Auth central.
               </p>
 
+              {mfaError && (
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold mb-4">
+                  {mfaError}
+                </div>
+              )}
+              {mfaSuccess && (
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold mb-4">
+                  {mfaSuccess}
+                </div>
+              )}
+
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold text-white block">Autenticación de Dos Factores (MFA)</span>
-                    <span className="text-[11px] text-[#94A3B8] font-light">Código TOTP desde Google Authenticator o 1Password</span>
+                <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white">Autenticación de Dos Factores (MFA TOTP)</span>
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            mfaFactorsCount && mfaFactorsCount > 0
+                              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                              : "bg-white/[0.04] text-white/50 border border-white/10"
+                          }`}
+                        >
+                          {mfaFactorsCount === null
+                            ? "Verificando..."
+                            : mfaFactorsCount > 0
+                            ? `ACTIVO (${mfaFactorsCount}) ✓`
+                            : "NO CONFIGURADO"}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-[#94A3B8] font-light mt-1 block">
+                        Protege tu cuenta con Google Authenticator, 1Password o Authy mediante Supabase MFA.
+                      </span>
+                    </div>
+
+                    {!enrollData && (
+                      <button
+                        onClick={handleStartEnroll}
+                        disabled={isEnrolling}
+                        className="px-4 py-2 rounded-xl bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/30 text-xs font-bold transition-all cursor-pointer whitespace-nowrap self-start sm:self-auto disabled:opacity-50"
+                      >
+                        {isEnrolling ? "Iniciando..." : "+ Configurar Nuevo Factor TOTP"}
+                      </button>
+                    )}
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-xl text-xs font-bold ${
-                      mfaFactorsCount && mfaFactorsCount > 0
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                        : "bg-white/[0.04] text-white/50 border border-white/10"
-                    }`}
-                  >
-                    {mfaFactorsCount === null
-                      ? "Verificando..."
-                      : mfaFactorsCount > 0
-                      ? `ACTIVADO (${mfaFactorsCount} TOTP) ✓`
-                      : "NO CONFIGURADO"}
-                  </span>
+
+                  {/* Formulario / QR de enrolamiento activo */}
+                  {enrollData && (
+                    <div className="mt-6 p-5 rounded-xl bg-black/40 border border-[#00E5FF]/30">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-[#00E5FF]">
+                          Vincular Aplicación de Autenticación
+                        </h4>
+                        <button
+                          onClick={() => {
+                            setEnrollData(null);
+                            setVerifyCode("");
+                          }}
+                          className="text-xs text-[#94A3B8] hover:text-white"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl">
+                          {enrollData.qr_code ? (
+                            <img
+                              src={enrollData.qr_code}
+                              alt="Código QR de autenticación"
+                              className="w-44 h-44 object-contain"
+                            />
+                          ) : (
+                            <div className="w-44 h-44 flex items-center justify-center text-xs text-black font-mono">
+                              QR no disponible
+                            </div>
+                          )}
+                          <span className="text-[10px] text-zinc-600 font-mono mt-2">
+                            Escanear con tu app TOTP
+                          </span>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <span className="text-[11px] text-[#94A3B8] block mb-1">
+                              Clave secreta manual (si no puedes escanear el QR):
+                            </span>
+                            <div className="p-2.5 rounded-lg bg-white/[0.04] border border-white/10 font-mono text-xs text-[#00E5FF] break-all select-all">
+                              {enrollData.secret}
+                            </div>
+                          </div>
+
+                          <form onSubmit={handleVerifyEnroll} className="space-y-3">
+                            <label className="text-[11px] text-white font-bold block">
+                              Ingresa el código de 6 dígitos generado por tu app:
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                maxLength={6}
+                                placeholder="000000"
+                                value={verifyCode}
+                                onChange={(e) => setVerifyCode(e.target.value)}
+                                className="flex-1 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-[#00E5FF]"
+                                required
+                              />
+                              <button
+                                type="submit"
+                                disabled={isVerifying || verifyCode.trim().length < 6}
+                                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black font-black text-xs transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer"
+                              >
+                                {isVerifying ? "Verificando..." : "Confirmar"}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Factores TOTP ya activos */}
+                  {factors.length > 0 && (
+                    <div className="mt-5 border-t border-white/[0.06] pt-4 space-y-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-[#94A3B8] block mb-2">
+                        Factores Verificados Activos
+                      </span>
+                      {factors.map((f) => (
+                        <div
+                          key={f.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-base">📱</span>
+                            <div>
+                              <span className="text-xs font-bold text-white block">
+                                {f.friendly_name || "Authenticator App"}
+                              </span>
+                              <span className="text-[10px] font-mono text-[#94A3B8]">
+                                ID: {f.id} • Creado: {new Date(f.created_at).toLocaleDateString("es-AR")}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleUnenroll(f.id)}
+                            disabled={unenrollFactorId === f.id}
+                            className="px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            {unenrollFactorId === f.id ? "Eliminando..." : "Desactivar"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
