@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabaseAuthClient } from "@moderno/auth-helpers";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,33 +13,36 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    /**
-     * =========================================================================
-     * PUNTO DE REGISTRO OIDC REAL:
-     * 
-     * Si usas una solución OIDC/SSO real como LOGTO, KEYCLOAK o SUPABASE AUTH:
-     * - Aquí enviarías las credenciales al endpoint de registro del IdP.
-     * - Ejemplo con Supabase Auth (central):
-     *   const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name } } })
-     * =========================================================================
-     */
+    try {
+      const { data, error: signUpError } = await supabaseAuthClient.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            name: name.trim(),
+          },
+        },
+      });
 
-    setTimeout(() => {
-      // Registramos al usuario en la sesión simulada
-      localStorage.setItem("moderno_user", JSON.stringify({
-        id: "usr_" + Math.random().toString(36).substr(2, 9),
-        email,
-        name,
-        avatarUrl: undefined,
-        createdAt: new Date().toISOString().split('T')[0]
-      }));
-      router.push("/dashboard");
-    }, 1000);
+      if (signUpError) {
+        setError(signUpError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data?.user) {
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error al registrar la cuenta en Supabase.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,6 +59,12 @@ export default function RegisterPage() {
           </h1>
           <p className="text-sm text-[#8e8e93] mt-2">Únete al ecosistema Moderno Style & Tech.</p>
         </div>
+
+        {error && (
+          <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleRegister} className="space-y-5">
           <div>

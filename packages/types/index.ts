@@ -21,3 +21,21 @@ export interface UserSubscription {
   role: 'admin' | 'user' | 'billing';
   creditsRemaining?: number;
 }
+
+export interface AuditLogEntry {
+  id: string;
+  created_at: string;
+  actor_user_id: string | null;
+  actor_email: string | null;
+  action: string;
+  resource_type: string;
+  resource_id: string;
+  status: 'success' | 'failure';
+  metadata: Record<string, any>;
+  before_data?: Record<string, any> | null;
+  after_data?: Record<string, any> | null;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  error_message?: string | null;
+}
+

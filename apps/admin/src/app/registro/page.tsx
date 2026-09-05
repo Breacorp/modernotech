@@ -14,7 +14,6 @@ export default function RegistroPage() {
   const [selectedService, setSelectedService] = useState<string>("general");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { setDemoSession } = useModernoAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,64 +24,26 @@ export default function RegistroPage() {
     try {
       // 1. Registro directo en Supabase Auth
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           data: {
-            name: name,
+            name: name.trim(),
             initial_service: selectedService,
           },
         },
       });
 
-      if (!error && data.user) {
-        // Inicializar perfil y capa gratuita en todos los productos con free tier
-        try {
-          await supabase.from("global_profiles").upsert({
-            id: data.user.id,
-            name: name,
-          });
-
-          const defaultFreeProducts = [
-            "play",
-            "cloud",
-            "ai",
-            "access",
-            "weather",
-            "cleaner",
-            "mercatto",
-            "academy",
-            "cinema",
-          ];
-
-          const entitlementsToInsert = defaultFreeProducts.map((pId) => ({
-            user_id: data.user!.id,
-            product_id: pId,
-            tier: pId === selectedService && selectedService !== "general" ? "free" : "free",
-            status: "active",
-          }));
-
-          await supabase.from("user_product_entitlements").upsert(entitlementsToInsert, {
-            onConflict: "user_id,product_id",
-          });
-        } catch (_) {}
-
-        setDemoSession({
-          id: data.user.id,
-          email: data.user.email || email,
-          name: name,
-        });
-        window.location.href = "/cuenta";
+      if (error) {
+        setErrorMessage(error.message || "Error al crear la cuenta en Supabase.");
+        setIsSubmitting(false);
         return;
       }
 
-      // 2. Fallback de sesión en cliente
-      setDemoSession({
-        id: "usr-" + Date.now(),
-        email: email,
-        name: name,
-      });
-      window.location.href = "/cuenta";
+      if (data?.user) {
+        window.location.href = "/cuenta";
+        return;
+      }
     } catch (err: any) {
       setErrorMessage(err.message || "Error al crear la cuenta");
       setIsSubmitting(false);

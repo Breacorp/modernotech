@@ -35,29 +35,34 @@ export class MonitoringService {
   }
 
   public captureError(error: Error, extraContext?: Record<string, unknown>): void {
-    console.warn(`🚨 [Monitoring - Sentry Simulated] Capturando excepción: ${error.message}`, extraContext);
+    if (this.config.sentryDsn) {
+      console.error(`🚨 [Monitoring] Capturando excepción: ${error.message}`, extraContext);
+    }
   }
 
   public captureEvent(event: string, properties?: Record<string, unknown>): void {
-    console.log(`📈 [Monitoring - PostHog Simulated] Evento capturado: [${event}]`, properties);
+    if (this.config.posthogToken) {
+      console.log(`📈 [Monitoring] Evento registrado: [${event}]`, properties);
+    }
   }
 
   public startTrace(name: string): { end: () => void } {
     const startTime = Date.now();
-    console.log(`⏱️ [Monitoring - OpenTelemetry] Iniciando traza de rendimiento: [${name}]`);
     return {
       end: () => {
         const duration = Date.now() - startTime;
-        console.log(`⏱️ [Monitoring - OpenTelemetry] Finalizando traza: [${name}] - Duración: ${duration}ms`);
+        if (this.config.openTelemetryUrl) {
+          console.log(`⏱️ [Monitoring - OpenTelemetry] [${name}] - Duración: ${duration}ms`);
+        }
       }
     };
   }
 }
 
 export const monitor = new MonitoringService({
-  environment: 'development',
-  sentryDsn: 'https://demo-sentry-dsn.ingest.sentry.io/123456',
-  posthogToken: 'phc_demo_posthog_token_123',
-  posthogHost: 'https://app.posthog.com',
-  openTelemetryUrl: 'http://localhost:4318/v1/traces'
+  environment: (process.env.NODE_ENV as any) || 'production',
+  sentryDsn: process.env.SENTRY_DSN,
+  posthogToken: process.env.POSTHOG_TOKEN,
+  posthogHost: process.env.POSTHOG_HOST || 'https://app.posthog.com',
+  openTelemetryUrl: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
 });

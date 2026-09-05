@@ -13,7 +13,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { setDemoSession } = useModernoAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,32 +21,20 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      // 1. Intentar inicio de sesión real en Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
-      if (!error && data.user) {
-        setDemoSession({
-          id: data.user.id,
-          email: data.user.email || email,
-          name: data.user.user_metadata?.name || email.split("@")[0],
-        });
-        window.location.href = "/cuenta";
+      if (error || !data.user) {
+        setErrorMessage(error?.message || "Credenciales incorrectas. Verificá tu correo y contraseña.");
+        setIsSubmitting(false);
         return;
       }
 
-      // 2. Si falla o es entorno offline/demo, guardar sesión local demo
-      const username = email.split("@")[0];
-      setDemoSession({
-        id: "usr-" + Date.now(),
-        email: email,
-        name: username.charAt(0).toUpperCase() + username.slice(1),
-      });
       window.location.href = "/cuenta";
     } catch (err: any) {
-      setErrorMessage(err.message || "Error al iniciar sesión");
+      setErrorMessage(err.message || "Error al conectar con el servidor de autenticación");
       setIsSubmitting(false);
     }
   };
@@ -57,7 +44,7 @@ export default function LoginPage() {
       <ModernoBackground />
       <ModernoNavbar />
 
-      <main className="relative z-10 max-w-md mx-auto px-6 pt-32 sm:pt-36 pb-24 select-none">
+      <main className="relative z-10 max-w-md mx-auto px-6 pt-32 sm:pt-36 pb-24">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-bold text-[#00E5FF] mb-3">
             <span className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse" />
@@ -73,6 +60,11 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <div className="p-8 rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl">
+          {errorMessage && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+              {errorMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-[11px] font-bold text-white/70 uppercase tracking-wider mb-1.5">

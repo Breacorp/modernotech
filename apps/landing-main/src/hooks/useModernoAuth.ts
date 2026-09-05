@@ -49,16 +49,25 @@ export function useModernoAuth() {
         const { data, error } = await supabase.auth.getSession();
         if (!error && data?.session?.user) {
           const u = data.session.user;
-          const isOwner = u.email === "jlbrea89@gmail.com" || u.email?.includes("breacorp");
-          
+
+          // Consultar rol real y estado desde global_users en Supabase
+          const { data: dbUserData } = await supabase
+            .from("global_users")
+            .select("role, status")
+            .eq("id", u.id)
+            .single();
+
+          const realRole = (dbUserData?.role as "user" | "admin" | "superadmin") || "user";
+          const realStatus = (dbUserData?.status as "active" | "suspended") || "active";
+
           if (isMounted) {
             setUser({
               id: u.id,
               email: u.email || "",
-              name: u.user_metadata?.name || (isOwner ? "Jose Luis Brea Fabeiro (Dueño)" : u.email?.split("@")[0] || "Usuario"),
+              name: u.user_metadata?.name || u.email?.split("@")[0] || "Usuario",
               avatarUrl: u.user_metadata?.avatar_url,
-              role: isOwner ? "superadmin" : (u.user_metadata?.role || "user"),
-              status: "active"
+              role: realRole,
+              status: realStatus,
             });
           }
 
@@ -75,27 +84,21 @@ export function useModernoAuth() {
                   productId: e.product_id,
                   tier: e.tier,
                   status: e.status,
-                  quotaLabel: e.quota_limit_bytes ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB` : e.tier.toUpperCase(),
+                  quotaLabel: e.quota_limit_bytes
+                    ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB`
+                    : e.tier.toUpperCase(),
                   grantedBy: e.granted_by,
                   grantNotes: e.grant_notes,
                 }))
               );
             }
-          } catch (e) {
-            console.debug("Supabase entitlements query fallback");
-          }
+          } catch (_) {}
           return;
         }
 
-        if (typeof window !== "undefined") {
-          const localSession = localStorage.getItem("moderno_auth_session");
-          if (localSession) {
-            const parsed = JSON.parse(localSession);
-            if (isMounted) {
-              setUser(parsed);
-            }
-            return;
-          }
+        if (isMounted) {
+          setUser(null);
+          setEntitlements([]);
         }
       } catch (err) {
         console.debug("Moderno Auth: Session init");
@@ -111,14 +114,22 @@ export function useModernoAuth() {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const u = session.user;
-        const isOwner = u.email === "jlbrea89@gmail.com" || u.email?.includes("breacorp");
+        const { data: dbUserData } = await supabase
+          .from("global_users")
+          .select("role, status")
+          .eq("id", u.id)
+          .single();
+
+        const realRole = (dbUserData?.role as "user" | "admin" | "superadmin") || "user";
+        const realStatus = (dbUserData?.status as "active" | "suspended") || "active";
+
         setUser({
           id: u.id,
           email: u.email || "",
-          name: u.user_metadata?.name || (isOwner ? "Jose Luis Brea Fabeiro (Dueño)" : u.email?.split("@")[0] || "Usuario"),
+          name: u.user_metadata?.name || u.email?.split("@")[0] || "Usuario",
           avatarUrl: u.user_metadata?.avatar_url,
-          role: isOwner ? "superadmin" : (u.user_metadata?.role || "user"),
-          status: "active"
+          role: realRole,
+          status: realStatus,
         });
 
         try {
@@ -133,7 +144,9 @@ export function useModernoAuth() {
                 productId: e.product_id,
                 tier: e.tier,
                 status: e.status,
-                quotaLabel: e.quota_limit_bytes ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB` : e.tier.toUpperCase(),
+                quotaLabel: e.quota_limit_bytes
+                  ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB`
+                  : e.tier.toUpperCase(),
                 grantedBy: e.granted_by,
                 grantNotes: e.grant_notes,
               }))
@@ -141,10 +154,8 @@ export function useModernoAuth() {
           }
         } catch (_) {}
       } else {
-        if (typeof window !== "undefined" && !localStorage.getItem("moderno_auth_session")) {
-          setUser(null);
-          setEntitlements([]);
-        }
+        setUser(null);
+        setEntitlements([]);
       }
     });
 
@@ -158,21 +169,11 @@ export function useModernoAuth() {
     try {
       await supabase.auth.signOut();
     } catch (_) {}
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("moderno_auth_session");
-    }
     setUser(null);
     setEntitlements([]);
   };
 
-  const setDemoSession = (demoUser: ModernoUser) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("moderno_auth_session", JSON.stringify(demoUser));
-    }
-    setUser(demoUser);
-  };
-
-  const isSuperAdmin = user?.role === "superadmin" || user?.role === "admin" || user?.email === "jlbrea89@gmail.com";
+  const isSuperAdmin = user?.role === "superadmin";
 
   return {
     user,
@@ -181,6 +182,5 @@ export function useModernoAuth() {
     isLoading,
     entitlements,
     signOut,
-    setDemoSession,
   };
 }

@@ -3,60 +3,72 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ECOSISTEMA_PRODUCTOS } from "@moderno/config/products";
-import { MOCK_SUBSCRIPTIONS, generateSimulatedDemoToken } from "@moderno/auth-helpers";
-import { GlobalUser, UserSubscription } from "@moderno/types";
+import { AccountLinkingCard, supabaseAuthClient } from "@moderno/auth-helpers";
+import { User } from "@supabase/supabase-js";
+import { UserSubscription } from "@moderno/types";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<GlobalUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [simulatedDemoToken, setSimulatedDemoToken] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const localUser = localStorage.getItem("moderno_user");
-    if (!localUser) {
-      router.push("/");
-      return;
-    }
-    const parsedUser = JSON.parse(localUser);
-    setUser(parsedUser);
+    async function loadRealSession() {
+      try {
+        const { data: sessionData, error: sessionError } = await supabaseAuthClient.auth.getSession();
+        if (sessionError || !sessionData?.session) {
+          router.push("/");
+          return;
+        }
 
-    // Obtener las suscripciones asociadas al usuario (usr_1 por defecto en mock, o una base por defecto si es nuevo)
-    const subs = MOCK_SUBSCRIPTIONS[parsedUser.id] || ECOSISTEMA_PRODUCTOS.map(p => ({
-      productId: p.id,
-      isActive: p.isActiveByDefault,
-      role: "user" as const
-    }));
-    setSubscriptions(subs);
+        const currentUser = sessionData.session.user;
+        setUser(currentUser);
+
+        // Consultar entitlements reales de la base de datos Supabase
+        const { data: entitlements, error: entError } = await supabaseAuthClient
+          .from("user_product_entitlements")
+          .select("product_id, tier, status")
+          .eq("user_id", currentUser.id)
+          .eq("status", "active");
+
+        if (!entError && entitlements) {
+          const activeSubs: UserSubscription[] = entitlements.map((e: any) => ({
+            productId: e.product_id,
+            isActive: e.status === "active",
+            role: "user" as const,
+          }));
+          setSubscriptions(activeSubs);
+        } else {
+          setSubscriptions([]);
+        }
+      } catch (err) {
+        console.error("Error cargando sesión o entitlements de Supabase:", err);
+        router.push("/");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadRealSession();
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("moderno_user");
+  const handleLogout = async () => {
+    await supabaseAuthClient.auth.signOut();
     router.push("/");
   };
 
-  const handleSimulateSSO = (product: any) => {
-    if (!user) return;
-    const isProductActive = subscriptions.find(s => s.productId === product.id)?.isActive;
-    
-    if (!isProductActive) {
-      alert(`⚠️ Debes activar una suscripción para ${product.name} en el billing central antes de poder ingresar.`);
-      return;
-    }
-
-    const token = generateSimulatedDemoToken(user.id, product.id);
-    setSelectedProduct(product);
-    setSimulatedDemoToken(token);
-  };
-
-  if (!user) {
+  if (isLoading || !user) {
     return (
-      <div className="min-h-screen bg-[#050505] text-[#f8fafc] flex justify-center items-center">
-        Cargando portal de identidad...
+      <div className="min-h-screen bg-[#050505] text-[#f8fafc] flex justify-center items-center font-mono text-sm">
+        <span className="w-2 h-2 rounded-full bg-[#2563eb] animate-pulse mr-3" />
+        Verificando sesión central en Supabase...
       </div>
     );
   }
+
+  const userDisplayName = user.user_metadata?.name || user.email?.split("@")[0] || "Usuario";
+  const userEmail = user.email || "";
 
   return (
     <main className="min-h-screen bg-[#050505] text-[#f8fafc] p-8 relative overflow-hidden font-sans">
@@ -68,11 +80,11 @@ export default function DashboardPage() {
         <header className="flex flex-col md:flex-row justify-between items-center bg-[rgba(17,17,17,0.6)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.06)] p-6 rounded-2xl mb-10">
           <div className="flex items-center space-x-4 mb-4 md:mb-0">
             <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2563eb] border border-[#2563eb]/30 flex items-center justify-center font-bold text-white text-lg">
-              {user.name.charAt(0)}
+              {userDisplayName.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-xl font-bold">{user.name}</h2>
-              <p className="text-xs text-[#8e8e93]">{user.email}</p>
+              <h2 className="text-xl font-bold">{userDisplayName}</h2>
+              <p className="text-xs text-[#8e8e93]">{userEmail}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -88,13 +100,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Informative Alert for Architect Verification */}
-        <div className="bg-[rgba(37,99,235,0.05)] border border-[rgba(37,99,235,0.15)] rounded-2xl p-6 mb-8 text-sm leading-relaxed">
-          <h3 className="font-bold text-[#2563eb] mb-1">💡 Demo de Federación e Identidad Central (OIDC)</h3>
-          <p className="text-[#8e8e93] text-xs">
-            Esta pantalla representa el <strong>Moderno ID Launchpad</strong>. Todas las aplicaciones listadas abajo son 100% independientes y cuentan con su propia base de datos (incluso tu app existente <em>Moderno Access</em>). Al hacer clic en &quot;Entrar&quot;, simularemos el flujo OAuth/OIDC donde el IdP central genera un token firmado de autenticación que es verificado localmente por cada aplicación.
-          </p>
-        </div>
+
 
         {/* Dashboard Sections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -125,16 +131,21 @@ export default function DashboardPage() {
                       <span className="text-[11px] font-semibold text-[#8e8e93]">
                         {isSubscribed ? "🟢 Suscripción Activa" : "🔴 Inactivo"}
                       </span>
-                      <button
-                        onClick={() => handleSimulateSSO(product)}
-                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                          isSubscribed
-                            ? "bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-white hover:opacity-95 active:scale-[0.97]"
-                            : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-neutral-500 cursor-not-allowed"
-                        }`}
-                      >
-                        {isSubscribed ? "Entrar →" : "Bloqueado"}
-                      </button>
+                      {isSubscribed ? (
+                        <a
+                          href={`https://${product.subdomain}.moderno.com.ar`}
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-white hover:opacity-95 active:scale-[0.97]"
+                        >
+                          Entrar →
+                        </a>
+                      ) : (
+                        <button
+                          disabled
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-neutral-500 cursor-not-allowed"
+                        >
+                          Bloqueado
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -142,46 +153,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Sidebar Panel for simulated SSO token & Developer Insights */}
-          <div className="bg-[rgba(17,17,17,0.4)] border border-[rgba(255,255,255,0.05)] p-6 rounded-3xl h-fit">
-            <h3 className="text-base font-bold text-white mb-4">SSO Debugger</h3>
-
-            {selectedProduct ? (
-              <div className="space-y-4">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-[#8e8e93]">Aplicación Destino</span>
-                  <div className="text-sm font-bold text-[#2563eb] mt-0.5">{selectedProduct.name}</div>
-                </div>
-
-                <div className="bg-amber-950/20 border border-amber-900/40 text-amber-500 rounded-xl p-3 text-[10px] font-medium leading-relaxed">
-                  ⚠️ <strong>ATENCIÓN:</strong> Este token es una simulación estática (PREVIEW UX). No utilizar en producción.
-                </div>
-
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-[#8e8e93]">Simulated Token (Non-Production UX Preview)</span>
-                  <div className="bg-[#050505] p-3 rounded-lg border border-[rgba(255,255,255,0.06)] text-[9px] font-mono break-all text-amber-400/90 mt-1 select-all cursor-pointer">
-                    {simulatedDemoToken}
-                  </div>
-                </div>
-
-                <div className="text-xs text-[#8e8e93] leading-relaxed border-t border-[rgba(255,255,255,0.05)] pt-4 space-y-2">
-                  <h4 className="font-bold text-white text-[11px]">🔐 Flujo OIDC Técnico Interno:</h4>
-                  <p>
-                    1. <strong>Firma RSA:</strong> El JWT de arriba es emitido por <code>id.moderno.com.ar</code> y firmado con la llave privada del IdP.
-                  </p>
-                  <p>
-                    2. <strong>Redirección:</strong> Se redirige al usuario a <code>{selectedProduct.subdomain}?token=...</code>.
-                  </p>
-                  <p>
-                    3. <strong>Validación Local:</strong> El backend local de <strong>{selectedProduct.name}</strong> descarga la llave pública, valida la firma, y si es correcta, inicia la sesión en su propia base de datos (con su propio Supabase y sus propios privilegios de forma 100% aislada).
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-xs text-[#8e8e93] py-12 text-center">
-                Haz clic en el botón de &quot;Entrar&quot; de alguna aplicación activa (ej. Moderno Access) para inspeccionar la federación SSO.
-              </div>
-            )}
+          <div className="space-y-6 h-fit">
+            <AccountLinkingCard project="tech" className="w-full" />
           </div>
 
         </div>

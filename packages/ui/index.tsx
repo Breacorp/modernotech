@@ -543,37 +543,42 @@ export const BillingCard: React.FC<{
 export const ProductLauncher: React.FC<{
   productName: string;
   subdomain: string;
-  simulatedToken: string;
   onClose: () => void;
-}> = ({ productName, subdomain, simulatedToken, onClose }) => {
+}> = ({ productName, subdomain, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-[4px]">
       <div className="w-full max-w-[550px] bg-[#0d0d0d] border border-[var(--border)] p-8 rounded-[var(--radius-lg)] shadow-2xl relative z-55">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-bold text-white tracking-tight">SSO Lanzador: {productName}</h3>
+          <h3 className="text-lg font-bold text-white tracking-tight">Acceso Directo: {productName}</h3>
           <button onClick={onClose} className="text-[var(--text-muted)] hover:text-white">✕</button>
         </div>
 
         <div className="space-y-4 text-xs">
-          <div className="bg-amber-950/20 border border-amber-900/30 text-amber-500 rounded-xl p-3 text-[10px] leading-relaxed">
-            ⚠️ <strong>ATENCIÓN:</strong> Este token es una simulación estática (PREVIEW UX). No utilizar en producción.
-          </div>
-
           <div>
-            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Subdominio de Destino</span>
+            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Subdominio Federado</span>
             <div className="text-sm font-bold text-[var(--primary)] mt-0.5">{subdomain}</div>
           </div>
 
-          <div>
-            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Simulated OIDC ID Token</span>
-            <div className="bg-[#050505] p-3 rounded-lg border border-[var(--border)] text-[9px] font-mono break-all text-amber-400/90 mt-1 select-all cursor-pointer">
-              {simulatedToken}
-            </div>
-          </div>
-
-          <p className="text-[10px] text-[var(--text-muted)] leading-relaxed border-t border-[var(--border)] pt-4">
-            El subdominio local asocia la identidad del usuario global, valida criptográficamente de forma asimétrica y levanta una sesión local en su propio Supabase lógicamente aislado.
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed border-t border-[var(--border)] pt-4">
+            Tu sesión autenticada se propaga de manera transparente mediante cookies de dominio unificado (<code className="text-[#00E5FF]">.moderno.com.ar</code>).
           </p>
+
+          <div className="pt-2 flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl bg-white/[0.04] text-white text-xs font-bold"
+            >
+              Cerrar
+            </button>
+            <a
+              href={`https://${subdomain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2 rounded-xl bg-[var(--primary)] text-black text-xs font-black tracking-wider shadow-lg"
+            >
+              Abrir Plataforma &rarr;
+            </a>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { supabaseAuthClient } from '@moderno/auth-helpers';
-// Nota: Para Mercado Pago se debería integrar el SDK "mercadopago" de npm.
-// import { MercadoPagoConfig, PreApproval } from 'mercadopago';
 
 export async function GET(request: Request) {
   // 1. Validar el JWT del usuario de la petición
@@ -12,29 +10,59 @@ export async function GET(request: Request) {
 
   const token = authHeader.replace('Bearer ', '');
   try {
-    const { data: user, error } = await supabaseAuthClient.auth.getUser(token);
+    const { data, error } = await supabaseAuthClient.auth.getUser(token);
     
-    if (error || !user) {
+    if (error || !data?.user) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+
+    const user = data.user;
 
     // 2. Extraer el ID del producto consultado
     const { searchParams } = new URL(request.url);
     const productId = searchParams.get('productId');
 
-    // Aquí iría la lógica para consultar Mercado Pago / Base de datos de billing centralizada
-    // Simularemos la respuesta para mantener la funcionalidad actual
-    const mockSubscription = {
-      productId,
-      isActive: true,
-      role: 'admin',
-      creditsRemaining: 1500,
-      provider: 'mercadopago'
-    };
+    if (!productId) {
+      return NextResponse.json({ error: 'Missing productId parameter' }, { status: 400 });
+    }
 
-    return NextResponse.json({ subscription: mockSubscription });
+    // 3. Consultar entitlements reales en Supabase
+    const { data: entitlement, error: entError } = await supabaseAuthClient
+      .from('user_product_entitlements')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('product_id', productId)
+      .maybeSingle();
+
+    if (entError) {
+      console.error('Error fetching entitlement:', entError.message);
+      return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
+    }
+
+    if (!entitlement) {
+      return NextResponse.json({
+        subscription: {
+          productId,
+          isActive: false,
+          role: 'user',
+          status: 'inactive'
+        }
+      });
+    }
+
+    return NextResponse.json({
+      subscription: {
+        productId: entitlement.product_id,
+        isActive: entitlement.status === 'active',
+        role: entitlement.tier === 'enterprise' ? 'admin' : 'user',
+        tier: entitlement.tier,
+        status: entitlement.status,
+        grantedAt: entitlement.created_at
+      }
+    });
 
   } catch (error) {
+    console.error('Error in subscription route:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

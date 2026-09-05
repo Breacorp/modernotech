@@ -4,36 +4,57 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getActiveProducts, getRecommendedProducts, getBillingSummary, getUsageSummary } from "@moderno/dashboard-helpers";
 import { GlobalUser } from "@moderno/types";
+import { supabaseAuthClient } from "@moderno/auth-helpers";
 
 type TabType = "inicio" | "productos" | "consumo" | "facturacion" | "recomendaciones";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<GlobalUser | null>(null);
+  const [entitlements, setEntitlements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>("inicio");
 
   // Filter state for products tab
   const [prodCategoryFilter, setProdCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
-    // Si no hay sesión, simulamos un inicio de sesión por defecto para el demo del dashboard maestro
-    const localUser = localStorage.getItem("moderno_user");
-    if (!localUser) {
-      const defaultUser = {
-        id: "usr_1",
-        email: "demo@moderno.com.ar",
-        name: "Jose Luis",
-        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
-        createdAt: "2026-05-17"
-      };
-      localStorage.setItem("moderno_user", JSON.stringify(defaultUser));
-      setUser(defaultUser);
-    } else {
-      setUser(JSON.parse(localUser));
-    }
-  }, []);
+    async function loadDashboardData() {
+      try {
+        const { data: sessionData, error: sessionErr } = await supabaseAuthClient.auth.getSession();
+        if (sessionErr || !sessionData?.session) {
+          router.push("https://auth.moderno.com.ar/login?redirect=" + encodeURIComponent(window.location.href));
+          return;
+        }
 
-  if (!user) {
+        const authUser = sessionData.session.user;
+        const currentGlobalUser: GlobalUser = {
+          id: authUser.id,
+          email: authUser.email || "",
+          name: authUser.user_metadata?.name || authUser.email?.split("@")[0] || "Usuario",
+          avatarUrl: authUser.user_metadata?.avatar_url,
+          createdAt: authUser.created_at || new Date().toISOString(),
+        };
+        setUser(currentGlobalUser);
+
+        // Consultar productos asignados reales en Supabase
+        const { data: entData } = await supabaseAuthClient
+          .from("user_product_entitlements")
+          .select("*")
+          .eq("user_id", authUser.id);
+
+        setEntitlements(entData || []);
+      } catch (err) {
+        console.error("Error al cargar sesión de Supabase:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, [router]);
+
+  if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#050505] text-[#f8fafc] flex justify-center items-center font-sans">
         Cargando Dashboard Maestro...
@@ -41,12 +62,12 @@ export default function DashboardPage() {
     );
   }
 
-  // Get data using the shared dashboard helpers
-  const products = getActiveProducts(user.id);
+  // Get data using the shared dashboard helpers with real entitlements
+  const products = getActiveProducts(user.id, entitlements);
   const activeProducts = products.filter(p => p.isSubscribed);
-  const billingSummary = getBillingSummary(user.id);
-  const usageSummary = getUsageSummary(user.id);
-  const recommendations = getRecommendedProducts(user.id);
+  const billingSummary = getBillingSummary(user.id, entitlements);
+  const usageSummary = getUsageSummary(user.id, entitlements);
+  const recommendations = getRecommendedProducts(user.id, entitlements);
 
   const categories = [
     { id: "all", name: "Todos" },
@@ -181,42 +202,52 @@ export default function DashboardPage() {
               <div className="bg-[rgba(17,17,17,0.4)] border border-[rgba(255,255,255,0.05)] p-6 rounded-2xl">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#8e8e93]">Facturación Estimada</span>
                 <div className="text-2xl font-extrabold text-white mt-1">USD ${billingSummary.totalCost.toFixed(2)} / mes</div>
-                <p className="text-[10px] text-[#8e8e93] mt-2">Agregada de tus {activeProducts.length} productos activos.</p>
+                <p className="text-[10px] text-[#8e8e93] mt-2">Agregada de tus {billingSummary.activePlans.length} planes de pago activos.</p>
               </div>
               <div className="bg-[rgba(17,17,17,0.4)] border border-[rgba(255,255,255,0.05)] p-6 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-[#8e8e93]">Créditos de Render AI</span>
-                <div className="text-2xl font-extrabold text-white mt-1">450 / 1000</div>
-                <p className="text-[10px] text-[#8e8e93] mt-2">Usado en Cinema Studio y asistentes.</p>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[#8e8e93]">Módulos Activos</span>
+                <div className="text-2xl font-extrabold text-[#22c55e] mt-1">{activeProducts.length}</div>
+                <p className="text-[10px] text-[#8e8e93] mt-2">Productos habilitados en tu cuenta global.</p>
               </div>
               <div className="bg-[rgba(17,17,17,0.4)] border border-[rgba(255,255,255,0.05)] p-6 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-[#8e8e93]">Soporte Respondido</span>
-                <div className="text-2xl font-extrabold text-white mt-1">1,450 / 5,000</div>
-                <p className="text-[10px] text-[#8e8e93] mt-2">Consultas respondidas con IA en Soporte ML.</p>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[#8e8e93]">Nivel de Cuenta</span>
+                <div className="text-2xl font-extrabold text-[#2563eb] mt-1">
+                  {entitlements.some(e => e.tier === "enterprise") ? "Enterprise" : entitlements.some(e => e.tier === "pro") ? "Pro" : "Estándar"}
+                </div>
+                <p className="text-[10px] text-[#8e8e93] mt-2">Sincronizado vía Supabase Auth.</p>
               </div>
             </div>
 
             {/* Short cuts Grid */}
             <div className="space-y-4">
               <h4 className="text-sm font-bold uppercase tracking-wider text-white">Accesos Rápidos Directos</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {activeProducts.map(product => (
-                  <div
-                    key={product.id}
-                    className="bg-[rgba(17,17,17,0.3)] border border-[rgba(255,255,255,0.04)] p-4 rounded-xl flex items-center justify-between hover:border-[#2563eb]/30 transition-all"
-                  >
-                    <div>
-                      <h5 className="text-xs font-bold text-white">{product.name}</h5>
-                      <span className="text-[9px] text-[#8e8e93]">{product.subdomain}</span>
-                    </div>
-                    <button
-                      onClick={() => alert(`🔗 Redireccionando de forma segura a https://${product.subdomain} con inicio de sesión único SSO centralizado...`)}
-                      className="px-2.5 py-1.5 bg-[#2563eb]/10 hover:bg-[#2563eb] border border-[#2563eb]/20 text-[#00d2ff] hover:text-white text-[10px] font-bold rounded-lg transition-all"
+              {activeProducts.length === 0 ? (
+                <div className="p-8 bg-[rgba(17,17,17,0.3)] border border-[rgba(255,255,255,0.04)] rounded-2xl text-center text-sm text-[#8e8e93]">
+                  No tienes módulos activos asignados. Explora el catálogo en la pestaña "Mis Productos".
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {activeProducts.map(product => (
+                    <div
+                      key={product.id}
+                      className="bg-[rgba(17,17,17,0.3)] border border-[rgba(255,255,255,0.04)] p-4 rounded-xl flex items-center justify-between hover:border-[#2563eb]/30 transition-all"
                     >
-                      Abrir
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div>
+                        <h5 className="text-xs font-bold text-white">{product.name}</h5>
+                        <span className="text-[9px] text-[#8e8e93]">{product.subdomain}</span>
+                      </div>
+                      <a
+                        href={`https://${product.subdomain}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1.5 bg-[#2563eb]/10 hover:bg-[#2563eb] border border-[#2563eb]/20 text-[#00d2ff] hover:text-white text-[10px] font-bold rounded-lg transition-all"
+                      >
+                        Abrir →
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -274,19 +305,23 @@ export default function DashboardPage() {
                         </span>
                         
                         {product.isSubscribed ? (
-                          <button
-                            onClick={() => alert(`Redireccionando a https://${product.subdomain} con autenticación federada...`)}
-                            className="px-3 py-1.5 bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-[10px] font-bold rounded-lg text-white hover:opacity-95 active:scale-[0.98] transition-all"
+                          <a
+                            href={`https://${product.subdomain}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-[10px] font-bold rounded-lg text-white hover:opacity-95 active:scale-[0.98] transition-all text-center"
                           >
                             Entrar →
-                          </button>
+                          </a>
                         ) : (
-                          <button
-                            onClick={() => alert(`Flujo comercial simulado: Redirigiendo a contratación centralizada de billing para activar ${product.name}...`)}
-                            className="px-3 py-1.5 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[10px] font-bold rounded-lg text-white hover:bg-[rgba(255,255,255,0.05)] transition-all"
+                          <a
+                            href={`https://${product.subdomain}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[10px] font-bold rounded-lg text-white hover:bg-[rgba(255,255,255,0.05)] transition-all text-center"
                           >
-                            Activar
-                          </button>
+                            Ver Detalles
+                          </a>
                         )}
                       </div>
                     </div>
@@ -329,11 +364,6 @@ export default function DashboardPage() {
         {/* Tab: FACTURACION */}
         {activeTab === "facturacion" && (
           <div className="space-y-8 animate-fade-in">
-            {/* Hardening billing warning banner */}
-            <div className="bg-amber-950/20 border border-amber-900/30 text-amber-500 p-4 rounded-xl text-xs max-w-2xl">
-              ⚠️ <strong>ATENCIÓN:</strong> Todo el módulo de facturación y cuotas comerciales que se muestra a continuación es una <strong>simulación estática de desarrollo (DEMO comercial)</strong>. No existen cobros, cargos reales ni pasarelas conectadas en esta fase.
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl">
               {/* Billing list */}
               <div className="bg-[rgba(17,17,17,0.4)] border border-[rgba(255,255,255,0.05)] p-6 rounded-2xl md:col-span-2 space-y-4">
@@ -355,30 +385,11 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Fake invoices */}
+              {/* Invoices list */}
               <div className="bg-[rgba(17,17,17,0.4)] border border-[rgba(255,255,255,0.05)] p-6 rounded-2xl space-y-4">
                 <h3 className="text-base font-bold text-white mb-4">Historial de Recibos</h3>
-                <div className="space-y-4 text-[11px]">
-                  <div className="p-3 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)] rounded-xl flex justify-between">
-                    <div>
-                      <p className="font-bold text-white">INV-2026-001</p>
-                      <p className="text-[#8e8e93] text-[9px]">01 May 2026</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-white">USD $78.00</p>
-                      <span className="text-[9px] text-green-400">Pagado</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)] rounded-xl flex justify-between">
-                    <div>
-                      <p className="font-bold text-white">INV-2026-002</p>
-                      <p className="text-[#8e8e93] text-[9px]">01 Abr 2026</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-white">USD $78.00</p>
-                      <span className="text-[9px] text-green-400">Pagado</span>
-                    </div>
-                  </div>
+                <div className="p-4 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)] rounded-xl text-center text-xs text-[#8e8e93]">
+                  No hay comprobantes de pago registrados aún para este usuario.
                 </div>
               </div>
             </div>
@@ -397,16 +408,18 @@ export default function DashboardPage() {
                 >
                   <div className="space-y-1">
                     <span className="text-[9px] font-bold bg-[#2563eb]/15 text-[#00d2ff] border border-[#2563eb]/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                      Módulo Recomendado: {rec.product.name}
+                      Módulo Sugerido: {rec.product.name}
                     </span>
                     <p className="text-xs text-[#8e8e93] mt-2 leading-relaxed">{rec.reason}</p>
                   </div>
-                  <button
-                    onClick={() => alert(`Inicializando activación del módulo ${rec.product.name} con licenciamiento simulado...`)}
-                    className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-[11px] font-bold rounded-xl text-white transition-all whitespace-nowrap"
+                  <a
+                    href={`https://${rec.product.subdomain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-[11px] font-bold rounded-xl text-white transition-all whitespace-nowrap text-center"
                   >
-                    Activar Módulo
-                  </button>
+                    Conocer Módulo
+                  </a>
                 </div>
               ))}
             </div>

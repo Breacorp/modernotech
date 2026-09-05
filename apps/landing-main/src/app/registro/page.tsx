@@ -14,7 +14,6 @@ export default function RegistroPage() {
   const [selectedService, setSelectedService] = useState<string>("general");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { setDemoSession } = useModernoAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,22 +66,12 @@ export default function RegistroPage() {
           });
         } catch (_) {}
 
-        setDemoSession({
-          id: data.user.id,
-          email: data.user.email || email,
-          name: name,
-        });
         window.location.href = "/cuenta";
         return;
       }
 
-      // 2. Fallback de sesión en cliente
-      setDemoSession({
-        id: "usr-" + Date.now(),
-        email: email,
-        name: name,
-      });
-      window.location.href = "/cuenta";
+      setErrorMessage(error?.message || "No se pudo registrar la cuenta. Verificá los datos ingresados.");
+      setIsSubmitting(false);
     } catch (err: any) {
       setErrorMessage(err.message || "Error al crear la cuenta");
       setIsSubmitting(false);

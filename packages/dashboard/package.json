@@ -7,6 +7,12 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "dependencies": {
+    "@moderno/product-registry": "*",
+    "@moderno/types": "*",
+    "@moderno/auth-helpers": "*",
+    "@supabase/supabase-js": "^2.49.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moderno/moderno-hub.git"

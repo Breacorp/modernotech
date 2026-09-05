@@ -193,7 +193,6 @@ function StyleGuideContent() {
               <ProductLauncher
                 productName="Cinema Studio AI"
                 subdomain="cinema.moderno.com.ar"
-                simulatedToken="SIMULATED_DEMO_TOKEN_ZXlKaGNIQnNaVzFwZEhWbFpEMHhNakEx..."
                 onClose={() => setIsLauncherOpen(false)}
               />
             )}

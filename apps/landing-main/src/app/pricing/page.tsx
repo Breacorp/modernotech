@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { ModernoBackground } from "../../components/ModernoBackground";
 import { ModernoNavbar } from "../../components/ModernoNavbar";
 import { Footer } from "../../components/Footer";
+import { supabase } from "../../lib/supabase";
 
 type PricingCategory = "all" | "cloud" | "play" | "access" | "suite" | "cleaner";
 
@@ -12,6 +13,7 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"annual" | "monthly">("annual");
   const [licenseKey, setLicenseKey] = useState("");
   const [activationStatus, setActivationStatus] = useState<string | null>(null);
+  const [isActivating, setIsActivating] = useState(false);
 
   // Read URL query params on load (e.g. ?service=cloud)
   useEffect(() => {
@@ -26,13 +28,35 @@ export default function PricingPage() {
     }
   }, []);
 
-  const handleActivate = (e: React.FormEvent) => {
+  const handleActivate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!licenseKey.trim()) return;
-    if (licenseKey.toUpperCase().startsWith("MODERNO-")) {
-      setActivationStatus("valid");
-    } else {
-      setActivationStatus("invalid");
+
+    setIsActivating(true);
+    setActivationStatus(null);
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user) {
+        window.location.href = `/login?redirect=/pricing?service=cleaner`;
+        return;
+      }
+
+      const { data, error } = await supabase.rpc("activate_license_key", {
+        p_license_key: licenseKey.trim(),
+      });
+
+      if (error) {
+        setActivationStatus(`error:${error.message}`);
+      } else if (data && !data.success) {
+        setActivationStatus(`error:${data.error}`);
+      } else {
+        setActivationStatus(`success:${data.message || "Licencia activada con éxito."}`);
+      }
+    } catch (err: any) {
+      setActivationStatus(`error:${err?.message || "Error al conectar con el servidor de licencias."}`);
+    } finally {
+      setIsActivating(false);
     }
   };
 
@@ -729,20 +753,21 @@ export default function PricingPage() {
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_15px_rgba(0,229,255,0.3)] cursor-pointer"
+                  disabled={isActivating}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_15px_rgba(0,229,255,0.3)] cursor-pointer disabled:opacity-50"
                 >
-                  Activar Licencia
+                  {isActivating ? "Validando en Supabase..." : "Activar Licencia"}
                 </button>
               </form>
 
-              {activationStatus === "valid" && (
+              {activationStatus?.startsWith("success:") && (
                 <p className="text-xs text-emerald-400 font-bold mt-3">
-                  ✓ Clave registrada correctamente. Abrí tu app Moderno AI Cleaner Pro para sincronizar la activación.
+                  ✓ {activationStatus.replace("success:", "")}
                 </p>
               )}
-              {activationStatus === "invalid" && (
+              {activationStatus?.startsWith("error:") && (
                 <p className="text-xs text-rose-400 font-medium mt-3">
-                  ✕ El formato de la clave no es válido. Debe iniciar con MODERNO- seguido de 12 caracteres alfanuméricos.
+                  ✕ {activationStatus.replace("error:", "")}
                 </p>
               )}
             </div>

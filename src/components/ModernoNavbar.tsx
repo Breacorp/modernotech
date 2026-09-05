@@ -40,18 +40,14 @@ export const ModernoNavbar: React.FC = () => {
   ];
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLElement>, href: string) => {
-    if (href.startsWith("/#") && window.location.pathname === "/") {
+    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+      return; // Permite que el enlace navegue normalmente a /#seccion
+    }
+    if (href.startsWith("/#") || href.startsWith("#")) {
       e.preventDefault();
       setMobileMenuOpen(false);
-      const targetId = href.replace("/", "");
+      const targetId = href.startsWith("/#") ? href.replace("/", "") : href;
       const target = document.querySelector(targetId);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
-    } else if (href.startsWith("#")) {
-      e.preventDefault();
-      setMobileMenuOpen(false);
-      const target = document.querySelector(href);
       if (target) {
         target.scrollIntoView({ behavior: "smooth" });
       }
@@ -148,10 +144,7 @@ export const ModernoNavbar: React.FC = () => {
                       <span className="text-[10px] font-black text-[#00E5FF] tracking-widest uppercase">
                         ECOSISTEMA MODERNO
                       </span>
-                      <a href="/admin" className="text-[10px] font-bold text-[#00E5FF] hover:underline flex items-center gap-1">
-                        <span>👑</span>
-                        <span>SuperAdmin</span>
-                      </a>
+                      <span className="text-[10px] font-mono text-white/40">Hub Central</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {ecosystemApps.map((app) => (
@@ -176,10 +169,10 @@ export const ModernoNavbar: React.FC = () => {
                     </div>
                     <div className="mt-3 pt-2.5 border-t border-white/[0.06] text-center">
                       <a
-                        href="/admin"
-                        className="w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-[#00E5FF]/10 to-[#157BFF]/10 hover:from-[#00E5FF]/20 hover:to-[#157BFF]/20 border border-[#00E5FF]/30 text-[10px] font-bold text-[#00E5FF] block transition-all"
+                        href="/cuenta"
+                        className="w-full py-1.5 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[10px] font-bold text-white block transition-all"
                       >
-                        ⚡ Abrir Panel de Control Global &rarr;
+                        Gestionar Servicios &rarr;
                       </a>
                     </div>
                   </motion.div>
@@ -192,16 +185,6 @@ export const ModernoNavbar: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>ONLINE</span>
             </div>
-
-            {/* SuperAdmin Direct Link */}
-            <a
-              href="/admin"
-              title="Panel de Control SuperAdmin (Dueño)"
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#00E5FF]/15 to-[#157BFF]/15 hover:from-[#00E5FF]/25 hover:to-[#157BFF]/25 border border-[#00E5FF]/40 text-xs font-bold text-white hover:text-[#00E5FF] transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,229,255,0.2)]"
-            >
-              <span>👑</span>
-              <span className="hidden xl:inline">SuperAdmin</span>
-            </a>
 
             {/* Moderno ID Conditional Action */}
             {isAuthenticated ? (

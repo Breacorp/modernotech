@@ -8,7 +8,7 @@ import { useModernoAuth, GlobalUserRecord, UserEntitlement } from "../../hooks/u
 import { supabase } from "../../lib/supabase";
 
 export default function SuperAdminPage() {
-  const { user, isSuperAdmin, isAuthenticated } = useModernoAuth();
+  const { user, isSuperAdmin, isAuthenticated, isLoading } = useModernoAuth();
 
   // Database of all ecosystem users from Supabase
   const [users, setUsers] = useState<GlobalUserRecord[]>([]);
@@ -43,6 +43,18 @@ export default function SuperAdminPage() {
   const [newUserRole, setNewUserRole] = useState<"user" | "admin" | "superadmin">("user");
   const [newUserInitialProduct, setNewUserInitialProduct] = useState("access");
   const [newUserInitialTier, setNewUserInitialTier] = useState<"free" | "vip" | "pro" | "family" | "enterprise" | "reseller">("pro");
+
+  // Navigation tab state
+  const [activeTab, setActiveTab] = useState<"users" | "audit">("users");
+
+  // Audit Logs state
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [isLoadingAuditLogs, setIsLoadingAuditLogs] = useState(false);
+  const [auditError, setAuditError] = useState<string | null>(null);
+  const [auditActionFilter, setAuditActionFilter] = useState("ALL");
+  const [auditStatusFilter, setAuditStatusFilter] = useState<"ALL" | "success" | "failure">("ALL");
+  const [auditSearchQuery, setAuditSearchQuery] = useState("");
+  const [selectedAuditLog, setSelectedAuditLog] = useState<any | null>(null);
 
   // Fetch users from central Supabase
   const fetchSupabaseUsers = async () => {
@@ -86,53 +98,44 @@ export default function SuperAdminPage() {
 
         setUsers(mappedUsers);
       } else {
-        if (user) {
-          setUsers([
-            {
-              id: user.id,
-              email: user.email,
-              name: user.name || "Jose Luis Brea Fabeiro (Dueño)",
-              company: "Moderno Tech HQ",
-              role: "superadmin",
-              status: "active",
-              createdAt: new Date().toISOString(),
-              entitlements: [
-                { productId: "access", tier: "enterprise", status: "active", quotaLabel: "Enterprise" },
-                { productId: "cloud", tier: "pro", status: "active", quotaLabel: "6 TB" },
-                { productId: "play", tier: "vip", status: "active", quotaLabel: "VIP" },
-                { productId: "one", tier: "enterprise", status: "active", quotaLabel: "Enterprise" },
-                { productId: "ai", tier: "pro", status: "active", quotaLabel: "Pro" },
-                { productId: "cleaner", tier: "pro", status: "active", quotaLabel: "Pro" },
-              ],
-            },
-          ]);
-        } else {
-          setUsers([]);
-        }
+        setUsers([]);
       }
     } catch (err) {
-      console.debug("Error fetching from Supabase:", err);
-      if (user) {
-        setUsers([
-          {
-            id: user.id,
-            email: user.email,
-            name: user.name || "Jose Luis Brea Fabeiro (Dueño)",
-            company: "Moderno Tech HQ",
-            role: "superadmin",
-            status: "active",
-            createdAt: new Date().toISOString(),
-            entitlements: [],
-          },
-        ]);
-      }
+      console.error("Error fetching from Supabase:", err);
+      setUsers([]);
     } finally {
       setIsLoadingUsers(false);
     }
   };
 
+  // Fetch real audit logs from Supabase audit_logs table
+  const fetchAuditLogs = async () => {
+    setIsLoadingAuditLogs(true);
+    setAuditError(null);
+    try {
+      const { data, error } = await supabase
+        .from("audit_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (error) {
+        setAuditError(error.message);
+        setAuditLogs([]);
+      } else {
+        setAuditLogs(data || []);
+      }
+    } catch (err: any) {
+      setAuditError(err?.message || "Error al conectar con la base de datos de auditoría.");
+      setAuditLogs([]);
+    } finally {
+      setIsLoadingAuditLogs(false);
+    }
+  };
+
   useEffect(() => {
     fetchSupabaseUsers();
+    fetchAuditLogs();
   }, [user]);
 
   // Open full edit modal
@@ -169,11 +172,18 @@ export default function SuperAdminPage() {
         })
         .eq("id", selectedUserForEdit.id);
 
-      // 3. Update password via Supabase Auth admin API if provided
+      // 3. Send password reset email if requested
       if (editUserNewPassword.trim().length >= 6) {
-        console.debug("Updating password in Supabase Auth for user:", selectedUserForEdit.id);
+        const { error: resetErr } = await supabase.auth.resetPasswordForEmail(editUserEmail.trim());
+        if (resetErr) {
+          console.error("Error sending reset password email:", resetErr.message);
+        }
       }
-    } catch (_) {}
+    } catch (err: any) {
+      console.error("Error updating user in Supabase:", err);
+      alert(`Error al actualizar usuario: ${err?.message || "Error desconocido"}`);
+      return;
+    }
 
     setUsers((prev) =>
       prev.map((u) => {
@@ -214,6 +224,24 @@ export default function SuperAdminPage() {
       return matchesSearch && matchesStatus && matchesProduct;
     });
   }, [users, searchQuery, statusFilter, productFilter]);
+
+  // Filtered audit logs list
+  const filteredAuditLogs = useMemo(() => {
+    return auditLogs.filter((log) => {
+      const matchesAction = auditActionFilter === "ALL" || log.action === auditActionFilter;
+      const matchesStatus = auditStatusFilter === "ALL" || log.status === auditStatusFilter;
+      const q = auditSearchQuery.toLowerCase().trim();
+      const matchesSearch =
+        q === "" ||
+        log.action.toLowerCase().includes(q) ||
+        log.resource_type.toLowerCase().includes(q) ||
+        log.resource_id.toLowerCase().includes(q) ||
+        (log.actor_email && log.actor_email.toLowerCase().includes(q)) ||
+        (log.actor_user_id && log.actor_user_id.toLowerCase().includes(q));
+
+      return matchesAction && matchesStatus && matchesSearch;
+    });
+  }, [auditLogs, auditActionFilter, auditStatusFilter, auditSearchQuery]);
 
   // KPIs
   const totalUsersCount = users.length;
@@ -353,6 +381,11 @@ export default function SuperAdminPage() {
     e.preventDefault();
     if (!newUserEmail.trim()) return;
 
+    if (!newUserPassword || newUserPassword.trim().length < 8) {
+      alert("Por seguridad, la contraseña inicial debe tener al menos 8 caracteres.");
+      return;
+    }
+
     const productNames: Record<string, string> = {
       access: "Moderno Access",
       cloud: "Moderno Cloud",
@@ -371,13 +404,11 @@ export default function SuperAdminPage() {
       reseller: "Cuenta Reseller / Distribuidor",
     };
 
-    const newUserId = `usr_${Date.now().toString(36)}`;
-
     try {
       // 1. Create auth user in Supabase
-      await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: newUserEmail.trim(),
-        password: newUserPassword || "ModernoPass2026!",
+        password: newUserPassword.trim(),
         options: {
           data: {
             name: newUserName.trim() || newUserEmail.split("@")[0],
@@ -386,51 +417,62 @@ export default function SuperAdminPage() {
         },
       });
 
+      if (signUpError || !signUpData.user) {
+        alert(`Error al crear usuario en Supabase: ${signUpError?.message || "Sin datos de usuario"}`);
+        return;
+      }
+
+      const createdUserId = signUpData.user.id;
+
       // 2. Insert in global_profiles
-      await supabase.from("global_profiles").insert({
-        id: newUserId,
+      const { error: profileErr } = await supabase.from("global_profiles").upsert({
+        id: createdUserId,
         name: newUserName.trim() || newUserEmail.split("@")[0],
         company: newUserCompany.trim() || "Particular",
       });
+      if (profileErr) console.error("Error upserting profile:", profileErr.message);
 
       // 3. Insert initial entitlement
-      await supabase.from("user_product_entitlements").insert({
-        user_id: newUserId,
+      const { error: entErr } = await supabase.from("user_product_entitlements").upsert({
+        user_id: createdUserId,
         product_id: newUserInitialProduct,
         tier: newUserInitialTier,
         status: "active",
+        granted_by: user?.id,
       });
-    } catch (_) {}
+      if (entErr) console.error("Error inserting entitlement:", entErr.message);
 
-    const newRecord: GlobalUserRecord = {
-      id: newUserId,
-      email: newUserEmail.trim(),
-      name: newUserName.trim() || newUserEmail.split("@")[0],
-      company: newUserCompany.trim() || "Particular",
-      role: newUserRole,
-      status: "active",
-      createdAt: new Date().toISOString(),
-      lastLogin: "Invitación creada",
-      entitlements: [
-        {
-          productId: newUserInitialProduct,
-          productName: productNames[newUserInitialProduct] || newUserInitialProduct,
-          tier: newUserInitialTier as any,
-          status: "active",
-          quotaLabel: quotaLabels[newUserInitialTier] || newUserInitialTier.toUpperCase(),
-          grantedBy: "SuperAdmin (Jose Luis Brea Fabeiro)",
-        },
-      ],
-    };
+      const newRecord: GlobalUserRecord = {
+        id: createdUserId,
+        email: newUserEmail.trim(),
+        name: newUserName.trim() || newUserEmail.split("@")[0],
+        company: newUserCompany.trim() || "Particular",
+        role: newUserRole,
+        status: "active",
+        createdAt: new Date().toISOString(),
+        lastLogin: "Invitación creada",
+        entitlements: [
+          {
+            productId: newUserInitialProduct,
+            productName: productNames[newUserInitialProduct] || newUserInitialProduct,
+            tier: newUserInitialTier as any,
+            status: "active",
+            quotaLabel: quotaLabels[newUserInitialTier] || newUserInitialTier.toUpperCase(),
+            grantedBy: user?.name || "SuperAdmin",
+          },
+        ],
+      };
 
-    setUsers((prev) => [newRecord, ...prev]);
-    setShowNewUserModal(false);
-    setNewUserEmail("");
-    setNewUserName("");
-    setNewUserPassword("");
-    setNewUserCompany("");
-    setActionSuccessMessage(`Usuario ${newRecord.email} creado y sincronizado con Supabase.`);
-    setTimeout(() => setActionSuccessMessage(null), 4500);
+      setUsers((prev) => [newRecord, ...prev]);
+      setShowNewUserModal(false);
+      setNewUserEmail("");
+      setNewUserName("");
+      setNewUserPassword("");
+      setActionSuccessMessage(`Usuario ${newUserEmail.trim()} creado exitosamente en Supabase Auth.`);
+      setNewUserCompany("");
+    } catch (err: any) {
+      alert(`Fallo en el proceso de alta: ${err.message || "Error desconocido"}`);
+    }
   };
 
   // Quick Action: Delete User in Supabase
@@ -456,6 +498,35 @@ export default function SuperAdminPage() {
     { name: "Moderno CRM (WaTicket)", icon: "💬", url: "https://ticket.moderno.com.ar", desc: "Bandeja WhatsApp API y atención multiagente", color: "#10B981" },
     { name: "AI Cleaner Pro", icon: "⚡", url: "https://cleaner.moderno.com.ar", desc: "Licencias de activación y diagnóstico macOS", color: "#00C8FF" },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center text-sm font-mono">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#00E5FF] animate-pulse mr-3" />
+        Verificando credenciales criptográficas de SuperAdmin...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !isSuperAdmin) {
+    return (
+      <div className="min-h-screen bg-[#050507] text-white flex flex-col items-center justify-center text-center p-6 select-none">
+        <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-3xl mb-4 text-rose-500">
+          🛡️
+        </div>
+        <h1 className="text-xl sm:text-2xl font-black text-white mb-2">Acceso Restringido</h1>
+        <p className="text-xs text-[#94A3B8] max-w-md mb-6 leading-relaxed">
+          Esta consola está reservada exclusivamente para operadores autorizados de Moderno Tech. Tu cuenta no cuenta con permisos de SuperAdmin en la base de datos central.
+        </p>
+        <a
+          href="/login?redirect=/admin"
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+        >
+          Iniciar Sesión con SuperAdmin &rarr;
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-[#050507] text-white selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
@@ -604,249 +675,553 @@ export default function SuperAdminPage() {
           </div>
         </div>
 
-        {/* Global Users Management Table */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
-          {/* Table Filters & Search */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/[0.06]">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-black text-[#00E5FF] uppercase tracking-wider mr-2">
-                FILTRAR POR:
-              </span>
+        {/* Tab Switcher: Usuarios Globales vs Audit Logs */}
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "users"
+                ? "bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black shadow-[0_0_20px_rgba(0,229,255,0.35)]"
+                : "bg-white/[0.04] text-[#94A3B8] hover:text-white border border-white/[0.08]"
+            }`}
+          >
+            <span>👥</span>
+            <span>Gestión de Usuarios ({users.length})</span>
+          </button>
 
-              {/* Status Filter */}
-              <div className="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                <button
-                  onClick={() => setStatusFilter("ALL")}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    statusFilter === "ALL" ? "bg-[#00E5FF] text-black" : "text-[#94A3B8] hover:text-white"
-                  }`}
-                >
-                  Todos ({totalUsersCount})
-                </button>
-                <button
-                  onClick={() => setStatusFilter("active")}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    statusFilter === "active" ? "bg-emerald-500 text-black" : "text-[#94A3B8] hover:text-white"
-                  }`}
-                >
-                  Activos ({activeUsersCount})
-                </button>
-                <button
-                  onClick={() => setStatusFilter("suspended")}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    statusFilter === "suspended" ? "bg-rose-500 text-white" : "text-[#94A3B8] hover:text-white"
-                  }`}
-                >
-                  Suspendidos ({suspendedUsersCount})
-                </button>
-              </div>
-
-              {/* Product Filter */}
-              <select
-                value={productFilter}
-                onChange={(e) => setProductFilter(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
-              >
-                <option value="ALL" className="bg-[#050507]">Todos los Productos</option>
-                <option value="access" className="bg-[#050507]">Moderno Access</option>
-                <option value="cloud" className="bg-[#050507]">Moderno Cloud</option>
-                <option value="play" className="bg-[#050507]">Moderno Play</option>
-                <option value="one" className="bg-[#050507]">Moderno One</option>
-                <option value="ai" className="bg-[#050507]">Moderno AI</option>
-                <option value="cleaner" className="bg-[#050507]">AI Cleaner Pro</option>
-                <option value="crm" className="bg-[#050507]">Moderno CRM</option>
-              </select>
-            </div>
-
-            {/* Search Input */}
-            <div className="w-full md:w-80 relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar por usuario, email o ID..."
-                className="w-full px-4 py-2 pl-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder-[#64748B] text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
-              />
-              <svg className="w-4 h-4 text-[#00E5FF] absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <circle cx="11" cy="11" r="8" strokeWidth="2" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="overflow-x-auto">
-            {isLoadingUsers ? (
-              <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
-                <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
-                Consultando usuarios en Supabase Central...
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
-                No se encontraron usuarios registrados en la base de datos de Supabase.
-              </div>
-            ) : (
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
-                    <th className="py-3.5 px-4">Usuario & Entidad</th>
-                    <th className="py-3.5 px-4">Identidad & ID</th>
-                    <th className="py-3.5 px-4">Rol Global</th>
-                    <th className="py-3.5 px-4">Estado Global</th>
-                    <th className="py-3.5 px-4">Servicios & Tiers Habilitados</th>
-                    <th className="py-3.5 px-4">Registro</th>
-                    <th className="py-3.5 px-4 text-right">Acciones de SuperAdmin</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.04]">
-                  {filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-white/[0.02] transition-colors group">
-                      {/* User & Company */}
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00E5FF]/20 to-[#157BFF]/20 border border-white/10 flex items-center justify-center font-bold text-white text-xs">
-                            {u.name.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-bold text-white flex items-center gap-1.5">
-                              <span>{u.name}</span>
-                              {u.role === "superadmin" && (
-                                <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-[#00E5FF] text-black">
-                                  DUEÑO
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-[#94A3B8] font-light">{u.company || "Particular"}</span>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Email & ID */}
-                      <td className="py-4 px-4 font-mono text-[11px] text-white/80">
-                        <div>{u.email}</div>
-                        <div className="text-[9px] text-[#64748B]">{u.id}</div>
-                      </td>
-
-                      {/* Global Role */}
-                      <td className="py-4 px-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${
-                          u.role === "superadmin" 
-                            ? "bg-[#00E5FF]/20 text-[#00E5FF] border-[#00E5FF]/40" 
-                            : u.role === "admin" 
-                            ? "bg-amber-500/20 text-amber-300 border-amber-500/40" 
-                            : "bg-white/[0.04] text-white/70 border-white/10"
-                        }`}>
-                          {u.role || "USER"}
-                        </span>
-                      </td>
-
-                      {/* Global Status */}
-                      <td className="py-4 px-4">
-                        {u.status === "active" ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            ACTIVO
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold uppercase">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                            SUSPENDIDO
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Entitlements Badges */}
-                      <td className="py-4 px-4">
-                        <div className="flex flex-wrap gap-1.5 max-w-md">
-                          {u.entitlements.map((e) => (
-                            <span
-                              key={e.productId}
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold border ${
-                                e.status === "suspended"
-                                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 line-through"
-                                  : e.tier === "enterprise" || e.tier === "pro" || e.tier === "vip"
-                                  ? "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/30 shadow-[0_0_10px_rgba(0,229,255,0.15)]"
-                                  : (e.tier as string) === "reseller"
-                                  ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                                  : e.tier === "family"
-                                  ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                                  : "bg-white/[0.04] text-white/60 border-white/[0.06]"
-                              }`}
-                              title={`${e.productName || e.productId}: ${e.quotaLabel || e.tier}`}
-                            >
-                              <span className="uppercase">{e.productId}:</span>
-                              <span>{e.tier.toUpperCase()}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-
-                      {/* Registration Date */}
-                      <td className="py-4 px-4 text-[#94A3B8] text-[11px] whitespace-nowrap">
-                        <div>{new Date(u.createdAt).toLocaleDateString("es-AR")}</div>
-                        <div className="text-[9px] text-[#64748B]">{u.lastLogin || "Online"}</div>
-                      </td>
-
-                      {/* Admin Actions */}
-                      <td className="py-4 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Full Edit Modal (Name, Email, Password, Role) */}
-                          <button
-                            onClick={() => handleOpenEditModal(u)}
-                            title="Editar Datos, Contraseña y Rol"
-                            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 text-white text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
-                          >
-                            <span>✏️</span>
-                            <span>Editar</span>
-                          </button>
-
-                          {/* Grant Perk / Change Plan */}
-                          <button
-                            onClick={() => setSelectedUserForPerk(u)}
-                            title="Otorgar Beneficio / Cambiar Plan"
-                            className="px-2.5 py-1.5 rounded-lg bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 text-[#00E5FF] text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
-                          >
-                            <span>🎁</span>
-                            <span>Planes</span>
-                          </button>
-
-                          {/* Toggle Suspend */}
-                          {u.role !== "superadmin" && (
-                            <button
-                              onClick={() => handleToggleSuspension(u)}
-                              title={u.status === "active" ? "Suspender cuenta globalmente" : "Reactivar cuenta"}
-                              className={`px-2 py-1.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
-                                u.status === "active"
-                                  ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-300"
-                                  : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
-                              }`}
-                            >
-                              {u.status === "active" ? "Suspender" : "Reactivar"}
-                            </button>
-                          )}
-
-                          {/* Delete User */}
-                          {u.role !== "superadmin" && (
-                            <button
-                              onClick={() => handleDeleteUser(u)}
-                              title="Eliminar cuenta permanentemente"
-                              className="p-1.5 rounded-lg bg-white/[0.02] hover:bg-rose-500/20 text-white/40 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-all cursor-pointer"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+          <button
+            onClick={() => {
+              setActiveTab("audit");
+              fetchAuditLogs();
+            }}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "audit"
+                ? "bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black shadow-[0_0_20px_rgba(0,229,255,0.35)]"
+                : "bg-white/[0.04] text-[#94A3B8] hover:text-white border border-white/[0.08]"
+            }`}
+          >
+            <span>📜</span>
+            <span>Audit Logs en Tiempo Real ({auditLogs.length})</span>
+          </button>
         </div>
 
+        {/* TAB 1: Global Users Management Table */}
+        {activeTab === "users" && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+            {/* Table Filters & Search */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/[0.06]">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-black text-[#00E5FF] uppercase tracking-wider mr-2">
+                  FILTRAR POR:
+                </span>
+
+                {/* Status Filter */}
+                <div className="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                  <button
+                    onClick={() => setStatusFilter("ALL")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      statusFilter === "ALL" ? "bg-[#00E5FF] text-black" : "text-[#94A3B8] hover:text-white"
+                    }`}
+                  >
+                    Todos ({totalUsersCount})
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("active")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      statusFilter === "active" ? "bg-emerald-500 text-black" : "text-[#94A3B8] hover:text-white"
+                    }`}
+                  >
+                    Activos ({activeUsersCount})
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("suspended")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      statusFilter === "suspended" ? "bg-rose-500 text-white" : "text-[#94A3B8] hover:text-white"
+                    }`}
+                  >
+                    Suspendidos ({suspendedUsersCount})
+                  </button>
+                </div>
+
+                {/* Product Filter */}
+                <select
+                  value={productFilter}
+                  onChange={(e) => setProductFilter(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
+                >
+                  <option value="ALL" className="bg-[#050507]">Todos los Productos</option>
+                  <option value="access" className="bg-[#050507]">Moderno Access</option>
+                  <option value="cloud" className="bg-[#050507]">Moderno Cloud</option>
+                  <option value="play" className="bg-[#050507]">Moderno Play</option>
+                  <option value="one" className="bg-[#050507]">Moderno One</option>
+                  <option value="ai" className="bg-[#050507]">Moderno AI</option>
+                  <option value="cleaner" className="bg-[#050507]">AI Cleaner Pro</option>
+                  <option value="crm" className="bg-[#050507]">Moderno CRM</option>
+                </select>
+              </div>
+
+              {/* Search Input */}
+              <div className="w-full md:w-80 relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar por usuario, email o ID..."
+                  className="w-full px-4 py-2 pl-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder-[#64748B] text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                />
+                <svg className="w-4 h-4 text-[#00E5FF] absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              {isLoadingUsers ? (
+                <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  Consultando usuarios en Supabase Central...
+                </div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                  No se encontraron usuarios registrados en la base de datos de Supabase.
+                </div>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                      <th className="py-3.5 px-4">Usuario & Entidad</th>
+                      <th className="py-3.5 px-4">Identidad & ID</th>
+                      <th className="py-3.5 px-4">Rol Global</th>
+                      <th className="py-3.5 px-4">Estado Global</th>
+                      <th className="py-3.5 px-4">Servicios & Tiers Habilitados</th>
+                      <th className="py-3.5 px-4">Registro</th>
+                      <th className="py-3.5 px-4 text-right">Acciones de SuperAdmin</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.04]">
+                    {filteredUsers.map((u) => (
+                      <tr key={u.id} className="hover:bg-white/[0.02] transition-colors group">
+                        {/* User & Company */}
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00E5FF]/20 to-[#157BFF]/20 border border-white/10 flex items-center justify-center font-bold text-white text-xs">
+                              {u.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-bold text-white flex items-center gap-1.5">
+                                <span>{u.name}</span>
+                                {u.role === "superadmin" && (
+                                  <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-[#00E5FF] text-black">
+                                    DUEÑO
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-[#94A3B8]">{u.company}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Email & ID */}
+                        <td className="py-4 px-4 font-mono text-[11px] text-[#94A3B8]">
+                          <div className="text-white font-medium">{u.email}</div>
+                          <div className="text-[9px] text-[#64748B]">{u.id}</div>
+                        </td>
+
+                        {/* Role */}
+                        <td className="py-4 px-4">
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                              u.role === "superadmin"
+                                ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                : u.role === "admin"
+                                ? "bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/30"
+                                : "bg-white/[0.04] text-[#94A3B8] border border-white/[0.08]"
+                            }`}
+                          >
+                            {u.role}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-4 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              u.status === "active"
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                u.status === "active" ? "bg-emerald-400" : "bg-rose-400"
+                              }`}
+                            />
+                            {u.status === "active" ? "Activo" : "Suspendido"}
+                          </span>
+                        </td>
+
+                        {/* Services & Tiers */}
+                        <td className="py-4 px-4">
+                          <div className="flex flex-wrap gap-1 max-w-xs">
+                            {u.entitlements && u.entitlements.length > 0 ? (
+                              u.entitlements.map((ent) => (
+                                <span
+                                  key={ent.productId}
+                                  className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
+                                    ent.status === "suspended"
+                                      ? "bg-rose-500/10 text-rose-300 border-rose-500/30"
+                                      : ent.tier === "vip" || ent.tier === "enterprise"
+                                      ? "bg-purple-500/20 text-purple-300 border-purple-500/40 font-bold"
+                                      : ent.tier === "pro"
+                                      ? "bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30"
+                                      : "bg-white/[0.04] text-white/70 border-white/[0.08]"
+                                  }`}
+                                  title={`${ent.productName}: ${ent.tier.toUpperCase()} (${ent.quotaLabel || "Cuota"})`}
+                                >
+                                  {ent.productId}:{ent.tier}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-[10px] text-[#64748B] italic">Sin servicios asignados</span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Created At */}
+                        <td className="py-4 px-4 text-[#94A3B8] text-[11px] whitespace-nowrap">
+                          <div>{new Date(u.createdAt).toLocaleDateString("es-AR")}</div>
+                          <div className="text-[9px] text-[#64748B]">{u.lastLogin || "Online"}</div>
+                        </td>
+
+                        {/* Admin Actions */}
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* Full Edit Modal (Name, Email, Password, Role) */}
+                            <button
+                              onClick={() => handleOpenEditModal(u)}
+                              title="Editar Datos, Contraseña y Rol"
+                              className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 text-white text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <span>✏️</span>
+                              <span>Editar</span>
+                            </button>
+
+                            {/* Grant Perk / Change Plan */}
+                            <button
+                              onClick={() => setSelectedUserForPerk(u)}
+                              title="Otorgar Beneficio / Cambiar Plan"
+                              className="px-2.5 py-1.5 rounded-lg bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 text-[#00E5FF] text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <span>🎁</span>
+                              <span>Planes</span>
+                            </button>
+
+                            {/* Toggle Suspend */}
+                            {u.role !== "superadmin" && (
+                              <button
+                                onClick={() => handleToggleSuspension(u)}
+                                title={u.status === "active" ? "Suspender cuenta globalmente" : "Reactivar cuenta"}
+                                className={`px-2 py-1.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
+                                  u.status === "active"
+                                    ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-300"
+                                    : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                                }`}
+                              >
+                                {u.status === "active" ? "Suspender" : "Reactivar"}
+                              </button>
+                            )}
+
+                            {/* Delete User */}
+                            {u.role !== "superadmin" && (
+                              <button
+                                onClick={() => handleDeleteUser(u)}
+                                title="Eliminar cuenta permanentemente"
+                                className="p-1.5 rounded-lg bg-white/[0.02] hover:bg-rose-500/20 text-white/40 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-all cursor-pointer"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: Audit Logs Management View */}
+        {activeTab === "audit" && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl animate-fade-in">
+            {/* Header & Controls */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/[0.06]">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-[11px] font-black text-[#00E5FF] uppercase tracking-wider mr-2">
+                  FILTROS AUDIT:
+                </span>
+
+                {/* Status Filter */}
+                <div className="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                  <button
+                    onClick={() => setAuditStatusFilter("ALL")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      auditStatusFilter === "ALL" ? "bg-[#00E5FF] text-black" : "text-[#94A3B8] hover:text-white"
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    onClick={() => setAuditStatusFilter("success")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      auditStatusFilter === "success" ? "bg-emerald-500 text-black" : "text-[#94A3B8] hover:text-white"
+                    }`}
+                  >
+                    Éxito
+                  </button>
+                  <button
+                    onClick={() => setAuditStatusFilter("failure")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      auditStatusFilter === "failure" ? "bg-rose-500 text-white" : "text-[#94A3B8] hover:text-white"
+                    }`}
+                  >
+                    Fallos
+                  </button>
+                </div>
+
+                {/* Action Filter */}
+                <select
+                  value={auditActionFilter}
+                  onChange={(e) => setAuditActionFilter(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
+                >
+                  <option value="ALL" className="bg-[#050507]">Todas las Acciones</option>
+                  <option value="user.role_changed" className="bg-[#050507]">user.role_changed</option>
+                  <option value="user.status_changed" className="bg-[#050507]">user.status_changed</option>
+                  <option value="user.deleted" className="bg-[#050507]">user.deleted</option>
+                  <option value="entitlement.assigned" className="bg-[#050507]">entitlement.assigned</option>
+                  <option value="entitlement.tier_changed" className="bg-[#050507]">entitlement.tier_changed</option>
+                  <option value="entitlement.status_changed" className="bg-[#050507]">entitlement.status_changed</option>
+                  <option value="entitlement.revoked" className="bg-[#050507]">entitlement.revoked</option>
+                  <option value="license.activated" className="bg-[#050507]">license.activated</option>
+                  <option value="license.activation_rejected" className="bg-[#050507]">license.activation_rejected</option>
+                </select>
+
+                <button
+                  onClick={fetchAuditLogs}
+                  className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-white text-xs font-bold transition-all flex items-center gap-1.5"
+                  title="Recargar registros"
+                >
+                  <span>🔄</span>
+                  <span>Refrescar</span>
+                </button>
+              </div>
+
+              {/* Search Input */}
+              <div className="w-full md:w-80 relative">
+                <input
+                  type="text"
+                  value={auditSearchQuery}
+                  onChange={(e) => setAuditSearchQuery(e.target.value)}
+                  placeholder="Buscar por actor, acción o recurso..."
+                  className="w-full px-4 py-2 pl-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder-[#64748B] text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                />
+                <svg className="w-4 h-4 text-[#00E5FF] absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Error State */}
+            {auditError && (
+              <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center justify-between">
+                <span>Error al consultar audit_logs: {auditError}</span>
+                <button onClick={fetchAuditLogs} className="underline hover:text-white">Reintentar</button>
+              </div>
+            )}
+
+            {/* Audit Logs Table */}
+            <div className="overflow-x-auto">
+              {isLoadingAuditLogs ? (
+                <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  Cargando registros criptográficos de auditoría desde Supabase...
+                </div>
+              ) : filteredAuditLogs.length === 0 ? (
+                <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                  {auditError ? "No se pudieron cargar los registros debido a un error de conexión." : "No existen eventos registrados que coincidan con los filtros seleccionados."}
+                </div>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                      <th className="py-3.5 px-4">Fecha / Hora</th>
+                      <th className="py-3.5 px-4">Actor</th>
+                      <th className="py-3.5 px-4">Acción</th>
+                      <th className="py-3.5 px-4">Recurso</th>
+                      <th className="py-3.5 px-4">Estado</th>
+                      <th className="py-3.5 px-4">IP / Agente</th>
+                      <th className="py-3.5 px-4 text-right">Detalles</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.04]">
+                    {filteredAuditLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-white/[0.02] transition-colors group">
+                        {/* Timestamp */}
+                        <td className="py-4 px-4 font-mono text-[11px] text-[#94A3B8] whitespace-nowrap">
+                          <div className="text-white font-medium">
+                            {new Date(log.created_at).toLocaleString("es-AR")}
+                          </div>
+                          <div className="text-[9px] text-[#64748B]">{log.id.slice(0, 8)}...</div>
+                        </td>
+
+                        {/* Actor */}
+                        <td className="py-4 px-4">
+                          <div className="font-bold text-white text-xs">{log.actor_email || "Sistema / Supabase"}</div>
+                          <div className="text-[9px] font-mono text-[#64748B]">
+                            {log.actor_user_id ? log.actor_user_id.slice(0, 8) + "..." : "system"}
+                          </div>
+                        </td>
+
+                        {/* Action */}
+                        <td className="py-4 px-4 font-mono text-xs">
+                          <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[#00E5FF] border border-white/[0.08]">
+                            {log.action}
+                          </span>
+                        </td>
+
+                        {/* Resource */}
+                        <td className="py-4 px-4 text-xs">
+                          <span className="text-white font-medium">{log.resource_type}</span>
+                          <span className="text-[#94A3B8] font-mono text-[10px] ml-1.5">
+                            ({log.resource_id})
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-4 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
+                              log.status === "success"
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${log.status === "success" ? "bg-emerald-400" : "bg-rose-400"}`} />
+                            {log.status === "success" ? "Éxito" : "Fallo"}
+                          </span>
+                        </td>
+
+                        {/* IP & User Agent */}
+                        <td className="py-4 px-4 text-[10px] text-[#94A3B8] font-mono">
+                          <div>{log.ip_address || "Interna / Server"}</div>
+                          <div className="truncate max-w-[140px] text-[#64748B] text-[9px]">{log.user_agent || "n/a"}</div>
+                        </td>
+
+                        {/* View Details Button */}
+                        <td className="py-4 px-4 text-right">
+                          <button
+                            onClick={() => setSelectedAuditLog(log)}
+                            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 text-white text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                          >
+                            <span>🔍</span>
+                            <span>Ver Payload</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Detalle de Audit Log */}
+        {selectedAuditLog && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="w-full max-w-2xl p-6 sm:p-8 rounded-3xl bg-[#0B0B10] border border-white/15 shadow-[0_20px_70px_rgba(0,0,0,0.95)] relative animate-fade-in max-h-[90vh] overflow-y-auto">
+              <button
+                onClick={() => setSelectedAuditLog(null)}
+                className="absolute top-5 right-5 text-white/50 hover:text-white text-lg font-bold"
+              >
+                &times;
+              </button>
+
+              <div className="flex items-center gap-2 text-[10px] font-black text-[#00E5FF] uppercase tracking-widest mb-1">
+                <span>EVENTO DE AUDITORÍA REGISTRADO</span>
+              </div>
+              <h3 className="text-xl font-black text-white font-sans mb-1">
+                {selectedAuditLog.action}
+              </h3>
+              <p className="text-xs text-[#94A3B8] font-light mb-6">
+                ID de Evento: <code className="text-white font-mono">{selectedAuditLog.id}</code>
+              </p>
+
+              <div className="space-y-4 text-xs font-mono">
+                <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <div>
+                    <span className="text-[10px] text-[#94A3B8] uppercase block">Actor</span>
+                    <span className="text-white font-bold">{selectedAuditLog.actor_email || "Sistema"}</span>
+                    <span className="text-[9px] text-[#64748B] block">{selectedAuditLog.actor_user_id}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#94A3B8] uppercase block">Fecha y Hora</span>
+                    <span className="text-white">{new Date(selectedAuditLog.created_at).toLocaleString("es-AR")}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#94A3B8] uppercase block">Recurso</span>
+                    <span className="text-white">{selectedAuditLog.resource_type}: {selectedAuditLog.resource_id}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#94A3B8] uppercase block">Estado</span>
+                    <span className={selectedAuditLog.status === "success" ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                      {selectedAuditLog.status.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedAuditLog.error_message && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300">
+                    <span className="font-bold block text-[10px] uppercase mb-1">Mensaje de Error</span>
+                    <span>{selectedAuditLog.error_message}</span>
+                  </div>
+                )}
+
+                <div>
+                  <span className="text-[10px] text-[#94A3B8] uppercase block mb-1">Metadata</span>
+                  <pre className="p-3 rounded-xl bg-black/60 border border-white/10 text-[#00E5FF] text-[11px] overflow-x-auto">
+                    {JSON.stringify(selectedAuditLog.metadata, null, 2)}
+                  </pre>
+                </div>
+
+                {selectedAuditLog.before_data && (
+                  <div>
+                    <span className="text-[10px] text-[#94A3B8] uppercase block mb-1">Before Data (Estado Previo)</span>
+                    <pre className="p-3 rounded-xl bg-black/60 border border-white/10 text-amber-300 text-[11px] overflow-x-auto">
+                      {JSON.stringify(selectedAuditLog.before_data, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {selectedAuditLog.after_data && (
+                  <div>
+                    <span className="text-[10px] text-[#94A3B8] uppercase block mb-1">After Data (Estado Resultante)</span>
+                    <pre className="p-3 rounded-xl bg-black/60 border border-white/10 text-emerald-300 text-[11px] overflow-x-auto">
+                      {JSON.stringify(selectedAuditLog.after_data, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {/* Modal: Editar Usuario Completo (Nombre, Email, Contraseña, Rol) */}
         {selectedUserForEdit && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -1107,7 +1482,9 @@ export default function SuperAdminPage() {
                     type="password"
                     value={newUserPassword}
                     onChange={(e) => setNewUserPassword(e.target.value)}
-                    placeholder="Dejar vacía para contraseña por defecto"
+                    placeholder="Mínimo 8 caracteres (requerida)"
+                    required
+                    minLength={8}
                     className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
                   />
                 </div>

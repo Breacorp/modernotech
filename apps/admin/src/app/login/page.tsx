@@ -13,7 +13,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { setDemoSession } = useModernoAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,32 +21,23 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      // 1. Intentar inicio de sesión real en Supabase Auth
+      // Intentar inicio de sesión real en Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
-      if (!error && data.user) {
-        setDemoSession({
-          id: data.user.id,
-          email: data.user.email || email,
-          name: data.user.user_metadata?.name || email.split("@")[0],
-        });
-        window.location.href = "/cuenta";
+      if (error) {
+        setErrorMessage(error.message || "Credenciales incorrectas.");
+        setIsSubmitting(false);
         return;
       }
 
-      // 2. Si falla o es entorno offline/demo, guardar sesión local demo
-      const username = email.split("@")[0];
-      setDemoSession({
-        id: "usr-" + Date.now(),
-        email: email,
-        name: username.charAt(0).toUpperCase() + username.slice(1),
-      });
-      window.location.href = "/cuenta";
+      if (data?.session) {
+        window.location.href = "/cuenta";
+      }
     } catch (err: any) {
-      setErrorMessage(err.message || "Error al iniciar sesión");
+      setErrorMessage(err.message || "Error de conexión al servidor de autenticación.");
       setIsSubmitting(false);
     }
   };

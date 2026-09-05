@@ -2,13 +2,13 @@ import { z } from "zod";
 
 export const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test", "staging"]).default("development"),
-  NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3005"),
+  NEXT_PUBLIC_APP_URL: z.string().url().default("https://moderno.com.ar"),
   SUPABASE_URL: z.string().url().default("https://rcskjdksimcfkdjzxara.supabase.co"),
-  SUPABASE_ANON_KEY: z.string().min(1).default("demo-anon-key"),
-  STRIPE_SECRET_KEY: z.string().min(1).default("sk_test_demo"),
-  OPENAI_API_KEY: z.string().min(1).default("sk-proj-demo"),
-  GOOGLE_AI_API_KEY: z.string().min(1).default("ai-google-demo"),
-  VAPI_API_KEY: z.string().min(1).default("vapi-demo")
+  SUPABASE_ANON_KEY: z.string().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+  GOOGLE_AI_API_KEY: z.string().optional(),
+  VAPI_API_KEY: z.string().optional()
 });
 
 export type Env = z.infer<typeof EnvSchema>;
