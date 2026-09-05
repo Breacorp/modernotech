@@ -9,12 +9,21 @@ import { PRODUCTS_REGISTRY } from "../../data/products";
 import { supabase } from "../../lib/supabase";
 
 export default function CuentaPage() {
-  const [activeTab, setActiveTab] = useState<"services" | "billing" | "security">("services");
+  const [activeTab, setActiveTab] = useState<"services" | "billing" | "licenses" | "security">("services");
   const [mfaFactorsCount, setMfaFactorsCount] = useState<number | null>(null);
   const [passwordResetStatus, setPasswordResetStatus] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
   const [invoicesError, setInvoicesError] = useState<string | null>(null);
+
+  // User Software Licenses
+  const [userLicenses, setUserLicenses] = useState<any[]>([]);
+  const [isLoadingLicenses, setIsLoadingLicenses] = useState(false);
+  const [licensesError, setLicensesError] = useState<string | null>(null);
+  const [verifyKeyInput, setVerifyKeyInput] = useState("");
+  const [verifyResult, setVerifyResult] = useState<{ valid: boolean; message: string } | null>(null);
+  const [isVerifyingLicense, setIsVerifyingLicense] = useState(false);
+
   const { user, isAuthenticated, isLoading, entitlements, signOut } = useModernoAuth();
 
   useEffect(() => {
@@ -51,6 +60,69 @@ export default function CuentaPage() {
     }
     loadInvoices();
   }, [isAuthenticated, user?.id]);
+
+  const loadUserLicenses = async () => {
+    if (isAuthenticated && user?.id) {
+      setIsLoadingLicenses(true);
+      setLicensesError(null);
+      try {
+        const { data, error } = await supabase
+          .from("software_licenses")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          setLicensesError(error.message);
+          setUserLicenses([]);
+        } else {
+          setUserLicenses(data || []);
+        }
+      } catch (err: any) {
+        setLicensesError(err?.message || "Error al conectar con la base de licencias.");
+        setUserLicenses([]);
+      } finally {
+        setIsLoadingLicenses(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadUserLicenses();
+  }, [isAuthenticated, user?.id]);
+
+  const handleValidateLicenseKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verifyKeyInput.trim()) return;
+    setIsVerifyingLicense(true);
+    setVerifyResult(null);
+
+    try {
+      const { data, error } = await supabase.rpc("verify_and_activate_license", {
+        p_license_key: verifyKeyInput.trim(),
+        p_hardware_id: `WEB-CLIENT-${window.navigator.userAgent.slice(0, 30)}`,
+      });
+
+      if (error) {
+        setVerifyResult({ valid: false, message: error.message });
+      } else if (data?.valid) {
+        setVerifyResult({
+          valid: true,
+          message: `Licencia VÁLIDA para ${data.product_id?.toUpperCase()} (${data.tier?.toUpperCase()}). Activaciones: ${data.activations}/${data.max_activations}.`,
+        });
+        loadUserLicenses();
+      } else {
+        setVerifyResult({
+          valid: false,
+          message: data?.error || "Licencia inválida o revocada.",
+        });
+      }
+    } catch (err: any) {
+      setVerifyResult({ valid: false, message: err?.message || "Error al validar la licencia." });
+    } finally {
+      setIsVerifyingLicense(false);
+    }
+  };
 
   const [factors, setFactors] = useState<any[]>([]);
   const [enrollData, setEnrollData] = useState<{ id: string; qr_code: string; secret: string; uri: string } | null>(null);
@@ -304,6 +376,16 @@ export default function CuentaPage() {
             Facturación & Pagos
           </button>
           <button
+            onClick={() => setActiveTab("licenses")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "licenses"
+                ? "bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            Licencias de Software ({userLicenses.length})
+          </button>
+          <button
             onClick={() => setActiveTab("security")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "security"
@@ -532,6 +614,116 @@ export default function CuentaPage() {
                               }`}
                             >
                               {inv.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Licencias de Software */}
+        {activeTab === "licenses" && (
+          <div className="space-y-8 max-w-4xl">
+            {/* Validador de Licencia Offline / Online */}
+            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
+              <h3 className="text-lg font-black text-white mb-1">Activar o Validar Licencia</h3>
+              <p className="text-xs text-[#94A3B8] font-light mb-6">
+                Ingresa una clave de producto para verificar su autenticidad y vincularla a tu hardware.
+              </p>
+
+              <form onSubmit={handleValidateLicenseKey} className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="MOD-CLEANER-XXXX-XXXX-XXXX"
+                  value={verifyKeyInput}
+                  onChange={(e) => setVerifyKeyInput(e.target.value.toUpperCase())}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-[#00E5FF] tracking-wider"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isVerifyingLicense || !verifyKeyInput.trim()}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer whitespace-nowrap shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+                >
+                  {isVerifyingLicense ? "Validando..." : "Validar Clave"}
+                </button>
+              </form>
+
+              {verifyResult && (
+                <div
+                  className={`mt-4 p-4 rounded-xl text-xs font-bold border ${
+                    verifyResult.valid
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                      : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                  }`}
+                >
+                  {verifyResult.message}
+                </div>
+              )}
+            </div>
+
+            {/* Listado de Licencias Propias */}
+            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-black text-white">Mis Claves de Licencia</h3>
+                <span className="text-xs font-mono text-[#00E5FF]">
+                  {userLicenses.length} {userLicenses.length === 1 ? "Licencia" : "Licencias"}
+                </span>
+              </div>
+
+              {licensesError && (
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold mb-4">
+                  {licensesError}
+                </div>
+              )}
+
+              {isLoadingLicenses ? (
+                <div className="p-8 text-center text-xs font-mono text-[#94A3B8]">
+                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  Consultando licencias en Supabase...
+                </div>
+              ) : userLicenses.length === 0 ? (
+                <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#94A3B8]">
+                  No registras licencias de software vinculadas a tu cuenta.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                        <th className="py-3 px-4">Clave</th>
+                        <th className="py-3 px-4">Producto</th>
+                        <th className="py-3 px-4">Activaciones</th>
+                        <th className="py-3 px-4">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {userLicenses.map((lic) => (
+                        <tr key={lic.id} className="hover:bg-white/[0.02]">
+                          <td className="py-3.5 px-4 font-mono text-[#00E5FF] font-bold select-all">
+                            {lic.license_key}
+                          </td>
+                          <td className="py-3.5 px-4 text-white">
+                            <span className="font-bold uppercase">{lic.product_id}</span>
+                            <span className="text-[10px] text-[#94A3B8] font-mono ml-2 uppercase">({lic.tier})</span>
+                          </td>
+                          <td className="py-3.5 px-4 text-white font-mono">
+                            {lic.current_activations} / {lic.max_activations}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                lic.status === "active"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              }`}
+                            >
+                              {lic.status}
                             </span>
                           </td>
                         </tr>

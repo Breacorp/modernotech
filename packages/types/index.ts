@@ -55,4 +55,21 @@ export interface BillingInvoice {
   created_at: string;
 }
 
+export interface SoftwareLicense {
+  id: string;
+  license_key: string;
+  user_id: string;
+  product_id: string;
+  tier: string;
+  status: 'active' | 'revoked' | 'expired';
+  max_activations: number;
+  current_activations: number;
+  hardware_fingerprints: string[];
+  expires_at?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+
 

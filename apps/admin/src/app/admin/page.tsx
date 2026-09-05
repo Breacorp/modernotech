@@ -45,7 +45,7 @@ export default function SuperAdminPage() {
   const [newUserInitialTier, setNewUserInitialTier] = useState<"free" | "vip" | "pro" | "family" | "enterprise" | "reseller">("pro");
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<"users" | "audit" | "billing">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "audit" | "billing" | "licenses">("users");
 
   // Audit Logs state
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -67,6 +67,17 @@ export default function SuperAdminPage() {
   const [newInvoiceCurrency, setNewInvoiceCurrency] = useState("ARS");
   const [newInvoiceGateway, setNewInvoiceGateway] = useState("manual_transfer");
   const [isEmittingInvoice, setIsEmittingInvoice] = useState(false);
+
+  // Software Licenses state
+  const [adminLicenses, setAdminLicenses] = useState<any[]>([]);
+  const [isLoadingLicenses, setIsLoadingLicenses] = useState(false);
+  const [licensesError, setLicensesError] = useState<string | null>(null);
+  const [newLicenseUserId, setNewLicenseUserId] = useState("");
+  const [newLicenseProduct, setNewLicenseProduct] = useState("cleaner");
+  const [newLicenseTier, setNewLicenseTier] = useState("pro");
+  const [newLicenseMaxActivations, setNewLicenseMaxActivations] = useState(1);
+  const [newLicenseNotes, setNewLicenseNotes] = useState("Licencia oficial Moderno Tech");
+  const [isIssuingLicense, setIsIssuingLicense] = useState(false);
 
   // Fetch users from central Supabase
   const fetchSupabaseUsers = async () => {
@@ -213,10 +224,93 @@ export default function SuperAdminPage() {
     }
   };
 
+  // Fetch real software licenses for SuperAdmin
+  const fetchAdminLicenses = async () => {
+    setIsLoadingLicenses(true);
+    setLicensesError(null);
+    try {
+      const { data, error } = await supabase
+        .from("software_licenses")
+        .select("*, global_users(email)")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setLicensesError(error.message);
+        setAdminLicenses([]);
+      } else {
+        setAdminLicenses(data || []);
+      }
+    } catch (err: any) {
+      setLicensesError(err?.message || "Error al consultar licencias de software.");
+      setAdminLicenses([]);
+    } finally {
+      setIsLoadingLicenses(false);
+    }
+  };
+
+  // Issue real software license
+  const handleIssueLicense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLicenseUserId) return;
+
+    setIsIssuingLicense(true);
+    try {
+      const keySegment = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+      const generatedKey = `MOD-${newLicenseProduct.toUpperCase()}-${keySegment()}-${keySegment()}-${keySegment()}`;
+
+      const { error } = await supabase
+        .from("software_licenses")
+        .insert({
+          license_key: generatedKey,
+          user_id: newLicenseUserId,
+          product_id: newLicenseProduct,
+          tier: newLicenseTier,
+          status: "active",
+          max_activations: newLicenseMaxActivations,
+          notes: newLicenseNotes,
+        });
+
+      if (error) {
+        alert(`Error al emitir licencia: ${error.message}`);
+      } else {
+        setActionSuccessMessage(`Licencia ${generatedKey} emitida y auditada.`);
+        fetchAdminLicenses();
+        fetchAuditLogs();
+      }
+    } catch (err: any) {
+      alert(`Error: ${err?.message}`);
+    } finally {
+      setIsIssuingLicense(false);
+    }
+  };
+
+  // Revoke software license
+  const handleRevokeLicense = async (licenseId: string, licenseKey: string) => {
+    if (!confirm(`¿Confirmás la revocación definitiva de la licencia ${licenseKey}?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from("software_licenses")
+        .update({ status: "revoked", updated_at: new Date().toISOString() })
+        .eq("id", licenseId);
+
+      if (error) {
+        alert(`Error al revocar licencia: ${error.message}`);
+      } else {
+        setActionSuccessMessage(`Licencia ${licenseKey} revocada exitosamente.`);
+        fetchAdminLicenses();
+        fetchAuditLogs();
+      }
+    } catch (err: any) {
+      alert(`Error: ${err?.message}`);
+    }
+  };
+
   useEffect(() => {
     fetchSupabaseUsers();
     fetchAuditLogs();
     fetchAdminInvoices();
+    fetchAdminLicenses();
   }, [user]);
 
   // Open full edit modal
@@ -798,6 +892,21 @@ export default function SuperAdminPage() {
           >
             <span>💳</span>
             <span>Facturación & Cobros ({adminInvoices.length})</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("licenses");
+              fetchAdminLicenses();
+            }}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "licenses"
+                ? "bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black shadow-[0_0_20px_rgba(0,229,255,0.35)]"
+                : "bg-white/[0.04] text-[#94A3B8] hover:text-white border border-white/[0.08]"
+            }`}
+          >
+            <span>🔑</span>
+            <span>Licencias de Software ({adminLicenses.length})</span>
           </button>
         </div>
 
@@ -1484,6 +1593,191 @@ export default function SuperAdminPage() {
                           </td>
                           <td className="py-4 px-4 text-[#94A3B8] text-[11px] whitespace-nowrap">
                             {new Date(inv.created_at).toLocaleString("es-AR")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: Software Licenses Management */}
+        {activeTab === "licenses" && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Formulario: Emitir Nueva Licencia */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+              <div className="flex items-center gap-2 text-[10px] font-black text-[#00E5FF] uppercase tracking-widest mb-1">
+                <span>EMISIÓN CRIPTOGRÁFICA DE LICENCIA</span>
+              </div>
+              <h2 className="text-xl font-black text-white font-sans mb-1">
+                Generar Licencia de Software Oficial
+              </h2>
+              <p className="text-xs text-[#94A3B8] font-light mb-6">
+                Emite licencias para aplicaciones instalables (AI Cleaner Pro, Moderno Voice, Cinema Studio) con control estricto de activaciones por hardware.
+              </p>
+
+              <form onSubmit={handleIssueLicense} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <div className="lg:col-span-1">
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Usuario Destinatario
+                  </label>
+                  <select
+                    required
+                    value={newLicenseUserId}
+                    onChange={(e) => setNewLicenseUserId(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
+                  >
+                    <option value="" className="bg-[#050507]">Seleccionar Usuario...</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id} className="bg-[#050507]">
+                        {u.name} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Software / App
+                  </label>
+                  <select
+                    value={newLicenseProduct}
+                    onChange={(e) => setNewLicenseProduct(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
+                  >
+                    <option value="cleaner" className="bg-[#050507]">AI Cleaner Pro</option>
+                    <option value="voice" className="bg-[#050507]">Moderno Voice</option>
+                    <option value="cinema" className="bg-[#050507]">Cinema Studio</option>
+                    <option value="access" className="bg-[#050507]">Moderno Access</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Tier / Nivel
+                  </label>
+                  <select
+                    value={newLicenseTier}
+                    onChange={(e) => setNewLicenseTier(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
+                  >
+                    <option value="pro" className="bg-[#050507]">Pro Edition</option>
+                    <option value="enterprise" className="bg-[#050507]">Enterprise / Multi-Mac</option>
+                    <option value="lifetime" className="bg-[#050507]">Lifetime Pass</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Máx. Activaciones
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={newLicenseMaxActivations}
+                    onChange={(e) => setNewLicenseMaxActivations(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none focus:border-[#00E5FF]"
+                  />
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={isIssuingLicense || !newLicenseUserId}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer shadow-[0_0_20px_rgba(0,229,255,0.35)]"
+                  >
+                    {isIssuingLicense ? "Generando..." : "Emitir Licencia"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Listado de Licencias Emitidas */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-black text-white">Registro Central de Licencias</h3>
+                  <p className="text-xs text-[#94A3B8] font-light">
+                    Licencias activas registradas en la tabla <code className="text-[#00E5FF]">software_licenses</code>.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchAdminLicenses}
+                  className="px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-white transition-all cursor-pointer"
+                >
+                  Actualizar Lista
+                </button>
+              </div>
+
+              {licensesError && (
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold mb-4">
+                  {licensesError}
+                </div>
+              )}
+
+              {isLoadingLicenses ? (
+                <div className="p-12 text-center text-xs font-mono text-[#94A3B8]">
+                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  Cargando licencias de software desde Supabase...
+                </div>
+              ) : adminLicenses.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#94A3B8]">
+                  No hay licencias emitidas en la base de datos central.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                        <th className="py-3 px-4">Clave de Licencia</th>
+                        <th className="py-3 px-4">Usuario Asignado</th>
+                        <th className="py-3 px-4">Software</th>
+                        <th className="py-3 px-4">Activaciones</th>
+                        <th className="py-3 px-4">Estado</th>
+                        <th className="py-3 px-4">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {adminLicenses.map((lic) => (
+                        <tr key={lic.id} className="hover:bg-white/[0.02]">
+                          <td className="py-4 px-4 font-mono text-[#00E5FF] font-bold">
+                            {lic.license_key}
+                          </td>
+                          <td className="py-4 px-4 text-[#94A3B8]">
+                            <div className="text-white font-bold">{lic.global_users?.email || lic.user_id}</div>
+                            <div className="text-[9px] font-mono text-[#64748B]">{lic.user_id}</div>
+                          </td>
+                          <td className="py-4 px-4 text-white">
+                            <span className="font-bold uppercase">{lic.product_id}</span>
+                            <span className="text-[10px] text-[#94A3B8] font-mono ml-2 uppercase">({lic.tier})</span>
+                          </td>
+                          <td className="py-4 px-4 font-mono text-white">
+                            {lic.current_activations} / {lic.max_activations} dispositivos
+                          </td>
+                          <td className="py-4 px-4">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                lic.status === "active"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              }`}
+                            >
+                              {lic.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            {lic.status === "active" && (
+                              <button
+                                onClick={() => handleRevokeLicense(lic.id, lic.license_key)}
+                                className="px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-bold cursor-pointer transition-all"
+                              >
+                                Revocar
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}

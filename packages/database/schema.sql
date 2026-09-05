@@ -681,6 +681,159 @@ CREATE TRIGGER trg_audit_billing_invoices
     AFTER INSERT OR UPDATE ON billing_invoices
     FOR EACH ROW EXECUTE FUNCTION trigger_audit_billing_invoices();
 
+-- 11. Tabla de Licencias de Software y Activaciones Criptográficas (Zero Mock)
+CREATE TABLE IF NOT EXISTS software_licenses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    license_key VARCHAR(100) UNIQUE NOT NULL,
+    user_id UUID REFERENCES global_users(id) ON DELETE CASCADE,
+    product_id VARCHAR(50) NOT NULL REFERENCES ecosystem_products(id) ON DELETE CASCADE,
+    tier VARCHAR(50) NOT NULL DEFAULT 'pro',
+    status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'revoked', 'expired')),
+    max_activations INT NOT NULL DEFAULT 1,
+    current_activations INT NOT NULL DEFAULT 0,
+    hardware_fingerprints JSONB DEFAULT '[]'::jsonb NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+ALTER TABLE software_licenses ENABLE ROW LEVEL SECURITY;
+
+-- Cada usuario puede ver exclusivamente sus propias licencias de software
+DROP POLICY IF EXISTS "Users can read own software licenses" ON software_licenses;
+CREATE POLICY "Users can read own software licenses"
+    ON software_licenses FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- SuperAdmin tiene control total para emitir, revocar o auditar licencias
+DROP POLICY IF EXISTS "Superadmin full access to software_licenses" ON software_licenses;
+CREATE POLICY "Superadmin full access to software_licenses"
+    ON software_licenses FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM global_users 
+            WHERE id = auth.uid() AND role IN ('admin', 'superadmin')
+        )
+    );
+
+-- Trigger de auditoría para generación, revocación y cambios de estado en licencias
+CREATE OR REPLACE FUNCTION trigger_audit_software_licenses()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        PERFORM log_audit_event(
+            'license.issued',
+            'software_license',
+            NEW.license_key,
+            'success',
+            jsonb_build_object(
+                'target_user_id', NEW.user_id,
+                'product_id', NEW.product_id,
+                'tier', NEW.tier,
+                'max_activations', NEW.max_activations,
+                'expires_at', NEW.expires_at
+            ),
+            NULL,
+            to_jsonb(NEW)
+        );
+    ELSIF (TG_OP = 'UPDATE' AND OLD.status <> NEW.status) THEN
+        PERFORM log_audit_event(
+            CASE 
+                WHEN NEW.status = 'revoked' THEN 'license.revoked'
+                WHEN NEW.status = 'expired' THEN 'license.expired'
+                ELSE 'license.status_changed'
+            END,
+            'software_license',
+            NEW.license_key,
+            'success',
+            jsonb_build_object(
+                'old_status', OLD.status,
+                'new_status', NEW.status,
+                'current_activations', NEW.current_activations
+            ),
+            to_jsonb(OLD),
+            to_jsonb(NEW)
+        );
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+DROP TRIGGER IF EXISTS trg_audit_software_licenses ON software_licenses;
+CREATE TRIGGER trg_audit_software_licenses
+    AFTER INSERT OR UPDATE ON software_licenses
+    FOR EACH ROW EXECUTE FUNCTION trigger_audit_software_licenses();
+
+-- Función RPC para validar y activar una licencia contra el backend real
+CREATE OR REPLACE FUNCTION verify_and_activate_license(
+    p_license_key VARCHAR,
+    p_hardware_id VARCHAR DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_license software_licenses%ROWTYPE;
+    v_already_activated BOOLEAN := FALSE;
+BEGIN
+    SELECT * INTO v_license
+    FROM software_licenses
+    WHERE license_key = p_license_key;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object(
+            'valid', false,
+            'error', 'La clave de licencia especificada no existe en la base de datos central.'
+        );
+    END IF;
+
+    IF v_license.status = 'revoked' THEN
+        RETURN jsonb_build_object(
+            'valid', false,
+            'error', 'Esta licencia ha sido revocada por un administrador.'
+        );
+    END IF;
+
+    IF v_license.expires_at IS NOT NULL AND v_license.expires_at < CURRENT_TIMESTAMP THEN
+        RETURN jsonb_build_object(
+            'valid', false,
+            'error', 'Esta licencia ha expirado.'
+        );
+    END IF;
+
+    IF p_hardware_id IS NOT NULL THEN
+        v_already_activated := v_license.hardware_fingerprints ? p_hardware_id;
+
+        IF NOT v_already_activated THEN
+            IF v_license.current_activations >= v_license.max_activations THEN
+                RETURN jsonb_build_object(
+                    'valid', false,
+                    'error', 'Límite máximo de activaciones alcanzado para esta licencia.'
+                );
+            END IF;
+
+            UPDATE software_licenses
+            SET current_activations = current_activations + 1,
+                hardware_fingerprints = hardware_fingerprints || to_jsonb(p_hardware_id),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = v_license.id;
+        END IF;
+    END IF;
+
+    RETURN jsonb_build_object(
+        'valid', true,
+        'product_id', v_license.product_id,
+        'tier', v_license.tier,
+        'status', v_license.status,
+        'activations', v_license.current_activations,
+        'max_activations', v_license.max_activations
+    );
+END;
+$$;
+
 
 
 
