@@ -12,6 +12,9 @@ export default function CuentaPage() {
   const [activeTab, setActiveTab] = useState<"services" | "billing" | "security">("services");
   const [mfaFactorsCount, setMfaFactorsCount] = useState<number | null>(null);
   const [passwordResetStatus, setPasswordResetStatus] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
+  const [invoicesError, setInvoicesError] = useState<string | null>(null);
   const { user, isAuthenticated, isLoading, entitlements, signOut } = useModernoAuth();
 
   useEffect(() => {
@@ -19,6 +22,35 @@ export default function CuentaPage() {
       window.location.href = "/login?redirect=/cuenta";
     }
   }, [isLoading, isAuthenticated]);
+
+  useEffect(() => {
+    async function loadInvoices() {
+      if (isAuthenticated && user?.id) {
+        setIsLoadingInvoices(true);
+        setInvoicesError(null);
+        try {
+          const { data, error } = await supabase
+            .from("billing_invoices")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+
+          if (error) {
+            setInvoicesError(error.message);
+            setInvoices([]);
+          } else {
+            setInvoices(data || []);
+          }
+        } catch (err: any) {
+          setInvoicesError(err?.message || "Error al conectar con la base de facturación.");
+          setInvoices([]);
+        } finally {
+          setIsLoadingInvoices(false);
+        }
+      }
+    }
+    loadInvoices();
+  }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
     async function loadMfaStatus() {
@@ -348,9 +380,66 @@ export default function CuentaPage() {
                 Comprobantes oficiales emitidos por tus suscripciones y servicios.
               </p>
 
-              <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#94A3B8]">
-                No registras facturas emitidas en tu cuenta.
-              </div>
+              {invoicesError && (
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold mb-4">
+                  Error al cargar facturas: {invoicesError}
+                </div>
+              )}
+
+              {isLoadingInvoices ? (
+                <div className="p-8 text-center text-xs font-mono text-[#94A3B8]">
+                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  Consultando facturas en Supabase...
+                </div>
+              ) : invoices.length === 0 ? (
+                <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#94A3B8]">
+                  No registras facturas emitidas en tu cuenta.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                        <th className="py-3 px-4">Comprobante</th>
+                        <th className="py-3 px-4">Servicio / Plan</th>
+                        <th className="py-3 px-4">Período</th>
+                        <th className="py-3 px-4">Monto</th>
+                        <th className="py-3 px-4">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {invoices.map((inv) => (
+                        <tr key={inv.id} className="hover:bg-white/[0.02]">
+                          <td className="py-3.5 px-4 font-mono text-white font-bold">
+                            {inv.invoice_number}
+                          </td>
+                          <td className="py-3.5 px-4 text-white">
+                            <span className="font-bold">{inv.product_id}</span>
+                            <span className="text-[10px] text-[#94A3B8] font-mono ml-2 uppercase">({inv.tier})</span>
+                          </td>
+                          <td className="py-3.5 px-4 text-[#94A3B8] text-[11px]">
+                            {new Date(inv.billing_period_start).toLocaleDateString("es-AR")} - {new Date(inv.billing_period_end).toLocaleDateString("es-AR")}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-white">
+                            ${(inv.amount_cents / 100).toFixed(2)} {inv.currency}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                inv.status === "paid"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              }`}
+                            >
+                              {inv.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

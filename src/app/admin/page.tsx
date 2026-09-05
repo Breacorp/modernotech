@@ -45,7 +45,7 @@ export default function SuperAdminPage() {
   const [newUserInitialTier, setNewUserInitialTier] = useState<"free" | "vip" | "pro" | "family" | "enterprise" | "reseller">("pro");
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<"users" | "audit">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "audit" | "billing">("users");
 
   // Audit Logs state
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -55,6 +55,18 @@ export default function SuperAdminPage() {
   const [auditStatusFilter, setAuditStatusFilter] = useState<"ALL" | "success" | "failure">("ALL");
   const [auditSearchQuery, setAuditSearchQuery] = useState("");
   const [selectedAuditLog, setSelectedAuditLog] = useState<any | null>(null);
+
+  // Billing & Invoices state
+  const [adminInvoices, setAdminInvoices] = useState<any[]>([]);
+  const [isLoadingAdminInvoices, setIsLoadingAdminInvoices] = useState(false);
+  const [adminInvoicesError, setAdminInvoicesError] = useState<string | null>(null);
+  const [newInvoiceUserId, setNewInvoiceUserId] = useState("");
+  const [newInvoiceProduct, setNewInvoiceProduct] = useState("access");
+  const [newInvoiceTier, setNewInvoiceTier] = useState("pro");
+  const [newInvoiceAmount, setNewInvoiceAmount] = useState("49.99");
+  const [newInvoiceCurrency, setNewInvoiceCurrency] = useState("ARS");
+  const [newInvoiceGateway, setNewInvoiceGateway] = useState("manual_transfer");
+  const [isEmittingInvoice, setIsEmittingInvoice] = useState(false);
 
   // Fetch users from central Supabase
   const fetchSupabaseUsers = async () => {
@@ -133,9 +145,78 @@ export default function SuperAdminPage() {
     }
   };
 
+  // Fetch real billing invoices for SuperAdmin
+  const fetchAdminInvoices = async () => {
+    setIsLoadingAdminInvoices(true);
+    setAdminInvoicesError(null);
+    try {
+      const { data, error } = await supabase
+        .from("billing_invoices")
+        .select("*, global_users(email)")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setAdminInvoicesError(error.message);
+        setAdminInvoices([]);
+      } else {
+        setAdminInvoices(data || []);
+      }
+    } catch (err: any) {
+      setAdminInvoicesError(err?.message || "Error al consultar facturas.");
+      setAdminInvoices([]);
+    } finally {
+      setIsLoadingAdminInvoices(false);
+    }
+  };
+
+  // Emit real invoice from SuperAdmin
+  const handleEmitInvoice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newInvoiceUserId || !newInvoiceAmount) return;
+
+    setIsEmittingInvoice(true);
+    try {
+      const amountCents = Math.round(parseFloat(newInvoiceAmount) * 100);
+      const invoiceNumber = `MOD-INV-${Date.now().toString().slice(-6)}`;
+      const now = new Date();
+      const nextMonth = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      const { data, error } = await supabase
+        .from("billing_invoices")
+        .insert({
+          invoice_number: invoiceNumber,
+          user_id: newInvoiceUserId,
+          product_id: newInvoiceProduct,
+          tier: newInvoiceTier,
+          amount_cents: amountCents,
+          currency: newInvoiceCurrency,
+          status: "paid",
+          billing_period_start: now.toISOString(),
+          billing_period_end: nextMonth.toISOString(),
+          gateway_provider: newInvoiceGateway,
+          gateway_payment_id: `ADMIN-MANUAL-${invoiceNumber}`,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        alert(`Error al emitir factura: ${error.message}`);
+      } else {
+        setActionSuccessMessage(`Factura ${invoiceNumber} emitida y registrada con auditoría.`);
+        fetchAdminInvoices();
+        fetchAuditLogs();
+      }
+    } catch (err: any) {
+      alert(`Error inesperado: ${err?.message}`);
+    } finally {
+      setIsEmittingInvoice(false);
+    }
+  };
+
   useEffect(() => {
     fetchSupabaseUsers();
     fetchAuditLogs();
+    fetchAdminInvoices();
   }, [user]);
 
   // Open full edit modal
@@ -703,6 +784,21 @@ export default function SuperAdminPage() {
             <span>📜</span>
             <span>Audit Logs en Tiempo Real ({auditLogs.length})</span>
           </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("billing");
+              fetchAdminInvoices();
+            }}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "billing"
+                ? "bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black shadow-[0_0_20px_rgba(0,229,255,0.35)]"
+                : "bg-white/[0.04] text-[#94A3B8] hover:text-white border border-white/[0.08]"
+            }`}
+          >
+            <span>💳</span>
+            <span>Facturación & Cobros ({adminInvoices.length})</span>
+          </button>
         </div>
 
         {/* TAB 1: Global Users Management Table */}
@@ -1222,6 +1318,183 @@ export default function SuperAdminPage() {
             </div>
           </div>
         )}
+
+        {/* TAB 3: Facturación & Cobros */}
+        {activeTab === "billing" && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B0B10]/95 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl animate-fade-in space-y-8">
+            {/* Header & Emit Form */}
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2 flex items-center gap-2">
+                <span>🧾</span>
+                <span>Emitir Factura / Cobro Manual (SuperAdmin)</span>
+              </h3>
+              <p className="text-xs text-[#94A3B8] font-light mb-6">
+                Genera comprobantes oficiales y registra ingresos en la base de datos de auditoría contable.
+              </p>
+
+              <form onSubmit={handleEmitInvoice} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                <div className="lg:col-span-2">
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Usuario Destino
+                  </label>
+                  <select
+                    value={newInvoiceUserId}
+                    onChange={(e) => setNewInvoiceUserId(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  >
+                    <option value="" className="bg-[#050507]">Seleccionar Usuario...</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id} className="bg-[#050507]">
+                        {u.email} ({u.name})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Producto
+                  </label>
+                  <select
+                    value={newInvoiceProduct}
+                    onChange={(e) => setNewInvoiceProduct(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  >
+                    <option value="access" className="bg-[#050507]">Access</option>
+                    <option value="cloud" className="bg-[#050507]">Cloud</option>
+                    <option value="play" className="bg-[#050507]">Play</option>
+                    <option value="one" className="bg-[#050507]">One</option>
+                    <option value="cleaner" className="bg-[#050507]">Cleaner Pro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Tier
+                  </label>
+                  <select
+                    value={newInvoiceTier}
+                    onChange={(e) => setNewInvoiceTier(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  >
+                    <option value="pro" className="bg-[#050507]">Pro</option>
+                    <option value="vip" className="bg-[#050507]">VIP</option>
+                    <option value="enterprise" className="bg-[#050507]">Enterprise</option>
+                    <option value="family" className="bg-[#050507]">Family</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#94A3B8] uppercase block mb-1">
+                    Monto ({newInvoiceCurrency})
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={newInvoiceAmount}
+                    onChange={(e) => setNewInvoiceAmount(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#00E5FF]"
+                  />
+                </div>
+
+                <div className="flex items-end">
+                  <button
+                    type="submit"
+                    disabled={isEmittingInvoice}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider shadow-[0_0_20px_rgba(0,229,255,0.35)] transition-transform hover:scale-105 cursor-pointer disabled:opacity-50"
+                  >
+                    {isEmittingInvoice ? "Emitiendo..." : "Emitir Factura"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Invoices List */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[11px] font-black text-[#00E5FF] uppercase tracking-wider">
+                  HISTORIAL DE FACTURAS EMITIDAS ({adminInvoices.length})
+                </span>
+                <button
+                  onClick={fetchAdminInvoices}
+                  className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-white text-xs font-bold transition-all flex items-center gap-1.5"
+                >
+                  <span>🔄</span>
+                  <span>Refrescar</span>
+                </button>
+              </div>
+
+              {adminInvoicesError && (
+                <div className="mb-4 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold">
+                  {adminInvoicesError}
+                </div>
+              )}
+
+              {isLoadingAdminInvoices ? (
+                <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  Consultando facturas en Supabase...
+                </div>
+              ) : adminInvoices.length === 0 ? (
+                <div className="py-12 text-center text-[#94A3B8] font-mono text-xs">
+                  No existen facturas emitidas registradas en el sistema.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                        <th className="py-3.5 px-4">Comprobante</th>
+                        <th className="py-3.5 px-4">Usuario / Email</th>
+                        <th className="py-3.5 px-4">Servicio & Plan</th>
+                        <th className="py-3.5 px-4">Monto</th>
+                        <th className="py-3.5 px-4">Estado</th>
+                        <th className="py-3.5 px-4">Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {adminInvoices.map((inv) => (
+                        <tr key={inv.id} className="hover:bg-white/[0.02]">
+                          <td className="py-4 px-4 font-mono text-white font-bold">
+                            {inv.invoice_number}
+                          </td>
+                          <td className="py-4 px-4 text-[#94A3B8]">
+                            <div className="text-white font-bold">{inv.global_users?.email || inv.user_id}</div>
+                            <div className="text-[9px] font-mono text-[#64748B]">{inv.user_id}</div>
+                          </td>
+                          <td className="py-4 px-4 text-white">
+                            <span className="font-bold">{inv.product_id}</span>
+                            <span className="text-[10px] text-[#00E5FF] font-mono ml-2 uppercase">({inv.tier})</span>
+                          </td>
+                          <td className="py-4 px-4 font-bold text-white">
+                            ${(inv.amount_cents / 100).toFixed(2)} {inv.currency}
+                          </td>
+                          <td className="py-4 px-4">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                inv.status === "paid"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              }`}
+                            >
+                              {inv.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4 text-[#94A3B8] text-[11px] whitespace-nowrap">
+                            {new Date(inv.created_at).toLocaleString("es-AR")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Modal: Editar Usuario Completo (Nombre, Email, Contraseña, Rol) */}
         {selectedUserForEdit && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">

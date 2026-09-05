@@ -39,3 +39,20 @@ export interface AuditLogEntry {
   error_message?: string | null;
 }
 
+export interface BillingInvoice {
+  id: string;
+  invoice_number: string;
+  user_id: string;
+  product_id: string;
+  tier: string;
+  amount_cents: number;
+  currency: string;
+  status: 'paid' | 'pending' | 'failed' | 'refunded';
+  billing_period_start: string;
+  billing_period_end: string;
+  gateway_provider: string;
+  gateway_payment_id?: string | null;
+  created_at: string;
+}
+
+

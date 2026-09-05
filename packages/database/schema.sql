@@ -600,5 +600,87 @@ $$;
 
 GRANT EXECUTE ON FUNCTION activate_license_key(VARCHAR) TO authenticated;
 
+-- 11. Sistema Central de Facturación & Historial de Pagos (Billing Reality)
+CREATE TABLE IF NOT EXISTS billing_invoices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    invoice_number VARCHAR(50) UNIQUE NOT NULL,
+    user_id UUID NOT NULL REFERENCES global_users(id) ON DELETE CASCADE,
+    product_id VARCHAR(50) NOT NULL REFERENCES ecosystem_products(id) ON DELETE CASCADE,
+    tier VARCHAR(50) NOT NULL,
+    amount_cents INT NOT NULL,
+    currency VARCHAR(10) DEFAULT 'ARS' NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('paid', 'pending', 'failed', 'refunded')),
+    billing_period_start TIMESTAMP WITH TIME ZONE NOT NULL,
+    billing_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+    gateway_provider VARCHAR(50) NOT NULL, -- 'manual_transfer', 'stripe', 'mercadopago', 'license_perk'
+    gateway_payment_id VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+ALTER TABLE billing_invoices ENABLE ROW LEVEL SECURITY;
+
+-- Cada usuario puede leer únicamente sus propias facturas / recibos
+DROP POLICY IF EXISTS "Users can read own invoices" ON billing_invoices;
+CREATE POLICY "Users can read own invoices"
+    ON billing_invoices FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- SuperAdmin puede leer y emitir todas las facturas
+DROP POLICY IF EXISTS "Superadmin full access to billing_invoices" ON billing_invoices;
+CREATE POLICY "Superadmin full access to billing_invoices"
+    ON billing_invoices FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM global_users 
+            WHERE id = auth.uid() AND role IN ('admin', 'superadmin')
+        )
+    );
+
+-- Trigger de auditoría automática para nuevas facturas y cobros
+CREATE OR REPLACE FUNCTION trigger_audit_billing_invoices()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        PERFORM log_audit_event(
+            'billing.invoice_created',
+            'invoice',
+            NEW.invoice_number,
+            CASE WHEN NEW.status = 'paid' THEN 'success' ELSE 'failure' END,
+            jsonb_build_object(
+                'user_id', NEW.user_id,
+                'product_id', NEW.product_id,
+                'tier', NEW.tier,
+                'amount_cents', NEW.amount_cents,
+                'currency', NEW.currency,
+                'gateway_provider', NEW.gateway_provider
+            ),
+            NULL,
+            to_jsonb(NEW)
+        );
+    ELSIF (TG_OP = 'UPDATE' AND OLD.status <> NEW.status) THEN
+        PERFORM log_audit_event(
+            'billing.invoice_status_changed',
+            'invoice',
+            NEW.invoice_number,
+            CASE WHEN NEW.status = 'paid' THEN 'success' ELSE 'failure' END,
+            jsonb_build_object(
+                'old_status', OLD.status,
+                'new_status', NEW.status,
+                'amount_cents', NEW.amount_cents
+            ),
+            to_jsonb(OLD),
+            to_jsonb(NEW)
+        );
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+DROP TRIGGER IF EXISTS trg_audit_billing_invoices ON billing_invoices;
+CREATE TRIGGER trg_audit_billing_invoices
+    AFTER INSERT OR UPDATE ON billing_invoices
+    FOR EACH ROW EXECUTE FUNCTION trigger_audit_billing_invoices();
+
+
 
 
