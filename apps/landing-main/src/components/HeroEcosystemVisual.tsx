@@ -25,6 +25,7 @@ const NODES: EcosystemNode[] = [
   { id: "play", name: "Moderno Play", tagline: "Cloud Gaming 60 FPS & Retro", category: "Gaming", icon: "gamepad", color: "#00E5FF", x: 86, y: 72, status: "DISPONIBLE", url: "https://play.moderno.com.ar/" },
   { id: "cinema", name: "Cinema Studio", tagline: "Generación Audiovisual IA", category: "IA Cine", icon: "film", color: "#EC4899", x: 68, y: 88, status: "BETA", url: "https://cinema.moderno.com.ar" },
   { id: "mercatto", name: "Mercatto", tagline: "Comercio & Marketplace Digital", category: "Comercio", icon: "credit-card", color: "#10B981", x: 32, y: 88, status: "DISPONIBLE", url: "https://mercatto.moderno.com.ar" },
+  { id: "air-gesture", name: "Air Gesture", tagline: "Interacción por Gestos con IA", category: "IA", icon: "hand", color: "#8B5CF6", x: 50, y: 25, status: "PRÓXIMAMENTE", url: "https://air-gesture.moderno.com.ar" },
 ];
 
 export const HeroEcosystemVisual: React.FC = () => {

@@ -115,6 +115,23 @@ export const ProductIcon: React.FC<ProductIconProps> = ({ name, className = "w-6
           <line x1="12" x2="12" y1="19" y2="22" />
         </svg>
       );
+    case "hand":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 11v6" />
+          <path d="M14 11v6" />
+          <path d="M10 11v6" />
+          <path d="M6 11v6" />
+          <path d="M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" />
+        </svg>
+      );
+    case "camera":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M23 10a6 6 0 0 1-6 6v6" />
+          <path d="M15.97 2.97a10 10 0 1 1-2.96-2.97" />
+        </svg>
+      );
     case "home":
       return (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">

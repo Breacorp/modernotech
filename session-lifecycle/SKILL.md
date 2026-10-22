@@ -310,3 +310,48 @@ Si detecto alguna de estas, paro y pregunto antes de seguir:
 - [Task Execution](../task-execution): Para ejecutar tareas dentro de la sesión
 - [Knowledge Management](../knowledge-management): Para registrar aprendizajes de la sesión
 - [session-context](../session-context): Para persistencia estructurada de contexto por proyecto
+
+## Ejemplo de flujo completo
+
+```
+User: "iniciar sesión"
+  → Detecta cwd → resume.mjs → proyecto: a11y-fixer
+  → Carga HANDOFF.md + .data/session-context.db
+  → Pregunta: "Session Goal para hoy?"
+  → User responde: "Arreglar el error de auth en la página de login"
+
+Session starts:
+  ├── Dispatcher → fork agent: "Analiza el error en src/auth/auth.ts:42"
+  ├── Task executor → corre test, corrige, verifica
+  └── Checkpoint → "¿Progreso suficiente? ¿Continuamos?"
+
+Mid-session checkpoint:
+  User: "El error es en middleware.ts, no en auth.ts"
+  → WAL: memory/YYYY-MM-DD.md ← "Corrección: middleware.ts:88"
+  → Continúa con nueva ruta
+
+Session ends:
+  → summary: "Corregí el middleware de auth, el error estaba en middleware.ts:88"
+  → nextSteps: "1. testear login 2. revisar edge cases"
+  → HANDOFF.md
+  → memory/YYYY-MM-DD.md
+  → git add, commit, push
+  → LEARNINGS.md ← "no asumir que el error está donde parece estar"
+```
+
+## Notas de despliegue
+
+- **CI/CD:** Todos los cambios se prueban en GitHub Actions antes de merge a main
+- **Deploy:** `npm run deploy` despliega a Vercel con preview URL pública
+- **Backup:** `memory/` se respalda en GitHub Releases cada fin de mes
+
+## Notas de privacidad
+
+- `memory/YYYY-MM-DD.md` se muestra al usuario antes de persistir
+- `.data/session-context.db` está en `.gitignore` y `.env`
+- HANDOFF.md nunca se comparte con terceros
+- El sistema nunca registra IPs, cookies o datos personales sin consentimiento explícito
+
+---
+
+*Documento generado el 2026-10-22 para el workspace moderno-tech*

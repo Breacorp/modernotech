@@ -14,6 +14,7 @@ export const ModernoNavbar: React.FC = () => {
   const ecosystemApps = [
     { name: "Moderno Cloud", icon: "☁️", url: "https://cloud.moderno.com.ar", desc: "Almacenamiento & Vault" },
     { name: "Moderno Access", icon: "🛡️", url: "https://access.moderno.com.ar", desc: "Control de Acceso" },
+    { name: "Air Gesture", icon: "✋", url: "https://air-gesture.moderno.com.ar", desc: "IA por Gestos" },
     { name: "Moderno Play", icon: "🎮", url: "https://play.moderno.com.ar", desc: "Cloud Gaming 60 FPS" },
     { name: "Cinema Studio", icon: "🎬", url: "https://cinema.moderno.com.ar", desc: "Generación Video AI" },
     { name: "Mercatto", icon: "🛍️", url: "https://mercatto.moderno.com.ar", desc: "E-Commerce 1-Click" },

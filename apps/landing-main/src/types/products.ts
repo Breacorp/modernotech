@@ -12,7 +12,8 @@ export type ProductCategory =
   | 'fintech'
   | 'software'
   | 'hardware'
-  | 'services';
+  | 'services'
+  | 'gesture';
 
 export interface ProductItem {
   id: string;
