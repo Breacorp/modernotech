@@ -7,54 +7,54 @@ interface ModernoBadgeProps {
   size?: "sm" | "md";
 }
 
+const statusConfig: Record<
+  Exclude<ProductStatus, "DEPRECATED">,
+  { label: string; dot: string; tone: string }
+> = {
+  AVAILABLE: {
+    label: "Disponible",
+    dot: "bg-emerald-400",
+    tone: "text-emerald-200/90",
+  },
+  BETA: {
+    label: "Beta",
+    dot: "bg-sky-400",
+    tone: "text-sky-200/90",
+  },
+  "PRIVATE BETA": {
+    label: "Beta privada",
+    dot: "bg-amber-300",
+    tone: "text-amber-200/90",
+  },
+  "COMING SOON": {
+    label: "En desarrollo",
+    dot: "bg-white/35",
+    tone: "text-white/60",
+  },
+};
+
 export const ModernoBadge: React.FC<ModernoBadgeProps> = ({
   status,
   className = "",
   size = "md",
 }) => {
+  if (status === "DEPRECATED") return null;
+
+  const config = statusConfig[status];
   const sizeClasses =
     size === "sm"
-      ? "px-2 py-0.5 text-[10px] tracking-wider"
-      : "px-2.5 py-1 text-[11px] tracking-widest";
+      ? "px-2.5 py-1 text-[11px]"
+      : "px-3 py-1.5 text-xs";
 
-  switch (status) {
-    case "AVAILABLE":
-      return (
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-bold uppercase bg-white/[0.04] border border-white/[0.08] text-white/85 shadow-sm ${sizeClasses} ${className}`}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--moderno-primary)] animate-pulse" />
-          DISPONIBLE
-        </span>
-      );
-    case "BETA":
-      return (
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-bold uppercase bg-white/[0.04] border border-[var(--moderno-secondary)]/30 text-[var(--moderno-accent-sky)] ${sizeClasses} ${className}`}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--moderno-accent-sky)]" />
-          BETA
-        </span>
-      );
-    case "PRIVATE BETA":
-      return (
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-bold uppercase bg-white/[0.04] border border-amber-500/30 text-amber-300 ${sizeClasses} ${className}`}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-          BETA PRIVADA
-        </span>
-      );
-    case "COMING SOON":
-      return (
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-bold uppercase bg-white/[0.02] border border-white/[0.06] text-white/55 ${sizeClasses} ${className}`}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
-          PRÓXIMAMENTE
-        </span>
-      );
-    default:
-      return null;
-  }
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.035] font-medium ${sizeClasses} ${config.tone} ${className}`}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${config.dot}`}
+        aria-hidden="true"
+      />
+      {config.label}
+    </span>
+  );
 };

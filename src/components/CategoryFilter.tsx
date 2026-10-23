@@ -1,51 +1,47 @@
 "use client";
 
 import React from "react";
-import { ProductCategory, CategoryInfo } from "../types/products";
+import { ProductArea } from "../types/products";
+import { PRODUCT_AREAS } from "../data/products";
+
+type AreaFilter = ProductArea | "ALL";
 
 interface CategoryFilterProps {
-  categories: CategoryInfo[];
-  selectedCategory: ProductCategory;
-  onSelectCategory: (category: ProductCategory) => void;
-  counts: Record<ProductCategory, number>;
+  selectedArea: AreaFilter;
+  onSelectArea: (area: AreaFilter) => void;
 }
 
+const filters: { id: AreaFilter; label: string }[] = [
+  { id: "ALL", label: "Todos" },
+  ...PRODUCT_AREAS.map((area) => ({ id: area.id, label: area.label })),
+];
+
 export const CategoryFilter: React.FC<CategoryFilterProps> = ({
-  categories,
-  selectedCategory,
-  onSelectCategory,
-  counts,
+  selectedArea,
+  onSelectArea,
 }) => {
   return (
     <div
       role="group"
-      aria-label="Filtrar plataformas por categoría"
-      className="flex items-center gap-2 overflow-x-auto pb-4 pt-1 no-scrollbar select-none"
+      aria-label="Filtrar productos por área"
+      className="no-scrollbar -mx-5 flex items-center gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
     >
-      {categories.map((cat) => {
-        const isSelected = selectedCategory === cat.id;
-        const count = counts[cat.id] || 0;
+      {filters.map((filter) => {
+        const isSelected = selectedArea === filter.id;
 
         return (
           <button
-            key={cat.id}
+            key={filter.id}
             type="button"
             aria-pressed={isSelected}
-            onClick={() => onSelectCategory(cat.id)}
-            className={`moderno-focus px-4 py-2 rounded-full text-xs font-semibold tracking-wider whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+            onClick={() => onSelectArea(filter.id)}
+            className={`moderno-focus h-9 shrink-0 rounded-full border px-4 text-[13px] font-medium transition-colors ${
               isSelected
-                ? "bg-[var(--moderno-primary-deep)] text-white shadow-[0_0_20px_rgba(0,82,255,0.4)] border border-white/20"
-                : "bg-white/5 hover:bg-white/10 text-[var(--moderno-text-muted)] hover:text-white border border-white/5"
+                ? "border-[var(--moderno-text)] bg-[var(--moderno-text)] text-[var(--moderno-background-alt)]"
+                : "border-white/[0.08] text-[var(--moderno-text-muted)] hover:border-white/[0.18] hover:text-[var(--moderno-text)]"
             }`}
           >
-            <span>{cat.label}</span>
-            <span
-              className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
-                isSelected ? "bg-white/20 text-white" : "bg-white/10 text-white/60"
-              }`}
-            >
-              {count}
-            </span>
+            {filter.label}
           </button>
         );
       })}

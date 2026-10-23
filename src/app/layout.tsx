@@ -5,7 +5,6 @@ import "./globals.css";
 
 const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 
@@ -18,12 +17,16 @@ export const metadata: Metadata = {
     "Moderno AI",
     "Moderno One",
     "Moderno Play",
+    "Moderno Cloud",
     "Moderno Weather",
     "Moderno AI Cleaner Pro",
     "Moderno Pay",
     "Moderno CRM",
     "WaTicket",
     "Moderno Access",
+    "Air Gesture",
+    "Moderno Diffusion",
+    "Moderno FaceSwap AI",
     "Cinema Studio AI",
     "Nova Home",
     "Ecosistema Tecnológico",
@@ -72,7 +75,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050507",
+  themeColor: "#0b0f14",
   colorScheme: "dark",
 };
 
