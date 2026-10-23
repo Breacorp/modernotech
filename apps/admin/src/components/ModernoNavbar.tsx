@@ -1,345 +1,265 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ModernoButton } from "./ModernoButton";
 import { useModernoAuth } from "../hooks/useModernoAuth";
 
-export const ModernoNavbar: React.FC = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [appsOpen, setAppsOpen] = useState(false);
-  const { user, isAuthenticated, signOut } = useModernoAuth();
+const NAV_LINKS = [
+  { label: "Ecosistema", href: "/#ecosistema" },
+  { label: "Compañía", href: "/#compania" },
+  { label: "Ayuda", href: "/ayuda" },
+];
 
-  const ecosystemApps = [
-    { name: "Moderno Cloud", icon: "☁️", url: "https://cloud.moderno.com.ar", desc: "Almacenamiento & Vault" },
-    { name: "Moderno Access", icon: "🛡️", url: "https://access.moderno.com.ar", desc: "Control de Acceso" },
-    { name: "Moderno Play", icon: "🎮", url: "https://play.moderno.com.ar", desc: "Cloud Gaming 60 FPS" },
-    { name: "Cinema Studio", icon: "🎬", url: "https://cinema.moderno.com.ar", desc: "Generación Video AI" },
-    { name: "Mercatto", icon: "🛍️", url: "https://mercatto.moderno.com.ar", desc: "E-Commerce 1-Click" },
-    { name: "Moderno AI", icon: "✨", url: "https://ai.moderno.com.ar", desc: "Motor Cognitivo" },
-    { name: "Moderno One", icon: "🏢", url: "https://one.moderno.com.ar", desc: "ERP Modular" },
-    { name: "AI Cleaner Pro", icon: "⚡", url: "https://cleaner.moderno.com.ar", desc: "Optimización macOS" },
-    { name: "Moderno Weather", icon: "🌤️", url: "https://weather.moderno.com.ar", desc: "Radar Meteorológico" },
-  ];
+export const ModernoNavbar: React.FC = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
+  const mobileCloseRef = useRef<HTMLButtonElement>(null);
+  const { isAuthenticated, signOut } = useModernoAuth();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+    if (!mobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        mobileToggleRef.current?.focus();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const menu = document.getElementById("mobile-menu");
+      const focusable = menu?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable || focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
-  const navLinks = [
-    { label: "Productos", href: "/#productos" },
-    { label: "Ecosistema", href: "/#ecosistema" },
-    { label: "Precios", href: "/pricing" },
-    { label: "Tecnología", href: "/#tecnologia" },
-    { label: "Ayuda", href: "/ayuda" },
-  ];
+    mobileCloseRef.current?.focus();
+    document.addEventListener("keydown", onKeyDown);
 
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLElement>, href: string) => {
-    if (href.startsWith("/#") && window.location.pathname === "/") {
-      e.preventDefault();
-      setMobileMenuOpen(false);
-      const targetId = href.replace("/", "");
-      const target = document.querySelector(targetId);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
-    } else if (href.startsWith("#")) {
-      e.preventDefault();
-      setMobileMenuOpen(false);
-      const target = document.querySelector(href);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
-    }
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [mobileMenuOpen]);
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    mobileToggleRef.current?.focus();
   };
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 select-none ${
-          scrolled
-            ? "bg-[#050507]/90 backdrop-blur-xl border-b border-white/[0.08] py-4 shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
-            : "bg-gradient-to-b from-[#050507]/90 via-[#050507]/40 to-transparent py-5"
-        }`}
-      >
-        <div className="max-w-[1920px] mx-auto px-6 sm:px-10 lg:px-12 flex items-center justify-between gap-6">
-          {/* Logo Brand Lockup matching Play & Access */}
-          <div className="flex items-center gap-8 lg:gap-10">
-            <a
-              href="#hero"
-              onClick={(e) => handleSmoothScroll(e, "#hero")}
-              className="flex items-center gap-2.5 group shrink-0 focus:outline-none"
-              aria-label="Moderno Tech - Home"
-            >
-              <img
-                src="/logo.png"
-                alt="Moderno Tech Logo"
-                className="w-8 h-8 rounded-full object-contain shadow-[0_0_20px_rgba(0,122,255,0.4)] group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="flex flex-col leading-none">
-                <span className="text-[9px] font-extrabold tracking-[0.25em] text-white/50 uppercase">
-                  MODERNO
-                </span>
-                <span className="text-base sm:text-lg font-black tracking-wider text-white flex items-center gap-1 font-sans">
-                  TECH
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#00E5FF] animate-pulse" />
-                </span>
-              </div>
-            </a>
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[var(--moderno-background-alt)]/95 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8 lg:px-10">
+          <a
+            href="/"
+            className="moderno-focus flex shrink-0 items-center gap-2.5 rounded-full"
+            aria-label="Moderno Tech — Inicio"
+          >
+            <Image
+              src="/logo-mark.png"
+              alt=""
+              width={30}
+              height={30}
+              priority
+              className="h-[30px] w-[30px] rounded-full object-contain"
+            />
+            <span className="text-[15px] font-semibold tracking-[-0.02em] text-[var(--moderno-text)]">
+              Moderno <span className="font-normal text-[var(--moderno-text-muted)]">Tech</span>
+            </span>
+          </a>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1" aria-label="Navegación principal">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => handleSmoothScroll(e, link.href)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#94A3B8] hover:text-white hover:bg-white/[0.04] transition-all"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-          </div>
-
-          {/* Desktop Right Actions */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Ecosystem App Launcher Button */}
-            <div className="relative">
-              <button
-                onClick={() => setAppsOpen(!appsOpen)}
-                title="Lanzador de Apps del Ecosistema"
-                className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${
-                  appsOpen
-                    ? "bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/50 shadow-[0_0_15px_rgba(0,229,255,0.3)]"
-                    : "bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#94A3B8] hover:text-white"
-                }`}
-                aria-label="Lanzador de Apps"
+          <nav
+            aria-label="Navegación principal"
+            className="hidden items-center gap-1 lg:flex"
+          >
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="moderno-focus rounded-full px-3.5 py-2 text-[13px] font-medium text-[var(--moderno-text-muted)] transition-colors hover:text-[var(--moderno-text)]"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="5" cy="5" r="2" />
-                  <circle cx="12" cy="5" r="2" />
-                  <circle cx="19" cy="5" r="2" />
-                  <circle cx="5" cy="12" r="2" />
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="19" cy="12" r="2" />
-                  <circle cx="5" cy="19" r="2" />
-                  <circle cx="12" cy="19" r="2" />
-                  <circle cx="19" cy="19" r="2" />
-                </svg>
-              </button>
+                {link.label}
+              </a>
+            ))}
+          </nav>
 
-              {/* App Launcher Dropdown */}
-              <AnimatePresence>
-                {appsOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-12 w-80 p-4 rounded-2xl bg-[#0B0B10]/98 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-2xl z-50"
-                  >
-                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/[0.06]">
-                      <span className="text-[10px] font-black text-[#00E5FF] tracking-widest uppercase">
-                        ECOSISTEMA MODERNO
-                      </span>
-                      <a href="/admin" className="text-[10px] font-bold text-[#00E5FF] hover:underline flex items-center gap-1">
-                        <span>👑</span>
-                        <span>SuperAdmin</span>
-                      </a>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {ecosystemApps.map((app) => (
-                        <a
-                          key={app.name}
-                          href={app.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.04] hover:border-[#00E5FF]/40 transition-all flex flex-col items-center text-center group"
-                        >
-                          <span className="text-xl mb-1 group-hover:scale-110 transition-transform">
-                            {app.icon}
-                          </span>
-                          <span className="text-[11px] font-bold text-white block truncate w-full">
-                            {app.name.replace("Moderno ", "")}
-                          </span>
-                          <span className="text-[9px] text-[#94A3B8] font-light block truncate w-full">
-                            {app.desc}
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                    <div className="mt-3 pt-2.5 border-t border-white/[0.06] text-center">
-                      <a
-                        href="/admin"
-                        className="w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-[#00E5FF]/10 to-[#157BFF]/10 hover:from-[#00E5FF]/20 hover:to-[#157BFF]/20 border border-[#00E5FF]/30 text-[10px] font-bold text-[#00E5FF] block transition-all"
-                      >
-                        ⚡ Abrir Panel de Control Global &rarr;
-                      </a>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Live Status Pill */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-[11px] font-mono text-emerald-400 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>ONLINE</span>
-            </div>
-
-            {/* SuperAdmin Direct Link */}
-            <a
-              href="/admin"
-              title="Panel de Control SuperAdmin (Dueño)"
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#00E5FF]/15 to-[#157BFF]/15 hover:from-[#00E5FF]/25 hover:to-[#157BFF]/25 border border-[#00E5FF]/40 text-xs font-bold text-white hover:text-[#00E5FF] transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,229,255,0.2)]"
-            >
-              <span>👑</span>
-              <span className="hidden xl:inline">SuperAdmin</span>
-            </a>
-
-            {/* Moderno ID Conditional Action */}
+          <div className="hidden items-center gap-2 lg:flex">
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
+              <>
                 <a
                   href="/cuenta"
-                  className="px-4 py-1.5 rounded-xl bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/40 text-xs font-bold text-white transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(0,229,255,0.2)]"
+                  className="moderno-focus rounded-full px-3.5 py-2 text-[13px] font-medium text-[var(--moderno-text)] transition-colors hover:text-[var(--moderno-accent-light)]"
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>Mi Cuenta</span>
-                  {user?.name && <span className="text-white/60 font-normal">({user.name})</span>}
+                  Mi cuenta
                 </a>
                 <button
+                  type="button"
                   onClick={signOut}
-                  title="Cerrar sesión"
-                  className="p-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
+                  className="moderno-focus rounded-full px-3 py-2 text-[13px] font-medium text-[var(--moderno-text-muted)] transition-colors hover:text-[var(--moderno-text)]"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  Salir
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center gap-2">
+              <>
                 <a
                   href="/login"
-                  className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-white transition-all flex items-center gap-1.5 hover:border-[#00E5FF]/40"
+                  className="moderno-focus rounded-full px-3.5 py-2 text-[13px] font-medium text-[var(--moderno-text-muted)] transition-colors hover:text-[var(--moderno-text)]"
                 >
-                  <svg className="w-3.5 h-3.5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                  <span>Iniciar Sesión</span>
+                  Ingresar
                 </a>
-                <ModernoButton
-                  variant="primary"
-                  href="/registro"
-                >
-                  Crear Cuenta
+                <ModernoButton href="/registro" size="sm">
+                  Crear cuenta
                 </ModernoButton>
-              </div>
+              </>
             )}
           </div>
 
-          {/* Mobile Menu Toggle Button */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl bg-white/[0.04] border border-white/10 text-white"
+            ref={mobileToggleRef}
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="moderno-focus flex h-10 w-10 items-center justify-center rounded-full text-[var(--moderno-text)] transition-colors hover:bg-white/[0.06] lg:hidden"
             aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
             aria-label="Abrir menú"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.75}
+                d="M4 7h16M4 12h16M4 17h16"
+              />
             </svg>
           </button>
         </div>
       </header>
 
-      {/* Mobile Drawer Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 top-[68px] z-40 bg-[#050507]/98 backdrop-blur-2xl border-b border-white/10 p-6 md:hidden shadow-2xl"
+      {mobileMenuOpen && (
+        <div
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menú de navegación"
+          className="fixed inset-0 z-[60] bg-[var(--moderno-background-alt)] lg:hidden"
+        >
+          <div className="flex h-16 items-center justify-between px-5 sm:px-8">
+            <a
+              href="/"
+              onClick={closeMobileMenu}
+              className="moderno-focus flex items-center gap-2.5 rounded-full"
+              aria-label="Moderno Tech — Inicio"
+            >
+              <Image
+                src="/logo-mark.png"
+                alt=""
+                width={30}
+                height={30}
+                className="h-[30px] w-[30px] rounded-full object-contain"
+              />
+              <span className="text-[15px] font-semibold tracking-[-0.02em] text-[var(--moderno-text)]">
+                Moderno <span className="font-normal text-[var(--moderno-text-muted)]">Tech</span>
+              </span>
+            </a>
+            <button
+              ref={mobileCloseRef}
+              type="button"
+              onClick={closeMobileMenu}
+              className="moderno-focus flex h-10 w-10 items-center justify-center rounded-full text-[var(--moderno-text)] transition-colors hover:bg-white/[0.06]"
+              aria-label="Cerrar menú"
+            >
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.75}
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <nav
+            aria-label="Navegación móvil"
+            className="flex flex-col px-5 pt-8 sm:px-8"
           >
-            <div className="flex flex-col gap-3">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => handleSmoothScroll(e, link.href)}
-                  className="text-sm font-bold text-[#94A3B8] hover:text-white py-2 border-b border-white/[0.04] transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={closeMobileMenu}
+                className="moderno-focus border-b border-white/[0.07] py-5 text-2xl font-medium tracking-[-0.03em] text-[var(--moderno-text)]"
+              >
+                {link.label}
+              </a>
+            ))}
+
+            <div className="mt-10 flex flex-col gap-3">
               {isAuthenticated ? (
                 <>
-                  <a
-                    href="/cuenta"
-                    className="text-sm font-bold text-[#00E5FF] hover:text-white py-2 border-b border-white/[0.04] transition-colors flex items-center justify-between"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span>🔑</span>
-                      <span>Mi Cuenta ({user?.name || "Activa"})</span>
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                      ONLINE
-                    </span>
-                  </a>
+                  <ModernoButton href="/cuenta" size="lg" className="w-full">
+                    Mi cuenta
+                  </ModernoButton>
                   <button
+                    type="button"
                     onClick={() => {
                       signOut();
-                      setMobileMenuOpen(false);
+                      closeMobileMenu();
                     }}
-                    className="text-left text-xs font-bold text-rose-400 hover:text-white py-2 border-b border-white/[0.04] transition-colors"
+                    className="moderno-focus h-12 w-full rounded-full border border-white/[0.12] text-sm font-medium text-[var(--moderno-text-muted)] transition-colors hover:text-[var(--moderno-text)]"
                   >
-                    Cerrar Sesión
+                    Cerrar sesión
                   </button>
                 </>
               ) : (
                 <>
+                  <ModernoButton href="/registro" size="lg" className="w-full">
+                    Crear cuenta
+                  </ModernoButton>
                   <a
                     href="/login"
-                    className="text-sm font-bold text-white hover:text-[#00E5FF] py-2 border-b border-white/[0.04] transition-colors flex items-center gap-2"
+                    onClick={closeMobileMenu}
+                    className="moderno-focus flex h-12 w-full items-center justify-center rounded-full border border-white/[0.12] text-sm font-medium text-[var(--moderno-text)] transition-colors hover:bg-white/[0.05]"
                   >
-                    <span>🔑</span>
-                    <span>Iniciar Sesión (Moderno ID)</span>
-                  </a>
-                  <a
-                    href="/registro"
-                    className="text-sm font-bold text-[#00E5FF] hover:text-white py-2 border-b border-white/[0.04] transition-colors flex items-center gap-2"
-                  >
-                    <span>✨</span>
-                    <span>Crear Cuenta Global</span>
+                    Ingresar
                   </a>
                 </>
               )}
-              <div className="pt-2">
-                <ModernoButton
-                  variant="primary"
-                  href="#productos"
-                  className="w-full text-center"
-                  onClick={(e: React.MouseEvent<HTMLElement>) => handleSmoothScroll(e, "#productos")}
-                >
-                  Explorar Ecosistema
-                </ModernoButton>
-              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </nav>
+        </div>
+      )}
     </>
   );
 };

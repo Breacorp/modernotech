@@ -1,38 +1,41 @@
 "use client";
 
 import React from "react";
+import { useModernoAuth } from "../hooks/useModernoAuth";
 import { ModernoButton } from "./ModernoButton";
 
 export const FinalCTA: React.FC = () => {
+  const { isAuthenticated } = useModernoAuth();
+
   return (
-    <section className="relative z-10 max-w-[1920px] mx-auto px-6 sm:px-10 lg:px-12 py-20 select-none">
-      <div className="relative p-10 sm:p-16 md:p-20 rounded-2xl bg-[#0B0B10] border border-white/[0.08] text-center flex flex-col items-center justify-center overflow-hidden shadow-[0_20px_80px_rgba(0,0,0,0.9)]">
-        {/* Glow behind CTA */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,229,255,0.12)_0%,transparent_60%)] pointer-events-none" />
-
-        <div className="relative z-10 max-w-2xl">
-          <span className="text-[11px] font-black text-[#00E5FF] tracking-widest uppercase block mb-3">
-            PORTAL CENTRAL MODERNO
-          </span>
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight font-sans mb-4">
-            Descubrí Moderno.
-          </h2>
-          <p className="text-sm sm:text-lg text-[#94A3B8] font-light max-w-lg mx-auto mb-8">
-            Conectá tus operaciones empresariales, seguridad, inteligencia artificial y servicios digitales en un solo ecosistema integrado.
-          </p>
-
-          <ModernoButton
-            variant="primary"
-            href="#productos"
-            className="px-10 py-4 text-xs font-black"
-            icon={
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            }
+    <section
+      id="empezar"
+      aria-labelledby="final-cta-heading"
+      className="relative z-10 mx-auto max-w-6xl scroll-mt-24 px-5 pb-24 pt-8 sm:px-8 lg:px-10 lg:pb-32"
+    >
+      <div className="relative overflow-hidden border-t border-white/[0.06] pt-16 text-center sm:pt-20">
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 h-56 w-[36rem] max-w-full -translate-x-1/2 rounded-full bg-[var(--moderno-accent)]/[0.055] blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="relative">
+          <h2
+            id="final-cta-heading"
+            className="mx-auto max-w-2xl text-balance text-3xl font-medium leading-[1.06] tracking-[-0.04em] text-[var(--moderno-text)] sm:text-4xl md:text-5xl"
           >
-            Ver Catálogo de Productos
-          </ModernoButton>
+            Una cuenta. Todo el ecosistema.
+          </h2>
+          <p className="mx-auto mt-5 max-w-md text-pretty text-sm font-light leading-relaxed text-[var(--moderno-text-muted)] sm:text-base">
+            Accedé a tus servicios, planes y datos desde un solo lugar.
+          </p>
+          <div className="mt-8 flex justify-center">
+            <ModernoButton
+              href={isAuthenticated ? "/cuenta" : "/registro"}
+              size="lg"
+            >
+              {isAuthenticated ? "Ir a mi cuenta" : "Crear cuenta"}
+            </ModernoButton>
+          </div>
         </div>
       </div>
     </section>

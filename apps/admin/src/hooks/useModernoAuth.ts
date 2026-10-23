@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { supabase } from "../lib/supabase";
 
 export interface UserEntitlement {
@@ -36,124 +44,138 @@ export interface GlobalUserRecord {
   entitlements: UserEntitlement[];
 }
 
-export function useModernoAuth() {
+interface ModernoAuthContextValue {
+  user: ModernoUser | null;
+  entitlements: UserEntitlement[];
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  isSuperAdmin: boolean;
+  activeServicesCount: number;
+  signOut: () => Promise<void>;
+}
+
+const ModernoAuthContext = createContext<ModernoAuthContextValue | null>(null);
+
+function mapEntitlements(rows: any[] | null): UserEntitlement[] {
+  if (!rows) return [];
+
+  return rows.map((e: any) => ({
+    productId: e.product_id,
+    tier: e.tier,
+    status: e.status,
+    quotaLabel: e.quota_limit_bytes
+      ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB`
+      : typeof e.tier === "string"
+        ? e.tier.toUpperCase()
+        : undefined,
+    grantedBy: e.granted_by,
+    grantNotes: e.grant_notes,
+    validUntil: e.valid_until,
+  }));
+}
+
+async function loadUserData(userId: string) {
+  const [{ data: profile }, { data: entitlements }] = await Promise.all([
+    supabase.from("global_users").select("role, status").eq("id", userId).single(),
+    supabase.from("user_product_entitlements").select("*").eq("user_id", userId),
+  ]);
+
+  return {
+    role: (profile?.role as ModernoUser["role"]) || "user",
+    status: (profile?.status as ModernoUser["status"]) || "active",
+    entitlements: mapEntitlements(entitlements),
+  };
+}
+
+/**
+ * Single source of truth for Moderno ID across the app.
+ * Mounted once in the root layout, so the navbar, the authenticated banner and
+ * any page share one session subscription and one pair of Supabase queries.
+ */
+export const ModernoAuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<ModernoUser | null>(null);
   const [entitlements, setEntitlements] = useState<UserEntitlement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Avoid loading profile + entitlements twice (getSession + INITIAL_SESSION).
+  const loadedUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    async function checkAuth() {
+    const applySessionUser = (sessionUser: {
+      id: string;
+      email?: string;
+      user_metadata?: Record<string, any>;
+    }) => {
+      if (!isMounted) return;
+
+      setUser({
+        id: sessionUser.id,
+        email: sessionUser.email || "",
+        name:
+          sessionUser.user_metadata?.name ||
+          sessionUser.email?.split("@")[0] ||
+          "Usuario",
+        avatarUrl: sessionUser.user_metadata?.avatar_url,
+        role: "user",
+        status: "active",
+      });
+
+      if (loadedUserIdRef.current === sessionUser.id) return;
+      loadedUserIdRef.current = sessionUser.id;
+
+      loadUserData(sessionUser.id)
+        .then((data) => {
+          if (!isMounted) return;
+          setUser((current) =>
+            current ? { ...current, role: data.role, status: data.status } : current
+          );
+          setEntitlements(data.entitlements);
+        })
+        .catch(() => {
+          /* Keep the session user even if the profile query fails. */
+        });
+    };
+
+    const checkAuth = async () => {
       try {
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData?.session?.user) {
-          if (isMounted) {
-            setUser(null);
-            setEntitlements([]);
-          }
+        const { data, error } = await supabase.auth.getSession();
+        if (!error && data?.session?.user) {
+          applySessionUser(data.session.user);
           return;
         }
 
-        const authUser = sessionData.session.user;
-
-        // Consultar rol real desde global_users en Supabase
-        const { data: dbUserData } = await supabase
-          .from("global_users")
-          .select("role, status")
-          .eq("id", authUser.id)
-          .single();
-
-        const realRole = (dbUserData?.role as "user" | "admin" | "superadmin") || "user";
-        const realStatus = (dbUserData?.status as "active" | "suspended") || "active";
-
         if (isMounted) {
-          setUser({
-            id: authUser.id,
-            email: authUser.email || "",
-            name: authUser.user_metadata?.name || authUser.email?.split("@")[0] || "Usuario",
-            avatarUrl: authUser.user_metadata?.avatar_url,
-            role: realRole,
-            status: realStatus,
-          });
+          loadedUserIdRef.current = null;
+          setUser(null);
+          setEntitlements([]);
         }
-
-        // Consultar entitlements reales desde Supabase
-        const { data: entData, error: entError } = await supabase
-          .from("user_product_entitlements")
-          .select("*")
-          .eq("user_id", authUser.id);
-
-        if (!entError && entData && isMounted) {
-          setEntitlements(
-            entData.map((e: any) => ({
-              productId: e.product_id,
-              tier: e.tier,
-              status: e.status,
-              quotaLabel: e.quota_limit_bytes
-                ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB`
-                : e.tier.toUpperCase(),
-              grantedBy: e.granted_by,
-              grantNotes: e.grant_notes,
-            }))
-          );
+      } catch {
+        if (isMounted) {
+          loadedUserIdRef.current = null;
+          setUser(null);
+          setEntitlements([]);
         }
-      } catch (err) {
-        console.error("Error inicializando sesión en Supabase:", err);
       } finally {
         if (isMounted) setIsLoading(false);
       }
-    }
+    };
 
     checkAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        const authUser = session.user;
-
-        const { data: dbUserData } = await supabase
-          .from("global_users")
-          .select("role, status")
-          .eq("id", authUser.id)
-          .single();
-
-        const realRole = (dbUserData?.role as "user" | "admin" | "superadmin") || "user";
-        const realStatus = (dbUserData?.status as "active" | "suspended") || "active";
-
-        setUser({
-          id: authUser.id,
-          email: authUser.email || "",
-          name: authUser.user_metadata?.name || authUser.email?.split("@")[0] || "Usuario",
-          avatarUrl: authUser.user_metadata?.avatar_url,
-          role: realRole,
-          status: realStatus,
-        });
-
-        const { data: entData } = await supabase
-          .from("user_product_entitlements")
-          .select("*")
-          .eq("user_id", authUser.id);
-
-        if (entData) {
-          setEntitlements(
-            entData.map((e: any) => ({
-              productId: e.product_id,
-              tier: e.tier,
-              status: e.status,
-              quotaLabel: e.quota_limit_bytes
-                ? `${Math.round(e.quota_limit_bytes / (1024 * 1024 * 1024))} GB`
-                : e.tier.toUpperCase(),
-              grantedBy: e.granted_by,
-              grantNotes: e.grant_notes,
-            }))
-          );
-        }
+        applySessionUser(session.user);
       } else {
+        loadedUserIdRef.current = null;
         setUser(null);
         setEntitlements([]);
       }
+      setIsLoading(false);
     });
 
     return () => {
@@ -162,20 +184,49 @@ export function useModernoAuth() {
     };
   }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = useCallback(async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      /* Clear local state regardless of the network result. */
+    }
+    loadedUserIdRef.current = null;
     setUser(null);
     setEntitlements([]);
-  };
+  }, []);
 
-  const isSuperAdmin = user?.role === "superadmin" || user?.role === "admin";
+  const value = useMemo<ModernoAuthContextValue>(() => {
+    const activeServicesCount = entitlements.filter(
+      (item) => item.status === "active"
+    ).length;
 
-  return {
-    user,
-    isAuthenticated: !!user,
-    isSuperAdmin,
-    isLoading,
-    entitlements,
-    signOut,
-  };
+    return {
+      user,
+      entitlements,
+      isLoading,
+      isAuthenticated: !!user,
+      isSuperAdmin:
+        user?.role === "superadmin" || user?.role === "admin",
+      activeServicesCount,
+      signOut,
+    };
+  }, [user, entitlements, isLoading, signOut]);
+
+  return React.createElement(
+    ModernoAuthContext.Provider,
+    { value },
+    children
+  );
+};
+
+export function useModernoAuth(): ModernoAuthContextValue {
+  const context = useContext(ModernoAuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useModernoAuth debe usarse dentro de <ModernoAuthProvider>. Revisá el layout raíz."
+    );
+  }
+
+  return context;
 }

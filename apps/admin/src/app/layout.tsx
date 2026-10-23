@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
+import { ModernoAuthProvider } from "../hooks/useModernoAuth";
 import "./globals.css";
 
 const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Moderno Tech — Tecnología que conecta todo",
+  title: "Moderno Tech — Tecnología para un mundo más moderno",
   description:
     "Descubrí el ecosistema Moderno Tech: inteligencia artificial, software empresarial, tecnología y soluciones diseñadas para el mundo real.",
   keywords: [
@@ -17,12 +17,16 @@ export const metadata: Metadata = {
     "Moderno AI",
     "Moderno One",
     "Moderno Play",
+    "Moderno Cloud",
     "Moderno Weather",
     "Moderno AI Cleaner Pro",
     "Moderno Pay",
     "Moderno CRM",
     "WaTicket",
     "Moderno Access",
+    "Air Gesture",
+    "Moderno Diffusion",
+    "Moderno FaceSwap AI",
     "Cinema Studio AI",
     "Nova Home",
     "Ecosistema Tecnológico",
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Moderno Tech — Tecnología que conecta todo",
+    title: "Moderno Tech — Tecnología para un mundo más moderno",
     description:
       "Descubrí el ecosistema Moderno Tech: inteligencia artificial, software empresarial, tecnología y soluciones diseñadas para el mundo real.",
     url: "https://moderno.com.ar",
@@ -52,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Moderno Tech — Tecnología que conecta todo",
+    title: "Moderno Tech — Tecnología para un mundo más moderno",
     description:
       "Descubrí el ecosistema Moderno Tech: inteligencia artificial, software, tecnología y soluciones diseñadas para el mundo real.",
     creator: "@modernotech",
@@ -68,6 +72,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0f14",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -112,7 +121,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={outfit.className}>{children}</body>
+      <body className={outfit.className}>
+        <ModernoAuthProvider>{children}</ModernoAuthProvider>
+      </body>
     </html>
   );
 }
