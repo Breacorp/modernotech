@@ -2,19 +2,21 @@
 @import "../styles/design-tokens.css";
 @source "../**";
 
+/* Legacy aliases — kept so older classes keep resolving, but all values now
+   point at the single source of truth in design-tokens.css */
 :root {
-  --bg: #050507;
-  --panel: rgba(11, 11, 16, 0.75);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(0, 229, 255, 0.4);
-  --primary: #00E5FF;
-  --primary-glow: rgba(0, 229, 255, 0.25);
-  --accent: #157BFF;
-  --text-muted: #94A3B8;
+  --bg: var(--moderno-background-alt);
+  --panel: var(--moderno-surface);
+  --border: var(--moderno-border);
+  --border-hover: var(--moderno-border-hover);
+  --primary: var(--moderno-primary);
+  --primary-glow: var(--moderno-glow);
+  --accent: var(--moderno-primary-light);
+  --text-muted: var(--moderno-text-muted);
 }
 
 html, body {
-  background-color: #050507 !important;
+  background-color: var(--moderno-background-alt) !important;
   color: #ffffff !important;
   font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
@@ -128,15 +130,15 @@ html, body {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #050a15;
+  background: var(--moderno-background-alt);
 }
 ::-webkit-scrollbar-thumb {
-  background: #142144;
-  border: 2px solid #050a15;
+  background: rgba(21, 123, 255, 0.35);
+  border: 2px solid var(--moderno-background-alt);
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #1e3266;
+  background: rgba(0, 229, 255, 0.45);
 }
 
 /* Hide scrollbar for category filters */

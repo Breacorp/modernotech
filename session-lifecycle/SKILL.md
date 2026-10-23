@@ -307,9 +307,9 @@ Si detecto alguna de estas, paro y pregunto antes de seguir:
 
 ## Related Skills
 
-- [Task Execution](../task-execution): Para ejecutar tareas dentro de la sesión
-- [Knowledge Management](../knowledge-management): Para registrar aprendizajes de la sesión
-- [session-context](../session-context): Para persistencia estructurada de contexto por proyecto
+- [Task Execution](/Volumes/Bault/Proyectos/modernotech/session-lifecycle/scripts/session-start.sh): Para ejecutar tareas dentro de la sesión
+- [Knowledge Management](/Volumes/Bault/Proyectos/modernotech/session-lifecycle/SKILL.md): Para registrar aprendizajes de la sesión
+- [session-context](/Volumes/Bault/Proyectos/modernotech/session-lifecycle/SKILL.md): Para persistencia estructurada de contexto por proyecto
 
 ## Ejemplo de flujo completo
 

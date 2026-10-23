@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { ModernoBackground } from "../components/ModernoBackground";
 import { ModernoNavbar } from "../components/ModernoNavbar";
@@ -8,47 +6,54 @@ import { AuthenticatedEcosystemBanner } from "../components/AuthenticatedEcosyst
 import { ProductShowcaseInteractive } from "../components/ProductShowcaseInteractive";
 import { ProductEcosystem } from "../components/ProductEcosystem";
 import { WhyModernoSection } from "../components/WhyModernoSection";
+import { HowItWorksSection } from "../components/HowItWorksSection";
 import { BuiltByModernoSection } from "../components/BuiltByModernoSection";
 import { VisionSection } from "../components/VisionSection";
+import { FaqSection } from "../components/FaqSection";
 import { FinalCTA } from "../components/FinalCTA";
 import { Footer } from "../components/Footer";
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-[#050507] text-white selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
-      {/* Interactive Deep Tech Background from Access & Play */}
+    <div className="relative min-h-screen bg-[var(--moderno-background-alt)] text-white selection:bg-[var(--moderno-primary)] selection:text-black overflow-x-hidden">
+      <a href="#main-content" className="skip-link">
+        Saltar al contenido
+      </a>
       <ModernoBackground />
-
-      {/* Moderno Tech Navigation Bar */}
       <ModernoNavbar />
 
-      <main className="relative z-10">
-        {/* 1. Hero Section ("Tecnología para un mundo más moderno") */}
+      <main id="main-content" tabIndex={-1} className="relative z-10 outline-none">
+        {/* 1. Hero */}
         <Hero />
 
-        {/* Dynamic Authenticated User Banner (Moderno ID Portal) */}
+        {/* Dynamic authenticated user banner (Moderno ID portal) */}
         <AuthenticatedEcosystemBanner />
 
-        {/* 2. Visual Interactive Product Showcase (Play, Access & Cleaner Pro) */}
+        {/* 2. Interactive product demos */}
         <ProductShowcaseInteractive />
 
-        {/* 3. Product Ecosystem ("Todo Moderno, conectado" with Access & Play Spotlight) */}
+        {/* 3. Full ecosystem catalog */}
         <ProductEcosystem />
 
-        {/* 3. Architecture & Philosophy ("¿Por qué Moderno?") */}
+        {/* 4. Architecture & philosophy */}
         <WhyModernoSection />
 
-        {/* 4. Engineering & Proprietary Tech ("Built by Moderno") */}
+        {/* 5. How the ecosystem works */}
+        <HowItWorksSection />
+
+        {/* 6. Engineering & proprietary tech */}
         <BuiltByModernoSection />
 
-        {/* 5. Continuous Expansion & Roadmap ("Esto recién empieza") */}
+        {/* 7. Roadmap & continuous expansion */}
         <VisionSection />
 
-        {/* 6. Final Call to Action ("Descubrí Moderno") */}
+        {/* 8. Frequently asked questions */}
+        <FaqSection />
+
+        {/* 9. Final call to action */}
         <FinalCTA />
       </main>
 
-      {/* 7. Footer with Live System Status */}
       <Footer />
     </div>
   );

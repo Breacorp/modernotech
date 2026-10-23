@@ -1,62 +1,66 @@
-"use client";
-
 import React from "react";
 import { ModernoButton } from "./ModernoButton";
 
 export const BuiltByModernoSection: React.FC = () => {
   return (
-    <section id="nosotros" className="relative z-10 max-w-[1920px] mx-auto px-6 sm:px-10 lg:px-12 py-20 scroll-mt-20 select-none">
-      <div className="relative p-8 sm:p-12 md:p-16 rounded-2xl bg-[#0B0B10] border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden">
-        {/* Subtle mesh light */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#0052FF]/20 to-[#00E5FF]/10 blur-3xl opacity-50 pointer-events-none" />
+    <section
+      id="nosotros"
+      aria-labelledby="built-by-heading"
+      className="relative z-10 max-w-[1920px] mx-auto px-6 sm:px-10 lg:px-12 py-24 scroll-mt-24 select-none"
+    >
+      <div className="relative p-8 sm:p-12 md:p-16 rounded-3xl bg-[var(--moderno-surface-card)] border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[var(--moderno-primary-deep)]/20 to-[var(--moderno-primary)]/10 blur-3xl opacity-50 pointer-events-none" aria-hidden="true" />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-8">
-            <div className="flex items-center gap-2 text-[11px] font-black text-[#00E5FF] tracking-widest uppercase mb-3">
+            <div className="flex items-center gap-2 text-[11px] font-black text-[var(--moderno-primary)] tracking-widest uppercase mb-3">
               <span>BUILT BY MODERNO</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight font-sans mb-4">
+            <h2
+              id="built-by-heading"
+              className="text-balance text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight font-sans mb-4"
+            >
               Diseñamos. Desarrollamos. <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00E5FF] to-[#157BFF]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--moderno-primary)] to-[var(--moderno-primary-light)]">
                 Conectamos.
               </span>
             </h2>
             <p className="text-base sm:text-lg text-white/90 font-medium mb-3">
               Tecnología creada por Moderno para resolver problemas reales.
             </p>
-            <p className="text-xs sm:text-sm text-[#94A3B8] font-light leading-relaxed max-w-2xl mb-8">
+            <p className="text-sm text-[var(--moderno-text-muted)] font-light leading-relaxed max-w-2xl mb-8">
               Un ecosistema digital creado para operaciones de empresas, consorcios y vida digital. Desarrollamos soluciones de gestión ERP, control de accesos, almacenamiento privado y herramientas de IA para operar con fluidez y coherencia técnica.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <ModernoButton
-                variant="primary"
-                href="#productos"
-              >
-                Ver Catálogo de Productos
+              <ModernoButton variant="primary" href="#ecosistema">
+                Ver catálogo de productos
               </ModernoButton>
               <a
                 href="https://github.com/Breacorp"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white text-xs font-bold transition-all hover:scale-105"
+                className="moderno-focus px-5 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white text-xs font-bold transition-all hover:scale-105"
               >
                 GitHub Oficial &rarr;
               </a>
             </div>
           </div>
 
-          {/* Right Highlights */}
           <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-xs font-bold text-white block mb-1">Arquitectura & Ecosistema Modular</span>
-              <p className="text-[11px] text-[#94A3B8] font-light">
+              <span className="text-xs font-bold text-white block mb-1">
+                Arquitectura &amp; Ecosistema Modular
+              </span>
+              <p className="text-[13px] text-[var(--moderno-text-muted)] font-light">
                 Arquitectura modular y código propio diseñado para garantizar escalabilidad, velocidad y mantenimiento centralizado.
               </p>
             </div>
             <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-xs font-bold text-white block mb-1">Aislamiento Lógico & Privacidad</span>
-              <p className="text-[11px] text-[#94A3B8] font-light">
+              <span className="text-xs font-bold text-white block mb-1">
+                Aislamiento Lógico &amp; Privacidad
+              </span>
+              <p className="text-[13px] text-[var(--moderno-text-muted)] font-light">
                 Arquitectura multi-tenant con permisos RLS independientes y cifrado TLS 1.3 / AES-256 para cada cuenta.
               </p>
             </div>

@@ -125,7 +125,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 6,
     bentoSpan: 'normal',
-    accentColor: '#10B981',
+    accentColor: '#38BDF8',
     tags: ['WhatsApp Multiagente', 'Gestión de Tickets', 'Inbox Centralizado'],
     metrics: { label: 'Atención', value: 'Multiagente' },
     highlightFeature: 'Bandeja Unificada'
@@ -144,7 +144,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 7,
     bentoSpan: 'normal',
-    accentColor: '#00C8FF',
+    accentColor: '#00E5FF',
     tags: ['Diagnóstico macOS', 'Limpieza Developer', 'Snapshots de Seguridad'],
     metrics: { label: 'Optimización', value: 'Heurística Asistida' },
     highlightFeature: 'Purga Inteligente & Rollback'
@@ -182,7 +182,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 9,
     bentoSpan: 'normal',
-    accentColor: '#EC4899',
+    accentColor: '#157BFF',
     tags: ['Storyboards', 'Video Generativo', 'Producción Audiovisual'],
     metrics: { label: 'Formato', value: 'HD & 4K' },
     highlightFeature: 'Generación Multitoma'
@@ -201,7 +201,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 10,
     bentoSpan: 'normal',
-    accentColor: '#8B5CF6',
+    accentColor: '#0052FF',
     tags: ['Voz Sintética', 'Telefonía IP', 'Atención Automatizada'],
     metrics: { label: 'Respuesta', value: 'Baja Latencia' },
     highlightFeature: 'Agentes Conversacionales'
@@ -220,7 +220,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 11,
     bentoSpan: 'normal',
-    accentColor: '#10B981',
+    accentColor: '#38BDF8',
     tags: ['E-Commerce', 'Marketplace', 'Moderno ID'],
     metrics: { label: 'Plataforma', value: 'E-Commerce Integrado' },
     highlightFeature: 'Checkout Unificado'
@@ -239,7 +239,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 12,
     bentoSpan: 'normal',
-    accentColor: '#14B8A6',
+    accentColor: '#157BFF',
     tags: ['Cursos Técnicos', 'Arquitectura Cloud', 'Inteligencia Artificial'],
     metrics: { label: 'Formación', value: 'Práctica & Guiada' },
     highlightFeature: 'Laboratorios Prácticos'
@@ -258,7 +258,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 13,
     bentoSpan: 'normal',
-    accentColor: '#6366F1',
+    accentColor: '#3B82F6',
     tags: ['Fintech', 'Checkout Digital', 'Suscripciones'],
     metrics: { label: 'Disponibilidad', value: 'En desarrollo' },
     highlightFeature: 'Enrutamiento Seguro'
@@ -277,7 +277,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 14,
     bentoSpan: 'normal',
-    accentColor: '#F59E0B',
+    accentColor: '#38BDF8',
     tags: ['Protocolos IoT', 'Climatización', 'Seguridad Integrada'],
     metrics: { label: 'Integración', value: 'En desarrollo' },
     highlightFeature: 'Control Unificado'
@@ -296,7 +296,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     featured: false,
     order: 15,
     bentoSpan: 'normal',
-    accentColor: '#64748B',
+    accentColor: '#3B82F6',
     tags: ['Diseño Industrial', 'Hardware', 'Materiales de Precisión'],
     metrics: { label: 'Materiales', value: 'Diseño Industrial' },
     highlightFeature: 'Ingeniería de Precisión'

@@ -5,7 +5,6 @@ import { ModernoBackground } from "../../components/ModernoBackground";
 import { ModernoNavbar } from "../../components/ModernoNavbar";
 import { Footer } from "../../components/Footer";
 
-import { useModernoAuth } from "../../hooks/useModernoAuth";
 import { supabase } from "../../lib/supabase";
 
 export default function LoginPage() {

@@ -12,6 +12,8 @@ interface ModernoButtonProps {
   type?: "button" | "submit" | "reset";
 }
 
+const focusClasses = "moderno-focus";
+
 export const ModernoButton: React.FC<ModernoButtonProps> = ({
   children,
   variant = "primary",
@@ -23,11 +25,12 @@ export const ModernoButton: React.FC<ModernoButtonProps> = ({
   onClick,
   type = "button",
 }) => {
-  const baseClasses = variant === "primary"
-    ? "moderno-btn-primary"
-    : variant === "secondary"
-    ? "moderno-btn-secondary"
-    : "px-4 py-2 text-xs font-bold text-[#94A3B8] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-2";
+  const baseClasses =
+    variant === "primary"
+      ? `moderno-btn-primary ${focusClasses}`
+      : variant === "secondary"
+        ? `moderno-btn-secondary ${focusClasses}`
+        : `px-4 py-2 text-xs font-bold text-[var(--moderno-text-muted)] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-2 rounded-lg ${focusClasses}`;
 
   if (href) {
     return (
@@ -45,11 +48,7 @@ export const ModernoButton: React.FC<ModernoButtonProps> = ({
   }
 
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      className={`${baseClasses} ${className}`}
-    >
+    <button type={type} onClick={onClick} className={`${baseClasses} ${className}`}>
       <span>{children}</span>
       {icon}
     </button>
