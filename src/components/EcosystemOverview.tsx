@@ -31,7 +31,10 @@ export const EcosystemOverview: React.FC = () => {
               key={area.id}
               className="grid grid-cols-[auto_1fr] items-start gap-4 border-b border-white/[0.07] py-6 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-6 sm:py-7"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-[var(--moderno-accent-light)]">
+              <span
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-[var(--moderno-accent-light)]"
+                aria-hidden="true"
+              >
                 <ProductIcon name={area.icon} className="h-[18px] w-[18px]" />
               </span>
 

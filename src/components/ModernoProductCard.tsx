@@ -2,7 +2,6 @@
 
 import React from "react";
 import { ProductItem } from "../types/products";
-import { getProductArea } from "../data/products";
 import { ModernoBadge } from "./ModernoBadge";
 import { ProductIcon } from "./ProductIcon";
 
@@ -13,28 +12,25 @@ interface ModernoProductCardProps {
 export const ModernoProductCard: React.FC<ModernoProductCardProps> = ({
   product,
 }) => {
-  const area = getProductArea(product.area);
-
   return (
     <a
       href={product.url}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${product.name}. ${product.tagline} Abrir en una nueva pestaña`}
       className="moderno-focus group flex h-full flex-col rounded-2xl border border-white/[0.075] bg-white/[0.022] p-6 transition-colors duration-200 hover:border-white/[0.16] hover:bg-white/[0.042] sm:p-7"
     >
       <div className="flex items-start justify-between gap-4">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-[var(--moderno-accent-light)]">
+        <span
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-[var(--moderno-accent-light)]"
+          aria-hidden="true"
+        >
           <ProductIcon name={product.icon} className="h-[18px] w-[18px]" />
         </span>
         <ModernoBadge status={product.status} size="sm" />
       </div>
 
       <div className="mt-6 flex-1">
-        <p className="text-xs font-light text-[var(--moderno-text-subtle)]">
-          {area?.label}
-        </p>
-        <h3 className="mt-1.5 text-xl font-medium tracking-[-0.025em] text-[var(--moderno-text)]">
+        <h3 className="text-xl font-medium tracking-[-0.025em] text-[var(--moderno-text)]">
           {product.name}
         </h3>
         <p className="mt-2.5 line-clamp-3 text-sm font-light leading-relaxed text-[var(--moderno-text-muted)]">
@@ -63,6 +59,7 @@ export const ModernoProductCard: React.FC<ModernoProductCardProps> = ({
           </svg>
         </span>
       </div>
+      <span className="sr-only"> (abre en una nueva pestaña)</span>
     </a>
   );
 };

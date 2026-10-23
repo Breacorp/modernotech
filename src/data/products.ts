@@ -231,7 +231,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     name: "Moderno Diffusion",
     tagline: "Creación visual con IA.",
     description:
-      "Nueva herramienta de generación de imágenes del ecosistema. Aún en desarrollo.",
+      "Nueva herramienta de generación de imágenes del ecosistema.",
     area: "ai",
     status: "COMING SOON",
     url: "https://diffusion.moderno.com.ar",
@@ -243,7 +243,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     name: "Moderno FaceSwap AI",
     tagline: "Edición de rostros con IA.",
     description:
-      "Herramienta de intercambio de rostros asistida por inteligencia artificial. Aún en desarrollo.",
+      "Herramienta de intercambio de rostros asistida por inteligencia artificial.",
     area: "ai",
     status: "COMING SOON",
     url: "https://faceswap.moderno.com.ar",

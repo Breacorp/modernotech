@@ -47,8 +47,8 @@ export const Footer: React.FC = () => {
   return (
     <footer className="relative z-10 border-t border-white/[0.07] bg-[var(--moderno-background-alt)]">
       <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))] lg:gap-10">
-          <div className="max-w-xs">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:gap-x-10 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))] lg:gap-10">
+          <div className="col-span-2 max-w-xs lg:col-span-1">
             <a
               href="/"
               className="moderno-focus inline-flex items-center gap-2.5 rounded-full"

@@ -12,7 +12,7 @@ export const Hero: React.FC = () => {
         <div className="max-w-2xl">
           <h1 className="text-balance text-5xl font-medium leading-[0.98] tracking-[-0.055em] text-[var(--moderno-text)] sm:text-6xl lg:text-7xl">
             Tecnología para un mundo{" "}
-            <span className="bg-gradient-to-r from-[#F4F7FA] via-[#DCE8FF] to-[#9CC0FF] bg-clip-text text-transparent">
+            <span className="text-[var(--moderno-accent-light)]">
               más moderno.
             </span>
           </h1>

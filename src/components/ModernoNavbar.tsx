@@ -15,7 +15,7 @@ export const ModernoNavbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const mobileCloseRef = useRef<HTMLButtonElement>(null);
-  const { user, isAuthenticated, signOut } = useModernoAuth();
+  const { isAuthenticated, signOut } = useModernoAuth();
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -66,7 +66,7 @@ export const ModernoNavbar: React.FC = () => {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[var(--moderno-background-alt)]/80 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[var(--moderno-background-alt)]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8 lg:px-10">
           <a
             href="/"
@@ -108,7 +108,7 @@ export const ModernoNavbar: React.FC = () => {
                   href="/cuenta"
                   className="moderno-focus rounded-full px-3.5 py-2 text-[13px] font-medium text-[var(--moderno-text)] transition-colors hover:text-[var(--moderno-accent-light)]"
                 >
-                  Mi cuenta{user?.name ? ` · ${user.name.split(" ")[0]}` : ""}
+                  Mi cuenta
                 </a>
                 <button
                   type="button"

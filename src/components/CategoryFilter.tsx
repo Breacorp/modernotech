@@ -25,7 +25,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     <div
       role="group"
       aria-label="Filtrar productos por área"
-      className="no-scrollbar -mx-5 flex items-center gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
+      className="flex flex-wrap items-center gap-2"
     >
       {filters.map((filter) => {
         const isSelected = selectedArea === filter.id;

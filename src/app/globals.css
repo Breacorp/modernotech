@@ -59,13 +59,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(168, 199, 255, 0.35);
 }
-
-/* Hide scrollbar for the compact area filters */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
