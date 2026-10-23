@@ -37,7 +37,7 @@ body {
 }
 
 ::selection {
-  background: var(--moderno-accent);
+  background: var(--moderno-accent-strong);
   color: #ffffff;
 }
 
