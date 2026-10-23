@@ -3,6 +3,7 @@ export type ProductStatus =
   | "BETA"
   | "PRIVATE BETA"
   | "COMING SOON"
+  | "UNAVAILABLE"
   | "DEPRECATED";
 
 export type ProductArea =

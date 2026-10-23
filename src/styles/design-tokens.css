@@ -26,7 +26,7 @@
 
   --moderno-text: #f4f7fa;
   --moderno-text-muted: #9ca8b6;
-  --moderno-text-subtle: #6f7c8b;
+  --moderno-text-subtle: #7d8a99;
 
   --moderno-border: rgba(255, 255, 255, 0.085);
   --moderno-border-hover: rgba(168, 199, 255, 0.32);
@@ -38,7 +38,7 @@
   --moderno-paper: #f2f4f7;
   --moderno-ink: #0b1220;
   --moderno-ink-muted: #4b5563;
-  --moderno-ink-subtle: #6b7280;
+  --moderno-ink-subtle: #5f6b78;
   --moderno-ink-border: rgba(11, 18, 32, 0.12);
 
   --moderno-radius-sm: 0.5rem;
@@ -108,6 +108,10 @@ html {
 .moderno-focus-on-light:focus-visible {
   outline: 2px solid var(--moderno-accent-strong);
   outline-offset: 3px;
+}
+
+details[open] .roadmap-chevron {
+  transform: rotate(180deg);
 }
 
 /* Skip link — visible only when focused by keyboard */

@@ -1,25 +1,26 @@
 "use client";
 
 import React from "react";
-import { ProductArea } from "../types/products";
-import { PRODUCT_AREAS } from "../data/products";
+import { ProductArea, ProductAreaInfo } from "../types/products";
 
 type AreaFilter = ProductArea | "ALL";
 
 interface CategoryFilterProps {
+  areas: ProductAreaInfo[];
   selectedArea: AreaFilter;
   onSelectArea: (area: AreaFilter) => void;
 }
 
-const filters: { id: AreaFilter; label: string }[] = [
-  { id: "ALL", label: "Todos" },
-  ...PRODUCT_AREAS.map((area) => ({ id: area.id, label: area.label })),
-];
-
 export const CategoryFilter: React.FC<CategoryFilterProps> = ({
+  areas,
   selectedArea,
   onSelectArea,
 }) => {
+  const filters: { id: AreaFilter; label: string }[] = [
+    { id: "ALL", label: "Todos" },
+    ...areas.map((area) => ({ id: area.id, label: area.label })),
+  ];
+
   return (
     <div
       role="group"

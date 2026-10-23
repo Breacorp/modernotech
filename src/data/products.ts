@@ -53,7 +53,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Ventas, finanzas, inventario, clientes y proyectos en una sola plataforma empresarial.",
     area: "business",
-    status: "AVAILABLE",
+    status: "UNAVAILABLE",
     url: "https://one.moderno.com.ar",
     icon: "building",
     order: 2,
@@ -89,7 +89,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Asistentes y automatización para resolver tareas y acelerar procesos.",
     area: "ai",
-    status: "AVAILABLE",
+    status: "UNAVAILABLE",
     url: "https://ai.moderno.com.ar",
     icon: "sparkles",
     order: 5,
@@ -113,7 +113,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "WhatsApp, Instagram y Messenger en una bandeja multiagente con tickets y seguimiento.",
     area: "business",
-    status: "AVAILABLE",
+    status: "UNAVAILABLE",
     url: "https://ticket.moderno.com.ar",
     icon: "message-square",
     order: 7,
@@ -125,7 +125,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Limpieza de cachés, gestión de memoria y diagnóstico de hardware.",
     area: "productivity",
-    status: "AVAILABLE",
+    status: "UNAVAILABLE",
     url: "https://cleaner.moderno.com.ar",
     icon: "cpu",
     order: 8,
@@ -137,7 +137,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Radar, sensores y modelos predictivos para seguir el clima en tiempo real.",
     area: "productivity",
-    status: "BETA",
+    status: "UNAVAILABLE",
     url: "https://weather.moderno.com.ar",
     icon: "cloud-sun",
     order: 9,
@@ -149,7 +149,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Generación de imagen y video para storyboards, previsualización y contenido creativo.",
     area: "ai",
-    status: "BETA",
+    status: "UNAVAILABLE",
     url: "https://cinema.moderno.com.ar",
     icon: "film",
     order: 10,
@@ -161,7 +161,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Automatización de llamadas, consultas y turnos con voz sintética.",
     area: "ai",
-    status: "BETA",
+    status: "UNAVAILABLE",
     url: "https://voice.moderno.com.ar",
     icon: "mic",
     order: 11,
@@ -185,7 +185,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Cursos de desarrollo, inteligencia artificial y cloud con laboratorios prácticos.",
     area: "productivity",
-    status: "AVAILABLE",
+    status: "UNAVAILABLE",
     url: "https://academy.moderno.com.ar",
     icon: "graduation",
     order: 13,
@@ -255,12 +255,11 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
 const byOrder = (a: ProductItem, b: ProductItem) => a.order - b.order;
 
 export const CATALOG_PRODUCTS = PRODUCTS_REGISTRY.filter(
-  (product) => product.status === "AVAILABLE" || product.status === "BETA"
+  (product) => product.status === "AVAILABLE"
 ).sort(byOrder);
 
 export const ROADMAP_PRODUCTS = PRODUCTS_REGISTRY.filter(
-  (product) =>
-    product.status === "PRIVATE BETA" || product.status === "COMING SOON"
+  (product) => product.status !== "AVAILABLE"
 ).sort(byOrder);
 
 export const getProductArea = (areaId: ProductItem["area"]) =>

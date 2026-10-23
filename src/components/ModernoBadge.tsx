@@ -13,8 +13,8 @@ const statusConfig: Record<
 > = {
   AVAILABLE: {
     label: "Disponible",
-    dot: "bg-emerald-400",
-    tone: "text-emerald-200/90",
+    dot: "bg-[var(--moderno-accent-light)]",
+    tone: "text-white/80",
   },
   BETA: {
     label: "Beta",
@@ -31,6 +31,11 @@ const statusConfig: Record<
     dot: "bg-white/35",
     tone: "text-white/60",
   },
+  UNAVAILABLE: {
+    label: "Acceso no disponible",
+    dot: "bg-white/20",
+    tone: "text-white/55",
+  },
 };
 
 export const ModernoBadge: React.FC<ModernoBadgeProps> = ({
@@ -41,10 +46,7 @@ export const ModernoBadge: React.FC<ModernoBadgeProps> = ({
   if (status === "DEPRECATED") return null;
 
   const config = statusConfig[status];
-  const sizeClasses =
-    size === "sm"
-      ? "px-2.5 py-1 text-[11px]"
-      : "px-3 py-1.5 text-xs";
+  const sizeClasses = size === "sm" ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs";
 
   return (
     <span

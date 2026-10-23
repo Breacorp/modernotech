@@ -16,6 +16,10 @@ type AreaFilter = ProductArea | "ALL";
 
 const INITIAL_COUNT = 6;
 
+const CATALOG_AREAS = PRODUCT_AREAS.filter((area) =>
+  CATALOG_PRODUCTS.some((product) => product.area === area.id)
+);
+
 const normalize = (value: string) =>
   value
     .toLowerCase()
@@ -23,7 +27,7 @@ const normalize = (value: string) =>
     .replace(/[\u0300-\u036f]/g, "");
 
 const isProductArea = (value: string | null): value is ProductArea =>
-  !!value && PRODUCT_AREAS.some((area) => area.id === value);
+  !!value && CATALOG_AREAS.some((area) => area.id === value);
 
 export const ProductCatalog: React.FC = () => {
   const [selectedArea, setSelectedArea] = useState<AreaFilter>("ALL");
@@ -77,22 +81,29 @@ export const ProductCatalog: React.FC = () => {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    const query = normalize(searchQuery.trim());
+    const queryTokens = normalize(searchQuery)
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean);
 
     return CATALOG_PRODUCTS.filter((product) => {
       const area = getProductArea(product.area);
       const matchesArea =
         selectedArea === "ALL" || product.area === selectedArea;
+      const searchableWords = normalize(
+        [
+          product.name,
+          product.description,
+          product.tagline,
+          area?.label ?? "",
+        ].join(" ")
+      )
+        .split(/[^a-z0-9]+/)
+        .filter(Boolean);
       const matchesSearch =
-        query === "" ||
-        normalize(
-          [
-            product.name,
-            product.description,
-            product.tagline,
-            area?.label ?? "",
-          ].join(" ")
-        ).includes(query);
+        queryTokens.length === 0 ||
+        queryTokens.every((token) =>
+          searchableWords.some((word) => word.startsWith(token))
+        );
 
       return matchesArea && matchesSearch;
     });
@@ -144,8 +155,8 @@ export const ProductCatalog: React.FC = () => {
             Explorá el ecosistema.
           </h2>
           <p className="mt-5 text-pretty text-[15px] font-light leading-relaxed text-[var(--moderno-text-muted)] sm:text-base">
-            Todos los productos disponibles y en beta, en un solo lugar.
-            Buscá por nombre o filtrá por área.
+            Los productos disponibles hoy, en un solo lugar. Buscá por nombre o
+            filtrá por área.
           </p>
         </div>
 
@@ -208,6 +219,7 @@ export const ProductCatalog: React.FC = () => {
 
       <div className="mt-10 flex flex-col gap-4 border-t border-white/[0.06] pt-8">
         <CategoryFilter
+          areas={CATALOG_AREAS}
           selectedArea={selectedArea}
           onSelectArea={selectArea}
         />
@@ -225,7 +237,7 @@ export const ProductCatalog: React.FC = () => {
               ? ` para “${searchQuery.trim()}”`
               : selectedAreaLabel
                 ? ` en ${selectedAreaLabel}`
-                : " disponibles o en beta"}
+                : " disponibles"}
           </p>
 
           {hasActiveFilters && (
@@ -255,9 +267,10 @@ export const ProductCatalog: React.FC = () => {
             No encontramos productos.
           </h3>
           <p className="mx-auto mt-2 max-w-sm text-sm font-light leading-relaxed text-[var(--moderno-text-muted)]">
-            Probá con otro nombre o explorá todas las áreas del ecosistema.
+            Probá con otro nombre o consultá los proyectos que todavía no
+            tienen acceso público.
           </p>
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col items-center gap-4">
             <ModernoButton
               variant="secondary"
               size="sm"
@@ -265,6 +278,12 @@ export const ProductCatalog: React.FC = () => {
             >
               Ver todos los productos
             </ModernoButton>
+            <a
+              href="#roadmap"
+              className="moderno-focus rounded text-[13px] font-light text-[var(--moderno-text-subtle)] underline-offset-4 transition-colors hover:text-[var(--moderno-text)] hover:underline"
+            >
+              Ver roadmap
+            </a>
           </div>
         </div>
       )}
@@ -293,6 +312,19 @@ export const ProductCatalog: React.FC = () => {
             Mostrar menos
           </button>
         </div>
+      )}
+
+      {!hasActiveFilters && (
+        <p className="mt-8 text-center text-[13px] font-light text-[var(--moderno-text-subtle)]">
+          Los demás proyectos están en el{" "}
+          <a
+            href="#roadmap"
+            className="moderno-focus rounded font-medium text-[var(--moderno-text-muted)] underline-offset-4 transition-colors hover:text-[var(--moderno-text)] hover:underline"
+          >
+            roadmap
+          </a>
+          .
+        </p>
       )}
     </section>
   );

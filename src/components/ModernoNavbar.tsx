@@ -27,6 +27,26 @@ export const ModernoNavbar: React.FC = () => {
       if (event.key === "Escape") {
         setMobileMenuOpen(false);
         mobileToggleRef.current?.focus();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const menu = document.getElementById("mobile-menu");
+      const focusable = menu?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable || focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
@@ -143,6 +163,9 @@ export const ModernoNavbar: React.FC = () => {
       {mobileMenuOpen && (
         <div
           id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menú de navegación"
           className="fixed inset-0 z-[60] bg-[var(--moderno-background-alt)] lg:hidden"
         >
           <div className="flex h-16 items-center justify-between px-5 sm:px-8">
