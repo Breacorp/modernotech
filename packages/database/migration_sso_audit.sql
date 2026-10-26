@@ -73,3 +73,54 @@ CREATE INDEX IF NOT EXISTS idx_product_user_preferences_product_id
     ON product_user_preferences(product_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_actor
     ON audit_logs(actor_user_id);
+
+-- 5. Backfill de usuarios ya creados en Supabase Auth (nunca provoco duplicados)
+INSERT INTO global_users (id, email, role, status, email_verified, created_at)
+SELECT
+    au.id,
+    au.email,
+    COALESCE(au.raw_user_meta_data->>'role', 'user'),
+    'active',
+    COALESCE(au.email_confirmed_at IS NOT NULL, FALSE),
+    COALESCE(au.created_at, NOW())
+FROM auth.users au
+WHERE NOT EXISTS (
+    SELECT 1 FROM global_users gu WHERE gu.id = au.id
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO global_profiles (id, name)
+SELECT
+    au.id,
+    COALESCE(au.raw_user_meta_data->>'name', split_part(au.email, '@', 1))
+FROM auth.users au
+WHERE NOT EXISTS (
+    SELECT 1 FROM global_profiles gp WHERE gp.id = au.id
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO user_product_entitlements (user_id, product_id, tier, status)
+SELECT
+    au.id,
+    ep.id,
+    'free',
+    'active'
+FROM auth.users au
+CROSS JOIN ecosystem_products ep
+WHERE ep.has_free_tier = TRUE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM user_product_entitlements upe
+      WHERE upe.user_id = au.id
+        AND upe.product_id = ep.id
+  )
+ON CONFLICT (user_id, product_id) DO NOTHING;
+
+-- 6. Verificación final
+SELECT 'auth_users' AS tabla, COUNT(*) AS cantidad FROM auth.users
+UNION ALL
+SELECT 'global_users', COUNT(*) FROM global_users
+UNION ALL
+SELECT 'global_profiles', COUNT(*) FROM global_profiles
+UNION ALL
+SELECT 'entitlements', COUNT(*) FROM user_product_entitlements;
