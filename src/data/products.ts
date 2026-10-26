@@ -31,6 +31,40 @@ export const PRODUCT_AREAS: ProductAreaInfo[] = [
     description: "Herramientas para el trabajo, el aprendizaje y el hogar.",
     icon: "cpu",
   },
+
+  {
+    id: "media",
+    name: "Moderno Media",
+    tagline: "Gestión de Medios & CDN",
+    description: "Infraestructura avanzada de distribución de contenido y gestión de activos digitales.",
+    area: "cloud",
+    status: "AVAILABLE",
+    url: "https://media.moderno.com.ar",
+    icon: "film",
+    order: 20,
+  },,
+  {
+    id: "builder",
+    name: "Moderno Builder",
+    tagline: "No-Code App Builder",
+    description: "Crea aplicaciones empresariales personalizadas sin escribir una sola línea de código.",
+    area: "productivity",
+    status: "AVAILABLE",
+    url: "https://builder.moderno.com.ar",
+    icon: "cpu",
+    order: 21,
+  },,
+  {
+    id: "factory",
+    name: "Moderno Factory",
+    tagline: "Taller de Desarrollo & Prototipado",
+    description: "Laboratorio de creación rápida de productos digitales y prototipado de hardware.",
+    area: "business",
+    status: "AVAILABLE",
+    url: "https://factory.moderno.com.ar",
+    icon: "circuit",
+    order: 22,
+  }
 ];
 
 export const PRODUCTS_REGISTRY: ProductItem[] = [
@@ -250,17 +284,3 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     icon: "scan-face",
     order: 18,
   },
-];
-
-const byOrder = (a: ProductItem, b: ProductItem) => a.order - b.order;
-
-export const CATALOG_PRODUCTS = PRODUCTS_REGISTRY.filter(
-  (product) => product.status === "AVAILABLE"
-).sort(byOrder);
-
-export const ROADMAP_PRODUCTS = PRODUCTS_REGISTRY.filter(
-  (product) => product.status !== "AVAILABLE"
-).sort(byOrder);
-
-export const getProductArea = (areaId: ProductItem["area"]) =>
-  PRODUCT_AREAS.find((area) => area.id === areaId);
