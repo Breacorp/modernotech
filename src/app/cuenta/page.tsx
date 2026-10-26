@@ -313,6 +313,7 @@ export default function CuentaPage() {
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#00E5FF]/80">Mi Moderno</span>
                 <h1 className="text-xl sm:text-2xl font-black text-white font-sans">{userName}</h1>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   SESIÓN SUPABASE ACTIVA
