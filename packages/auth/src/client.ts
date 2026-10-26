@@ -76,6 +76,25 @@ export const sharedCookieStorage = {
 };
   setItem: (key: string, value: string): void => {
     if (typeof window === 'undefined') return;
+    localStorage.setItem(key, value);
+    try {
+      const sessionData = JSON.parse(value);
+      const token = sessionData.access_token;
+      if (token) {
+        localStorage.setItem('jwt', token);
+        modernoSSO.saveToken(token);
+      }
+    } catch (e) {}
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(key);
+    localStorage.removeItem('jwt');
+    modernoSSO.logout();
+  },
+};
+  setItem: (key: string, value: string): void => {
+    if (typeof window === 'undefined') return;
     
     // Store the full session for Supabase's internal use
     localStorage.setItem(key, value);
