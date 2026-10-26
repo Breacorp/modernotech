@@ -21,30 +21,74 @@ export function getSharedCookieDomain(): string | undefined {
  * Supabase espera que el storage maneje el objeto de sesión completo (JSON).
  * Nosotros necesitamos que el token viaje en 'mp_token' para el SSO.
  */
+
 export const sharedCookieStorage = {
   getItem: (key: string): string | null => {
     if (typeof window === 'undefined') return null;
-
-    // 1. Intentar leer del localStorage normal (donde Supabase guarda el JSON de la sesión)
+    
+    // Prioritize localStorage 'jwt' if that's what the contract asks for, 
+    // but Supabase storage needs the full JSON session.
     const localValue = localStorage.getItem(key);
     if (localValue) return localValue;
 
-    // 2. Si no hay sesión local, intentar reconstruirla desde la cookie 'mp_token'
+    // SSO Recovery: If we are looking for the session and it's missing, 
+    // check the mp_token cookie.
     if (key.includes('auth-token')) {
       const token = modernoSSO.readTokenFromCookie();
       if (token) {
-        // Decodificar el payload del JWT (sin validar firma) para obtener exp y claims básicos.
-        let exp = Math.floor(Date.now() / 1000) + 3600;
-        let user: any = {};
+        // Restore to localStorage as per contract
+        localStorage.setItem('jwt', token);
+        
+        // Reconstruct minimal session JSON for Supabase
         try {
           const parts = token.split('.');
+          let exp = Math.floor(Date.now() / 1000) + 3600;
+          let user = {};
           if (parts.length === 3) {
             const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-            if (typeof payload.exp === 'number') exp = payload.exp;
-            user = {
-              id: payload.sub || '',
-              email: payload.email || '',
-              user_metadata: payload.user_metadata || payload.app_metadata || {},
+            if (payload.exp) exp = payload.exp;
+            user = { id: payload.sub, email: payload.email, user_metadata: payload.user_metadata || {} };
+          }
+          return JSON.stringify({
+            access_token: token,
+            token_type: 'bearer',
+            expires_at: exp,
+            refresh_token: '', 
+            user: user
+          });
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    if (typeof window === 'undefined') return;
+    
+    // 1. Save the full session for Supabase
+    localStorage.setItem(key, value);
+
+    // 2. Sync with the SSO contract (mp_token and jwt)
+    try {
+      const sessionData = JSON.parse(value);
+      const token = sessionData.access_token;
+      if (token) {
+        // Requirement 1: save to localStorage 'jwt'
+        localStorage.setItem('jwt', token);
+        // Requirement 1: save to shared cookie mp_token
+        modernoSSO.saveToken(token);
+      }
+    } catch (e) {}
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(key);
+    localStorage.removeItem('jwt'); // Requirement 3
+    modernoSSO.logout(); // Requirement 3: Max-Age=0
+  },
+};
+
               aud: payload.aud,
               role: payload.role,
             };
