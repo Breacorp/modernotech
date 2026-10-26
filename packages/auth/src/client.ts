@@ -22,24 +22,24 @@ export function getSharedCookieDomain(): string | undefined {
  * Nosotros necesitamos que el token viaje en 'mp_token' para el SSO.
  */
 
+
 export const sharedCookieStorage = {
   getItem: (key: string): string | null => {
     if (typeof window === 'undefined') return null;
     
-    // Prioritize localStorage 'jwt' if that's what the contract asks for, 
-    // but Supabase storage needs the full JSON session.
+    // 1. Try to get the normal value from localStorage (standard Supabase behavior)
     const localValue = localStorage.getItem(key);
     if (localValue) return localValue;
 
-    // SSO Recovery: If we are looking for the session and it's missing, 
-    // check the mp_token cookie.
+    // 2. SSO Recovery: If we are looking for the session token and it's missing, 
+    // we implement the "restoreToken" logic from the contract.
     if (key.includes('auth-token')) {
       const token = modernoSSO.readTokenFromCookie();
       if (token) {
-        // Restore to localStorage as per contract
+        // Requirement 2: if token exists in cookie, save it to localStorage ['jwt']
         localStorage.setItem('jwt', token);
         
-        // Reconstruct minimal session JSON for Supabase
+        // Reconstruct minimal session JSON for Supabase to initialize the session
         try {
           const parts = token.split('.');
           let exp = Math.floor(Date.now() / 1000) + 3600;
@@ -63,6 +63,38 @@ export const sharedCookieStorage = {
     }
     return null;
   },
+  setItem: (key: string, value: string): void => {
+    if (typeof window === 'undefined') return;
+    
+    // Store the full session for Supabase's internal use
+    localStorage.setItem(key, value);
+
+    // Sync with the SSO contract requirements
+    try {
+      const sessionData = JSON.parse(value);
+      const token = sessionData.access_token;
+      if (token) {
+        // Requirement 1: Save access_token in localStorage key 'jwt'
+        localStorage.setItem('jwt', token);
+        // Requirement 1: Save access_token in shared cookie 'mp_token'
+        modernoSSO.saveToken(token);
+      }
+    } catch (e) {
+      // If not JSON, it's not a session update, just let it be
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === 'undefined') return;
+    
+    // Remove Supabase session
+    localStorage.removeItem(key);
+    
+    // Requirement 3: Clear token from localStorage AND shared cookie (Max-Age=0)
+    localStorage.removeItem('jwt');
+    modernoSSO.logout();
+  },
+};
+
   setItem: (key: string, value: string): void => {
     if (typeof window === 'undefined') return;
     
