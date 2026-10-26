@@ -39,7 +39,6 @@ export const modernoSSO = {
     if (typeof window === 'undefined') return;
     const domain = getSharedCookieDomain();
     const domainPart = domain ? `; domain=${domain}` : '';
-    document.cookie = `mp_token=; path=/; max-// a bit of a mess, let me just write it properly
     document.cookie = `mp_token=; path=/; max-age=0; SameSite=Lax${domainPart}`;
   }
 };

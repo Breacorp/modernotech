@@ -64,7 +64,7 @@ export const PRODUCT_AREAS: ProductAreaInfo[] = [
     url: "https://factory.moderno.com.ar",
     icon: "circuit",
     order: 22,
-    }
+  },
 ];
 
 export const PRODUCTS_REGISTRY: ProductItem[] = [
