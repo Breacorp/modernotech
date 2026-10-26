@@ -26,20 +26,12 @@ export function getSharedCookieDomain(): string | undefined {
 export const sharedCookieStorage = {
   getItem: (key: string): string | null => {
     if (typeof window === 'undefined') return null;
-    
-    // 1. Try to get the normal value from localStorage (standard Supabase behavior)
     const localValue = localStorage.getItem(key);
     if (localValue) return localValue;
-
-    // 2. SSO Recovery: If we are looking for the session token and it's missing, 
-    // we implement the "restoreToken" logic from the contract.
     if (key.includes('auth-token')) {
       const token = modernoSSO.readTokenFromCookie();
       if (token) {
-        // Requirement 2: if token exists in cookie, save it to localStorage ['jwt']
         localStorage.setItem('jwt', token);
-        
-        // Reconstruct minimal session JSON for Supabase to initialize the session
         try {
           const parts = token.split('.');
           let exp = Math.floor(Date.now() / 1000) + 3600;
@@ -63,6 +55,25 @@ export const sharedCookieStorage = {
     }
     return null;
   },
+  setItem: (key: string, value: string): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(key, value);
+    try {
+      const sessionData = JSON.parse(value);
+      const token = sessionData.access_token;
+      if (token) {
+        localStorage.setItem('jwt', token);
+        modernoSSO.saveToken(token);
+      }
+    } catch (e) {}
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(key);
+    localStorage.removeItem('jwt');
+    modernoSSO.logout();
+  },
+};
   setItem: (key: string, value: string): void => {
     if (typeof window === 'undefined') return;
     
