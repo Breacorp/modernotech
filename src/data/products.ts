@@ -250,3 +250,4 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     icon: "scan-face",
     order: 18,
   },
+];
