@@ -277,6 +277,13 @@ export default function CuentaPage() {
   const paidEntitlements = activeEntitlements.filter((e) => e.tier !== "free");
   const freeEntitlements = activeEntitlements.filter((e) => e.tier === "free");
 
+  const ownedProductIds = new Set(entitlements.map((e) => e.productId));
+  const discoverableProducts = PRODUCTS_REGISTRY
+    .filter((product) => !ownedProductIds.has(product.id))
+    .sort((a, b) => a.order - b.order);
+  const paidProducts = paidEntitlements;
+  const freeProducts = freeEntitlements;
+
   const getProductMeta = (productId: string) => {
     const found = PRODUCTS_REGISTRY.find((p) => p.id === productId);
     if (found) return found;
@@ -363,7 +370,7 @@ export default function CuentaPage() {
                 : "text-white/60 hover:text-white"
             }`}
           >
-            Servicios & Membresías ({activeEntitlements.length})
+            Mis Productos ({activeEntitlements.length})
           </button>
           <button
             onClick={() => setActiveTab("billing")}
@@ -529,6 +536,45 @@ export default function CuentaPage() {
           </div>
         )}
 
+        {/* Discoverable products / update paths */}
+        {activeTab === "services" && discoverableProducts.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-black text-white/50 tracking-widest uppercase flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                <span>Descubrir y Contratar Servicios</span>
+              </h2>
+              <span className="text-[11px] text-purple-300 font-mono">
+                {discoverableProducts.length} {discoverableProducts.length === 1 ? "Disponible" : "Disponibles"}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {discoverableProducts.map((product) => (
+                <div key={product.id} className="p-6 rounded-2xl bg-[#0B0B10] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all">
+                  <div>
+                    <h3 className="text-base font-black text-white mb-1">{product.name}</h3>
+                    <p className="text-xs text-[#94A3B8] font-light mb-3">{product.tagline}</p>
+                    <span className="inline-flex px-2.5 py-1 rounded-full bg-white/[0.04] text-[#94A3B8] text-[10px] font-bold border border-white/10">
+                      {product.status === "AVAILABLE" ? "Disponible" : product.status}
+                    </span>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    {product.status === "AVAILABLE" ? (
+                      <a href="https://pay.moderno.com.ar/" target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-white transition-all">
+                        Contratar en Moderno Pay →
+                      </a>
+                    ) : (
+                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-white transition-all">
+                        Ver Estado del Proyecto →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Tab 2: Facturación */}
         {activeTab === "billing" && (
           <div className="space-y-6 max-w-4xl">
@@ -547,11 +593,13 @@ export default function CuentaPage() {
                 </p>
               </div>
 
-              <a
-                href="/pricing"
+              <a 
+                href="https://pay.moderno.com.ar/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
                 className="inline-block px-4 py-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105"
               >
-                Ver Planes Disponibles
+                Administrar Planes en Moderno Pay →
               </a>
             </div>
 
