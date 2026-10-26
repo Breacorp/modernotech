@@ -1,3 +1,5 @@
+![Moderno Tech Logo](https://raw.githubusercontent.com/Breacorp/modernotech/main/public/logo.png)
+
 # Moderno Tech — Ecosistema Digital Unificado
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.4-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
