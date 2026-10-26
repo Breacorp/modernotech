@@ -197,7 +197,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Infraestructura de pagos para productos y servicios del ecosistema.",
     area: "business",
-    status: "COMING SOON",
+    status: "AVAILABLE",
     url: "https://pay.moderno.com.ar",
     icon: "credit-card",
     order: 14,
@@ -209,7 +209,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Control de climatización, iluminación y seguridad integrado con Moderno Access.",
     area: "productivity",
-    status: "COMING SOON",
+    status: "AVAILABLE",
     url: "https://home.moderno.com.ar",
     icon: "home",
     order: 15,
@@ -233,7 +233,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Nueva herramienta de generación de imágenes del ecosistema.",
     area: "ai",
-    status: "COMING SOON",
+    status: "AVAILABLE",
     url: "https://diffusion.moderno.com.ar",
     icon: "image",
     order: 17,
@@ -245,7 +245,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Herramienta de intercambio de rostros asistida por inteligencia artificial.",
     area: "ai",
-    status: "COMING SOON",
+    status: "AVAILABLE",
     url: "https://faceswap.moderno.com.ar",
     icon: "scan-face",
     order: 18,
