@@ -188,6 +188,8 @@ export default function LoginPage() {
             <span>🎬 Media</span>
             <span>&bull;</span>
             <span>💳 Pay</span>
+            <span>&bull;</span>
+            <span>🛍️ Mercatto</span>
           </div>
         </div>
       </main>
