@@ -1,3 +1,3 @@
-import { supabase } from "@moderno/auth-helpers";
+import { supabase, activateFreeProduct, deactivateProduct } from "@moderno/auth-helpers";
 
-export { supabase };
+export { supabase, activateFreeProduct, deactivateProduct };

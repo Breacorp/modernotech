@@ -113,3 +113,14 @@ export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON
 });
 
 export const supabaseAuthClient = supabase;
+
+
+export async function activateFreeProduct(productId: string) {
+  const { data, error } = await supabase.rpc('activate_free_entitlement', { p_product_id: productId });
+  return { data, error };
+}
+
+export async function deactivateProduct(productId: string) {
+  const { data, error } = await supabase.rpc('deactivate_entitlement', { p_product_id: productId });
+  return { data, error };
+}

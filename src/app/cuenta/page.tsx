@@ -6,7 +6,7 @@ import { ModernoNavbar } from "../../components/ModernoNavbar";
 import { Footer } from "../../components/Footer";
 import { useModernoAuth } from "../../hooks/useModernoAuth";
 import { PRODUCTS_REGISTRY } from "../../data/products";
-import { supabase } from "../../lib/supabase";
+import { supabase, activateFreeProduct, deactivateProduct } from "../../lib/supabase";
 
 export default function CuentaPage() {
   const [activeTab, setActiveTab] = useState<"services" | "billing" | "licenses" | "security">("services");
@@ -22,6 +22,8 @@ export default function CuentaPage() {
   const [licensesError, setLicensesError] = useState<string | null>(null);
   const [verifyKeyInput, setVerifyKeyInput] = useState("");
   const [verifyResult, setVerifyResult] = useState<{ valid: boolean; message: string } | null>(null);
+  const [serviceActionStatus, setServiceActionStatus] = useState<{ id: string; ok: boolean; message: string } | null>(null);
+  const [isWorkingService, setIsWorkingService] = useState<string | null>(null);
   const [isVerifyingLicense, setIsVerifyingLicense] = useState(false);
 
   const { user, isAuthenticated, isLoading, entitlements, signOut } = useModernoAuth();
@@ -90,6 +92,23 @@ export default function CuentaPage() {
   useEffect(() => {
     loadUserLicenses();
   }, [isAuthenticated, user?.id]);
+  const handleServiceToggle = async (productId: string, active: boolean) => {
+    if (!user?.id) return;
+    setIsWorkingService(productId);
+    setServiceActionStatus(null);
+    try {
+      const result = active ? await activateFreeProduct(productId) : await deactivateProduct(productId);
+      const ok = !!result?.data?.success;
+      const msg = (result?.data as any)?.message || (result?.data as any)?.error || (ok ? "OK" : "No se pudo completar la acción.");
+      setServiceActionStatus({ id: productId, ok, message: msg });
+      if (ok) window.location.reload();
+    } catch (err: any) {
+      setServiceActionStatus({ id: productId, ok: false, message: err?.message || "Error de red." });
+    } finally {
+      setIsWorkingService(null);
+    }
+  };
+
 
   const handleValidateLicenseKey = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -523,10 +542,18 @@ export default function CuentaPage() {
                             href={meta.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-white/[0.12] border border-slate-200 text-xs font-bold text-slate-900 transition-all block"
+                            className="w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-900 transition-all block"
                           >
                             Entrar a {meta.name} &rarr;
                           </a>
+                          <button
+                            type="button"
+                            onClick={() => handleServiceToggle(ent.productId, false)}
+                            disabled={isWorkingService === ent.productId}
+                            className="w-full py-2 text-center rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
+                          >
+                            {isWorkingService === ent.productId ? "Desactivando..." : "Desactivar acceso gratuito"}
+                          </button>
                         </div>
                       </div>
                     );
@@ -561,13 +588,24 @@ export default function CuentaPage() {
                   </div>
                   <div className="mt-4 space-y-2">
                     {product.status === "AVAILABLE" ? (
-                      <a href="https://pay.moderno.com.ar/" target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-white/[0.12] border border-slate-200 text-xs font-bold text-slate-900 transition-all">
-                        Contratar en Moderno Pay →
-                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleServiceToggle(product.id, true)}
+                        disabled={isWorkingService === product.id}
+                        className="w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-900 transition-all disabled:opacity-50"
+                      >
+                        {isWorkingService === product.id ? "Activando..." : "Activar acceso gratuito"}
+                      </button>
                     ) : (
-                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-white/[0.12] border border-slate-200 text-xs font-bold text-slate-900 transition-all">
+                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-900 transition-all">
                         Ver Estado del Proyecto →
                       </a>
+                    )}
+
+                    {serviceActionStatus?.id === product.id && (
+                      <div className={`mt-2 text-[11px] font-medium ${serviceActionStatus.ok ? "text-emerald-600" : "text-rose-600"}`}>
+                        {serviceActionStatus.message}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -124,3 +124,89 @@ UNION ALL
 SELECT 'global_profiles', COUNT(*) FROM global_profiles
 UNION ALL
 SELECT 'entitlements', COUNT(*) FROM user_product_entitlements;
+
+-- ============================================================================
+-- Helpers para alta/baja de servicios desde apps y Mi Moderno
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION public.activate_free_entitlement(p_product_id VARCHAR)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_user_id UUID;
+    v_has_free_tier BOOLEAN;
+BEGIN
+    v_user_id := auth.uid();
+    IF v_user_id IS NULL THEN
+        RETURN jsonb_build_object('success', FALSE, 'error', 'Debes iniciar sesión.');
+    END IF;
+
+    SELECT has_free_tier INTO v_has_free_tier
+    FROM ecosystem_products
+    WHERE id = p_product_id;
+
+    IF NOT FOUND OR COALESCE(v_has_free_tier, FALSE) IS DISTINCT FROM TRUE THEN
+        RETURN jsonb_build_object('success', FALSE, 'error', 'Este producto no ofrece capa gratuita.');
+    END IF;
+
+    INSERT INTO user_product_entitlements (user_id, product_id, tier, status)
+    VALUES (v_user_id, p_product_id, 'free', 'active')
+    ON CONFLICT (user_id, product_id) DO UPDATE SET
+        tier = 'free',
+        status = 'active',
+        updated_at = CURRENT_TIMESTAMP;
+
+    PERFORM log_audit_event(
+        'entitlement.activated_free',
+        'entitlement',
+        p_product_id,
+        'success',
+        jsonb_build_object('user_id', v_user_id, 'product_id', p_product_id)
+    );
+
+    RETURN jsonb_build_object('success', TRUE, 'message', 'Servicio activado correctamente.');
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.deactivate_entitlement(p_product_id VARCHAR)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_user_id UUID;
+BEGIN
+    v_user_id := auth.uid();
+    IF v_user_id IS NULL THEN
+        RETURN jsonb_build_object('success', FALSE, 'error', 'Debes iniciar sesión.');
+    END IF;
+
+    UPDATE user_product_entitlements
+    SET status = 'suspended',
+        updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = v_user_id
+      AND product_id = p_product_id
+      AND tier = 'free';
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', FALSE, 'error', 'No puedes desactivar este servicio desde esta vía.');
+    END IF;
+
+    PERFORM log_audit_event(
+        'entitlement.deactivated_free',
+        'entitlement',
+        p_product_id,
+        'success',
+        jsonb_build_object('user_id', v_user_id, 'product_id', p_product_id)
+    );
+
+    RETURN jsonb_build_object('success', TRUE, 'message', 'Servicio suspendido correctamente.');
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.activate_free_entitlement(VARCHAR) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.deactivate_entitlement(VARCHAR) TO authenticated;
