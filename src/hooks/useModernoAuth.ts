@@ -141,6 +141,17 @@ export const ModernoAuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const checkAuth = async () => {
       try {
+        // Handle Supabase OAuth PKCE code (Google) present in redirect URL.
+        const code = new URLSearchParams(window.location.search).get('code');
+        if (code) {
+          try {
+            await supabase.auth.exchangeCodeForSession(code);
+          } catch {
+            // Ignore exchange errors and fall back to session read.
+          }
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        }
+
         const { data, error } = await supabase.auth.getSession();
         if (!error && data?.session?.user) {
           applySessionUser(data.session.user);
