@@ -9,22 +9,22 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.111.0",
-    "framer-motion": "^12.38.0",
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "@moderno/types": "*",
+    "@moderno/api-client": "*",
     "@moderno/config": "*",
-    "@moderno/theme": "*",
-    "@moderno/ui": "*",
     "@moderno/env": "*",
+    "@moderno/feature-flags": "*",
     "@moderno/logger": "*",
     "@moderno/monitoring": "*",
-    "@moderno/feature-flags": "*",
     "@moderno/product-registry": "*",
-    "@moderno/api-client": "*",
-    "@moderno/security": "*"
+    "@moderno/security": "*",
+    "@moderno/theme": "*",
+    "@moderno/types": "*",
+    "@moderno/ui": "*",
+    "@supabase/supabase-js": "^2.111.0",
+    "framer-motion": "^12.38.0",
+    "next": "^16.4.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

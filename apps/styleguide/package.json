@@ -9,13 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "@moderno/types": "*",
     "@moderno/config": "*",
     "@moderno/theme": "*",
-    "@moderno/ui": "*"
+    "@moderno/types": "*",
+    "@moderno/ui": "*",
+    "next": "^16.4.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
