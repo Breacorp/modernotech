@@ -1,0 +1,152 @@
+:root {
+  /* Moderno Tech — graphite, off-white and a single restrained blue accent */
+  --moderno-background: #0b0f14;
+  --moderno-background-alt: #0b0f14;
+  --moderno-background-elevated: #10161f;
+  --moderno-surface: rgba(255, 255, 255, 0.035);
+  --moderno-surface-hover: rgba(255, 255, 255, 0.06);
+  --moderno-surface-card: #111821;
+  --moderno-surface-strong: #151d27;
+
+  --moderno-primary: #4c8dff;
+  --moderno-primary-light: #8bb8ff;
+  --moderno-primary-deep: #245bdb;
+  --moderno-secondary: #4c8dff;
+  --moderno-accent: #4c8dff;
+  --moderno-accent-light: #a8c7ff;
+  --moderno-accent-strong: #245bdb;
+  --moderno-accent-hover: #2f6bff;
+
+  /* Compatibility aliases for older shared components */
+  --moderno-accent-cyan: var(--moderno-accent);
+  --moderno-accent-sky: var(--moderno-accent-light);
+  --moderno-accent-blue: var(--moderno-accent);
+  --moderno-accent-cobalt: var(--moderno-primary-deep);
+  --moderno-accent-deep: var(--moderno-primary-deep);
+
+  --moderno-text: #f4f7fa;
+  --moderno-text-muted: #9ca8b6;
+  --moderno-text-subtle: #7d8a99;
+
+  --moderno-border: rgba(255, 255, 255, 0.085);
+  --moderno-border-hover: rgba(168, 199, 255, 0.32);
+  --moderno-border-access: rgba(76, 141, 255, 0.24);
+
+  --moderno-glow: rgba(76, 141, 255, 0.18);
+  --moderno-glow-blue: rgba(36, 91, 219, 0.24);
+
+  --moderno-paper: #f2f4f7;
+  --moderno-ink: #0b1220;
+  --moderno-ink-muted: #4b5563;
+  --moderno-ink-subtle: #5f6b78;
+  --moderno-ink-border: rgba(11, 18, 32, 0.12);
+
+  --moderno-radius-sm: 0.5rem;
+  --moderno-radius-md: 0.75rem;
+  --moderno-radius-lg: 1rem;
+  --moderno-radius-xl: 1.5rem;
+  --moderno-radius-2xl: 2rem;
+  --moderno-radius-full: 9999px;
+
+  --moderno-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  --moderno-shadow-card-hover: 0 18px 40px rgba(0, 0, 0, 0.22);
+  --moderno-shadow-cta: 0 10px 30px rgba(36, 91, 219, 0.22);
+
+  --moderno-section-pad: clamp(5rem, 9vw, 8rem);
+  --moderno-section-pad-tight: clamp(3.5rem, 6vw, 5.5rem);
+  --moderno-focus-ring: #a8c7ff;
+}
+
+/* Fixed-header anchor offset so in-page links never hide under the navigation */
+html {
+  scroll-padding-top: 6rem;
+}
+
+/* A single, static ambient wash — no particles, orbs or cursor effects */
+.site-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 70% 50% at 50% -12%,
+      rgba(76, 141, 255, 0.16),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 34% 30% at 92% 12%,
+      rgba(76, 141, 255, 0.055),
+      transparent 72%
+    ),
+    var(--moderno-background-alt);
+}
+
+.site-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 68%,
+    rgba(11, 15, 20, 0.55) 100%
+  );
+}
+
+/* Shared focus treatment for every interactive element */
+.moderno-focus {
+  outline: none;
+}
+
+.moderno-focus:focus-visible {
+  outline: 2px solid var(--moderno-focus-ring);
+  outline-offset: 3px;
+}
+
+.moderno-focus-on-light:focus-visible {
+  outline: 2px solid var(--moderno-accent-strong);
+  outline-offset: 3px;
+}
+
+details[open] .roadmap-chevron {
+  transform: rotate(180deg);
+}
+
+/* Skip link — visible only when focused by keyboard */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--moderno-radius-full);
+  background: var(--moderno-text);
+  color: var(--moderno-background);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: top 0.15s ease-out;
+}
+
+.skip-link:focus-visible {
+  top: 1rem;
+  outline: 2px solid var(--moderno-focus-ring);
+  outline-offset: 3px;
+}
+
+/* Respect users who ask for less motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
