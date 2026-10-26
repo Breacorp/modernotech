@@ -68,7 +68,7 @@ export default function LoginPage() {
             <span className="tracking-[0.2em] uppercase">MODERNO ID // AUTENTICACIÓN GLOBAL</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight font-sans">
-            Iniciar Sesión
+            Iniciar Sesión (v2.1)
           </h1>
           <p className="text-xs text-[#94A3B8] font-light mt-1.5">
             Una sola cuenta para Moderno Cloud, Access, AI, Play, One, Builder y Media.
