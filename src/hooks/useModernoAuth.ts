@@ -76,7 +76,7 @@ function mapEntitlements(rows: any[] | null): UserEntitlement[] {
 
 async function loadUserData(userId: string) {
   const [{ data: profile }, { data: entitlements }] = await Promise.all([
-    supabase.from("global_users").select("role, status").eq("id", userId).single(),
+    supabase.from("global_users").select("role, status").eq("id", userId).maybeSingle(),
     supabase.from("user_product_entitlements").select("*").eq("user_id", userId),
   ]);
 
