@@ -251,3 +251,14 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     order: 18,
   },
 ];
+
+export const getProductArea = (areaId: string) =>
+  PRODUCT_AREAS.find((area) => area.id === areaId);
+
+export const CATALOG_PRODUCTS = PRODUCTS_REGISTRY.filter(
+  (product) => product.status === "AVAILABLE"
+).sort((a, b) => a.order - b.order);
+
+export const ROADMAP_PRODUCTS = PRODUCTS_REGISTRY.filter(
+  (product) => product.status !== "AVAILABLE"
+).sort((a, b) => a.order - b.order);
