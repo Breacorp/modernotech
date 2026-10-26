@@ -5,8 +5,7 @@ import { ModernoBadge } from "./ModernoBadge";
 
 export const VisionSection: React.FC = () => {
   const futureNodes = [
-    { title: "Moderno Pay", tag: "FINANZAS & PAGOS", status: "COMING SOON" as const },
-    { title: "Nova Home", tag: "DOMÓTICA RESIDENCIAL", status: "COMING SOON" as const },
+        { title: "Nova Home", tag: "DOMÓTICA RESIDENCIAL", status: "COMING SOON" as const },
     { title: "Moderno Style & Tech", tag: "HARDWARE & DISEÑO", status: "PRIVATE BETA" as const },
     { title: "Moderno Voice AI", tag: "TELEFONÍA & VOZ IA", status: "BETA" as const },
   ];
