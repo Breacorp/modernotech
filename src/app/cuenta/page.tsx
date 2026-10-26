@@ -262,7 +262,7 @@ export default function CuentaPage() {
   if (isLoading || !isAuthenticated || !user) {
     return (
       <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center text-sm font-mono">
-        <span className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse mr-3" />
+        <span className="w-2 h-2 rounded-full bg-[#4c8dff] animate-pulse mr-3" />
         Verificando sesión segura en Supabase...
       </div>
     );
@@ -293,12 +293,12 @@ export default function CuentaPage() {
       tagline: "Servicio oficial del ecosistema Moderno",
       description: "Servicio integrado mediante Moderno ID centralizado.",
       url: `https://${productId}.moderno.com.ar`,
-      accentColor: "#00E5FF",
+      accentColor: "#4c8dff",
     };
   };
 
   return (
-    <div className="relative min-h-screen bg-[#050507] text-white selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#050507] text-white selection:bg-[#4c8dff] selection:text-black overflow-x-hidden">
       <ModernoBackground />
       <ModernoNavbar />
 
@@ -306,14 +306,14 @@ export default function CuentaPage() {
         {/* Header Profile Summary */}
         <div className="mb-8 p-8 rounded-3xl bg-[#0B0B10]/90 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#00E5FF] to-[#157BFF] p-0.5 shadow-[0_0_30px_rgba(0,229,255,0.3)] shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#4c8dff] to-[#2f6bff] p-0.5 shadow-[0_0_30px_rgba(0,229,255,0.3)] shrink-0">
               <div className="w-full h-full bg-[#050507] rounded-[14px] flex items-center justify-center text-2xl font-black text-white font-sans">
                 {userInitials}
               </div>
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#00E5FF]/80">Mi Moderno</span>
+                <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#4c8dff]/80">Mi Moderno</span>
                 <h1 className="text-xl sm:text-2xl font-black text-white font-sans">{userName}</h1>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   SESIÓN SUPABASE ACTIVA
@@ -323,7 +323,7 @@ export default function CuentaPage() {
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] text-white/50 mt-2">
                 <span>Ecosistema: <strong className="text-white">{activeEntitlements.length} Productos Conectados</strong></span>
                 <span>&bull;</span>
-                <span>Membresías Pagas: <strong className="text-[#00E5FF]">{paidEntitlements.length} Activas</strong></span>
+                <span>Membresías Pagas: <strong className="text-[#4c8dff]">{paidEntitlements.length} Activas</strong></span>
                 <span>&bull;</span>
                 <span>Capas Gratuitas: <strong className="text-emerald-400">{freeEntitlements.length} Habilitadas</strong></span>
               </div>
@@ -339,7 +339,7 @@ export default function CuentaPage() {
             </button>
             <a
               href="/pricing"
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_15px_rgba(0,229,255,0.3)]"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#4c8dff] to-[#2f6bff] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 shadow-[0_0_15px_rgba(0,229,255,0.3)]"
             >
               Explorar Planes & Mejoras
             </a>
@@ -347,7 +347,7 @@ export default function CuentaPage() {
         </div>
 
         {/* Global Entitlement Callout Banner */}
-        <div className="mb-10 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#00E5FF]/10 via-[#157BFF]/10 to-purple-500/10 border border-[#00E5FF]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="mb-10 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#4c8dff]/10 via-[#2f6bff]/10 to-purple-500/10 border border-[#4c8dff]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3">
             <span className="text-2xl">🏛️</span>
             <div>
@@ -367,7 +367,7 @@ export default function CuentaPage() {
             onClick={() => setActiveTab("services")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "services"
-                ? "bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30"
+                ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -377,7 +377,7 @@ export default function CuentaPage() {
             onClick={() => setActiveTab("billing")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "billing"
-                ? "bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30"
+                ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -387,7 +387,7 @@ export default function CuentaPage() {
             onClick={() => setActiveTab("licenses")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "licenses"
-                ? "bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30"
+                ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -397,7 +397,7 @@ export default function CuentaPage() {
             onClick={() => setActiveTab("security")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "security"
-                ? "bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30"
+                ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -412,10 +412,10 @@ export default function CuentaPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xs font-black text-white/50 tracking-widest uppercase flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#00E5FF]" />
+                  <span className="w-2 h-2 rounded-full bg-[#4c8dff]" />
                   <span>Membresías & Planes Contratados</span>
                 </h2>
-                <span className="text-[11px] text-[#00E5FF] font-mono">
+                <span className="text-[11px] text-[#4c8dff] font-mono">
                   {paidEntitlements.length} {paidEntitlements.length === 1 ? "Suscripción Activa" : "Suscripciones Activas"}
                 </span>
               </div>
@@ -427,7 +427,7 @@ export default function CuentaPage() {
                   </p>
                   <a
                     href="/pricing"
-                    className="inline-block px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105"
+                    className="inline-block px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#4c8dff] to-[#2f6bff] text-black text-xs font-black tracking-wider transition-transform hover:scale-105"
                   >
                     Explorar Catálogo de Planes &rarr;
                   </a>
@@ -439,15 +439,15 @@ export default function CuentaPage() {
                     return (
                       <div
                         key={ent.productId}
-                        className="p-7 rounded-2xl bg-[#0B0B10] border border-[#00E5FF]/40 shadow-[0_10px_30px_rgba(0,0,0,0.6)] flex flex-col justify-between relative overflow-hidden"
+                        className="p-7 rounded-2xl bg-[#0B0B10] border border-[#4c8dff]/40 shadow-[0_10px_30px_rgba(0,0,0,0.6)] flex flex-col justify-between relative overflow-hidden"
                       >
                         <div>
                           <div className="flex items-center justify-between mb-4">
                             <div>
                               <h3 className="text-lg font-black text-white">{meta.name}</h3>
-                              <span className="text-[10px] font-mono text-[#00E5FF]">{meta.url}</span>
+                              <span className="text-[10px] font-mono text-[#4c8dff]">{meta.url}</span>
                             </div>
-                            <span className="px-2.5 py-1 rounded-full bg-[#00E5FF]/15 text-[#00E5FF] text-[10px] font-black border border-[#00E5FF]/40">
+                            <span className="px-2.5 py-1 rounded-full bg-[#4c8dff]/15 text-[#4c8dff] text-[10px] font-black border border-[#4c8dff]/40">
                               TIER: {ent.tier.toUpperCase()}
                             </span>
                           </div>
@@ -469,7 +469,7 @@ export default function CuentaPage() {
                             href={meta.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 py-2.5 text-center rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-[1.02]"
+                            className="flex-1 py-2.5 text-center rounded-xl bg-gradient-to-r from-[#4c8dff] to-[#2f6bff] text-black text-xs font-black tracking-wider transition-transform hover:scale-[1.02]"
                           >
                             Abrir {meta.name} &rarr;
                           </a>
@@ -598,7 +598,7 @@ export default function CuentaPage() {
                 href="https://pay.moderno.com.ar/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="inline-block px-4 py-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105"
+                className="inline-block px-4 py-2 rounded-xl bg-gradient-to-r from-[#4c8dff] to-[#2f6bff] text-black text-xs font-black tracking-wider transition-transform hover:scale-105"
               >
                 Administrar Planes en Moderno Pay →
               </a>
@@ -619,7 +619,7 @@ export default function CuentaPage() {
 
               {isLoadingInvoices ? (
                 <div className="p-8 text-center text-xs font-mono text-[#94A3B8]">
-                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  <span className="inline-block w-4 h-4 border-2 border-[#4c8dff] border-t-transparent rounded-full animate-spin mr-2" />
                   Consultando facturas en Supabase...
                 </div>
               ) : invoices.length === 0 ? (
@@ -691,13 +691,13 @@ export default function CuentaPage() {
                   placeholder="MOD-CLEANER-XXXX-XXXX-XXXX"
                   value={verifyKeyInput}
                   onChange={(e) => setVerifyKeyInput(e.target.value.toUpperCase())}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-[#00E5FF] tracking-wider"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-[#4c8dff] tracking-wider"
                   required
                 />
                 <button
                   type="submit"
                   disabled={isVerifyingLicense || !verifyKeyInput.trim()}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer whitespace-nowrap shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#4c8dff] to-[#2f6bff] text-black text-xs font-black tracking-wider transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer whitespace-nowrap shadow-[0_0_20px_rgba(0,229,255,0.3)]"
                 >
                   {isVerifyingLicense ? "Validando..." : "Validar Clave"}
                 </button>
@@ -720,7 +720,7 @@ export default function CuentaPage() {
             <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-black text-white">Mis Claves de Licencia</h3>
-                <span className="text-xs font-mono text-[#00E5FF]">
+                <span className="text-xs font-mono text-[#4c8dff]">
                   {userLicenses.length} {userLicenses.length === 1 ? "Licencia" : "Licencias"}
                 </span>
               </div>
@@ -733,7 +733,7 @@ export default function CuentaPage() {
 
               {isLoadingLicenses ? (
                 <div className="p-8 text-center text-xs font-mono text-[#94A3B8]">
-                  <span className="inline-block w-4 h-4 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mr-2" />
+                  <span className="inline-block w-4 h-4 border-2 border-[#4c8dff] border-t-transparent rounded-full animate-spin mr-2" />
                   Consultando licencias en Supabase...
                 </div>
               ) : userLicenses.length === 0 ? (
@@ -754,7 +754,7 @@ export default function CuentaPage() {
                     <tbody className="divide-y divide-white/[0.04]">
                       {userLicenses.map((lic) => (
                         <tr key={lic.id} className="hover:bg-white/[0.02]">
-                          <td className="py-3.5 px-4 font-mono text-[#00E5FF] font-bold select-all">
+                          <td className="py-3.5 px-4 font-mono text-[#4c8dff] font-bold select-all">
                             {lic.license_key}
                           </td>
                           <td className="py-3.5 px-4 text-white">
@@ -834,7 +834,7 @@ export default function CuentaPage() {
                       <button
                         onClick={handleStartEnroll}
                         disabled={isEnrolling}
-                        className="px-4 py-2 rounded-xl bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/30 text-xs font-bold transition-all cursor-pointer whitespace-nowrap self-start sm:self-auto disabled:opacity-50"
+                        className="px-4 py-2 rounded-xl bg-[#4c8dff]/10 hover:bg-[#4c8dff]/20 text-[#4c8dff] border border-[#4c8dff]/30 text-xs font-bold transition-all cursor-pointer whitespace-nowrap self-start sm:self-auto disabled:opacity-50"
                       >
                         {isEnrolling ? "Iniciando..." : "+ Configurar Nuevo Factor TOTP"}
                       </button>
@@ -843,9 +843,9 @@ export default function CuentaPage() {
 
                   {/* Formulario / QR de enrolamiento activo */}
                   {enrollData && (
-                    <div className="mt-6 p-5 rounded-xl bg-black/40 border border-[#00E5FF]/30">
+                    <div className="mt-6 p-5 rounded-xl bg-black/40 border border-[#4c8dff]/30">
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-xs font-black uppercase tracking-wider text-[#00E5FF]">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-[#4c8dff]">
                           Vincular Aplicación de Autenticación
                         </h4>
                         <button
@@ -882,7 +882,7 @@ export default function CuentaPage() {
                             <span className="text-[11px] text-[#94A3B8] block mb-1">
                               Clave secreta manual (si no puedes escanear el QR):
                             </span>
-                            <div className="p-2.5 rounded-lg bg-white/[0.04] border border-white/10 font-mono text-xs text-[#00E5FF] break-all select-all">
+                            <div className="p-2.5 rounded-lg bg-white/[0.04] border border-white/10 font-mono text-xs text-[#4c8dff] break-all select-all">
                               {enrollData.secret}
                             </div>
                           </div>
@@ -898,13 +898,13 @@ export default function CuentaPage() {
                                 placeholder="000000"
                                 value={verifyCode}
                                 onChange={(e) => setVerifyCode(e.target.value)}
-                                className="flex-1 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-[#00E5FF]"
+                                className="flex-1 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-[#4c8dff]"
                                 required
                               />
                               <button
                                 type="submit"
                                 disabled={isVerifying || verifyCode.trim().length < 6}
-                                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#157BFF] text-black font-black text-xs transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer"
+                                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#4c8dff] to-[#2f6bff] text-black font-black text-xs transition-transform hover:scale-105 disabled:opacity-50 cursor-pointer"
                               >
                                 {isVerifying ? "Verificando..." : "Confirmar"}
                               </button>
@@ -957,7 +957,7 @@ export default function CuentaPage() {
                       Protegida y cifrada en los servidores de autenticación central.
                     </span>
                     {passwordResetStatus && (
-                      <span className="text-[11px] text-[#00E5FF] block mt-1">
+                      <span className="text-[11px] text-[#4c8dff] block mt-1">
                         {passwordResetStatus}
                       </span>
                     )}
