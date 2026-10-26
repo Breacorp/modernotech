@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { User, Session, UserIdentity, AuthError } from '@supabase/supabase-js';
-import { supabase } from './client';
+import { supabase, modernoSSO } from './client';
 import { getAuthRedirectUrl, ModernoProject } from './redirects';
 
 export interface UseModernoAuthReturn {
@@ -26,8 +26,7 @@ export interface UseModernoAuthReturn {
 
 /**
  * Hook universal de autenticación para el ecosistema Moderno.
- * Controla sesión centralizada, login con correo, Google OAuth,
- * vinculación de identidades y cierre de sesión sincronizado.
+ * Implementa la restauración de sesión vía cookie mp_token para SSO cross-subdomain.
  */
 export function useModernoAuth(project?: ModernoProject): UseModernoAuthReturn {
   const [user, setUser] = useState<User | null>(null);
@@ -36,6 +35,13 @@ export function useModernoAuth(project?: ModernoProject): UseModernoAuthReturn {
 
   const refreshSession = useCallback(async () => {
     try {
+      // 1. Intentar restaurar token desde cookie mp_token antes de pedir a Supabase
+      const restoredToken = modernoSSO.restoreToken();
+      
+      // Nota: Supabase-js gestiona su propio storage, pero si hemos inyectado 
+      // el token en localStorage['jwt'] (como pide el contrato), 
+      // y configuramos el cliente correctamente, Supabase lo usará.
+      
       const { data, error } = await supabase.auth.getSession();
       if (!error && data?.session) {
         setSession(data.session);
@@ -50,15 +56,21 @@ export function useModernoAuth(project?: ModernoProject): UseModernoAuthReturn {
   }, []);
 
   useEffect(() => {
-    // 1. Cargar sesión inicial
     refreshSession();
 
-    // 2. Escuchar cambios de estado de autenticación en vivo
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
+      
+      // Sincronizar mp_token cuando la sesión cambia
+      if (newSession) {
+        modernoSSO.saveToken(newSession.access_token);
+      } else {
+        modernoSSO.logout();
+      }
+      
       setIsLoading(false);
     });
 
@@ -67,13 +79,12 @@ export function useModernoAuth(project?: ModernoProject): UseModernoAuthReturn {
     };
   }, [refreshSession]);
 
-  // Login tradicional con email y contraseña
   const signInWithEmail = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    // onAuthStateChange se encargará de llamar a saveToken via modernoSSO
     return { error };
   }, []);
 
-  // Registro tradicional con email y contraseña
   const signUpWithEmail = useCallback(
     async (email: string, password: string, metadata?: Record<string, any>) => {
       const { error } = await supabase.auth.signUp({
@@ -89,7 +100,6 @@ export function useModernoAuth(project?: ModernoProject): UseModernoAuthReturn {
     [project]
   );
 
-  // Inicio de sesión con Google OAuth nativo y redirección dinámica
   const signInWithGoogle = useCallback(
     async (nextPath = '/dashboard') => {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -107,7 +117,6 @@ export function useModernoAuth(project?: ModernoProject): UseModernoAuthReturn {
     [project]
   );
 
-  // Vinculación posterior de identidad de Google (Account Linking)
   const linkGoogleAccount = useCallback(
     async (nextPath = '/profile') => {
       const { error } = await supabase.auth.linkIdentity({
@@ -121,15 +130,14 @@ export function useModernoAuth(project?: ModernoProject): UseModernoAuthReturn {
     [project]
   );
 
-  // Desvincular identidad
   const unlinkIdentity = useCallback(async (identity: UserIdentity) => {
     const { error } = await supabase.auth.unlinkIdentity(identity);
     return { error };
   }, []);
 
-  // Cierre de sesión centralizado
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
+    modernoSSO.logout();
     setUser(null);
     setSession(null);
     return { error };

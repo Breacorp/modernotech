@@ -30,6 +30,7 @@ export const ProductEcosystem: React.FC = () => {
       fintech: 0,
       hardware: 0,
       services: 0,
+      gesture: 0,
     };
 
     PRODUCTS_REGISTRY.forEach((p) => {

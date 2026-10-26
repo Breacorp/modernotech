@@ -20,6 +20,9 @@ export const ModernoNavbar: React.FC = () => {
     { name: "Mercatto", icon: "🛍️", url: "https://mercatto.moderno.com.ar", desc: "E-Commerce 1-Click" },
     { name: "Moderno AI", icon: "✨", url: "https://ai.moderno.com.ar", desc: "Motor Cognitivo" },
     { name: "Moderno One", icon: "🏢", url: "https://one.moderno.com.ar", desc: "ERP Modular" },
+    { name: "Moderno Builder", icon: "🛠️", url: "https://builder.moderno.com.ar", desc: "No-Code App Builder" },
+    { name: "Moderno Media", icon: "🎬", url: "https://media.moderno.com.ar", desc: "Gestión de Medios & CDN" },
+    { name: "Moderno Pay", icon: "💳", url: "https://pay.moderno.com.ar", desc: "Infraestructura de Pagos" },
     { name: "AI Cleaner Pro", icon: "⚡", url: "https://cleaner.moderno.com.ar", desc: "Optimización macOS" },
     { name: "Moderno Weather", icon: "🌤️", url: "https://weather.moderno.com.ar", desc: "Radar Meteorológico" },
   ];
@@ -208,7 +211,7 @@ export const ModernoNavbar: React.FC = () => {
                   className="p-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
                 </button>
               </div>
@@ -290,7 +293,8 @@ export const ModernoNavbar: React.FC = () => {
                     onClick={() => {
                       signOut();
                       setMobileMenuOpen(false);
-                    }}
+                    }
+                    }
                     className="text-left text-xs font-bold text-rose-400 hover:text-white py-2 border-b border-white/[0.04] transition-colors"
                   >
                     Cerrar Sesión

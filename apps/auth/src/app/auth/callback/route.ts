@@ -1,22 +1,17 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const next = searchParams.get('next') || '/dashboard';
 
+  // Delegamos el intercambio de código al cliente (supabase-js) para que
+  // la sesión se persista en el almacenamiento compartido (mp_token)
+  // y el SSO funcione entre subdominios.
   if (code) {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rcskjdksimcfkdjzxara.supabase.co',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
-    );
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      const isRelative = next.startsWith('/');
-      const destination = isRelative ? `${origin}${next}` : next;
-      return NextResponse.redirect(destination);
-    }
+    const destination = new URL(next.startsWith('/') ? next : `/${next}`, origin);
+    destination.searchParams.set('code', code);
+    return NextResponse.redirect(destination.toString());
   }
 
   return NextResponse.redirect(`${origin}/?error=auth_callback_failed`);
