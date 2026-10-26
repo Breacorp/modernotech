@@ -261,7 +261,7 @@ export default function CuentaPage() {
 
   if (isLoading || !isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center text-sm font-mono">
+      <div className="min-h-screen bg-[#f5f7fa] text-slate-900 flex items-center justify-center text-sm font-mono">
         <span className="w-2 h-2 rounded-full bg-[#4c8dff] animate-pulse mr-3" />
         Verificando sesión segura en Supabase...
       </div>
@@ -298,30 +298,30 @@ export default function CuentaPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#050507] text-white selection:bg-[#4c8dff] selection:text-black overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#f5f7fa] text-slate-900 selection:bg-[#4c8dff] selection:text-black overflow-x-hidden">
       <ModernoBackground />
       <ModernoNavbar />
 
       <main className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-12 pt-32 sm:pt-36 pb-24">
         {/* Header Profile Summary */}
-        <div className="mb-8 p-8 rounded-3xl bg-[#0B0B10]/90 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="mb-8 p-8 rounded-3xl bg-white/80 border border-slate-200/70 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#4c8dff] to-[#2f6bff] p-0.5 shadow-[0_0_30px_rgba(0,229,255,0.3)] shrink-0">
-              <div className="w-full h-full bg-[#050507] rounded-[14px] flex items-center justify-center text-2xl font-black text-white font-sans">
+              <div className="w-full h-full bg-[#f5f7fa] rounded-[14px] flex items-center justify-center text-2xl font-black text-slate-900 font-sans">
                 {userInitials}
               </div>
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#4c8dff]/80">Mi Moderno</span>
-                <h1 className="text-xl sm:text-2xl font-black text-white font-sans">{userName}</h1>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-sans">{userName}</h1>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   SESIÓN SUPABASE ACTIVA
                 </span>
               </div>
-              <p className="text-xs text-[#94A3B8] font-mono">{userEmail} &bull; ID: {userIdDisplay}</p>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] text-white/50 mt-2">
-                <span>Ecosistema: <strong className="text-white">{activeEntitlements.length} Productos Conectados</strong></span>
+              <p className="text-xs text-slate-500 font-mono">{userEmail} &bull; ID: {userIdDisplay}</p>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] text-slate-400 mt-2">
+                <span>Ecosistema: <strong className="text-slate-900">{activeEntitlements.length} Productos Conectados</strong></span>
                 <span>&bull;</span>
                 <span>Membresías Pagas: <strong className="text-[#4c8dff]">{paidEntitlements.length} Activas</strong></span>
                 <span>&bull;</span>
@@ -333,7 +333,7 @@ export default function CuentaPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={signOut}
-              className="px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-white transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-slate-200 text-xs font-bold text-slate-900 transition-all cursor-pointer"
             >
               Cerrar Sesión
             </button>
@@ -351,10 +351,10 @@ export default function CuentaPage() {
           <div className="flex items-start sm:items-center gap-3">
             <span className="text-2xl">🏛️</span>
             <div>
-              <h3 className="text-xs sm:text-sm font-bold text-white">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900">
                 Cuenta Universal de Ecosistema (Base de Datos Supabase Central)
               </h3>
-              <p className="text-[11px] text-[#94A3B8] font-light">
+              <p className="text-[11px] text-slate-500 font-light">
                 Los accesos a tus servicios se validan en tiempo real contra los registros de la base de datos de identidad.
               </p>
             </div>
@@ -362,13 +362,13 @@ export default function CuentaPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 mb-8 border-b border-white/[0.06] pb-4">
+        <div className="flex items-center gap-2 mb-8 border-b border-slate-200/70 pb-4">
           <button
             onClick={() => setActiveTab("services")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "services"
                 ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
-                : "text-white/60 hover:text-white"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Mis Productos ({activeEntitlements.length})
@@ -378,7 +378,7 @@ export default function CuentaPage() {
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "billing"
                 ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
-                : "text-white/60 hover:text-white"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Facturación & Pagos
@@ -388,7 +388,7 @@ export default function CuentaPage() {
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "licenses"
                 ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
-                : "text-white/60 hover:text-white"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Licencias de Software ({userLicenses.length})
@@ -398,7 +398,7 @@ export default function CuentaPage() {
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "security"
                 ? "bg-[#4c8dff]/15 text-[#4c8dff] border border-[#4c8dff]/30"
-                : "text-white/60 hover:text-white"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Seguridad & Sesión
@@ -411,7 +411,7 @@ export default function CuentaPage() {
             {/* Membresías Pagas Activas */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-black text-white/50 tracking-widest uppercase flex items-center gap-2">
+                <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#4c8dff]" />
                   <span>Membresías & Planes Contratados</span>
                 </h2>
@@ -421,8 +421,8 @@ export default function CuentaPage() {
               </div>
 
               {paidEntitlements.length === 0 ? (
-                <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.06] text-center max-w-xl">
-                  <p className="text-sm text-[#94A3B8] mb-4">
+                <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70 text-center max-w-xl">
+                  <p className="text-sm text-slate-500 mb-4">
                     No posees planes o membresías de pago activas en este momento.
                   </p>
                   <a
@@ -439,22 +439,22 @@ export default function CuentaPage() {
                     return (
                       <div
                         key={ent.productId}
-                        className="p-7 rounded-2xl bg-[#0B0B10] border border-[#4c8dff]/40 shadow-[0_10px_30px_rgba(0,0,0,0.6)] flex flex-col justify-between relative overflow-hidden"
+                        className="p-7 rounded-2xl bg-white/80 border border-[#4c8dff]/40 shadow-[0_10px_30px_rgba(15,23,42,0.12)] flex flex-col justify-between relative overflow-hidden"
                       >
                         <div>
                           <div className="flex items-center justify-between mb-4">
                             <div>
-                              <h3 className="text-lg font-black text-white">{meta.name}</h3>
+                              <h3 className="text-lg font-black text-slate-900">{meta.name}</h3>
                               <span className="text-[10px] font-mono text-[#4c8dff]">{meta.url}</span>
                             </div>
                             <span className="px-2.5 py-1 rounded-full bg-[#4c8dff]/15 text-[#4c8dff] text-[10px] font-black border border-[#4c8dff]/40">
                               TIER: {ent.tier.toUpperCase()}
                             </span>
                           </div>
-                          <p className="text-xs text-[#94A3B8] font-light mb-5">{meta.tagline}</p>
+                          <p className="text-xs text-slate-500 font-light mb-5">{meta.tagline}</p>
                           {ent.quotaLabel && (
-                            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] mb-5 text-xs text-white/70">
-                              Cuota Asignada: <strong className="text-white">{ent.quotaLabel}</strong>
+                            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 mb-5 text-xs text-slate-600">
+                              Cuota Asignada: <strong className="text-slate-900">{ent.quotaLabel}</strong>
                             </div>
                           )}
                           {ent.grantNotes && (
@@ -464,7 +464,7 @@ export default function CuentaPage() {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+                        <div className="flex items-center gap-3 pt-4 border-t border-slate-200/70">
                           <a
                             href={meta.url}
                             target="_blank"
@@ -484,7 +484,7 @@ export default function CuentaPage() {
             {/* Productos con Acceso Gratuito Activo */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-black text-white/50 tracking-widest uppercase flex items-center gap-2">
+                <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   <span>Productos con Capa Gratuita Habilitada</span>
                 </h2>
@@ -494,8 +494,8 @@ export default function CuentaPage() {
               </div>
 
               {freeEntitlements.length === 0 ? (
-                <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.06] text-center max-w-xl">
-                  <p className="text-sm text-[#94A3B8]">
+                <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70 text-center max-w-xl">
+                  <p className="text-sm text-slate-500">
                     No posees servicios gratuitos asignados en tu cuenta.
                   </p>
                 </div>
@@ -506,7 +506,7 @@ export default function CuentaPage() {
                     return (
                       <div
                         key={ent.productId}
-                        className="p-6 rounded-2xl bg-[#0B0B10] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all"
+                        className="p-6 rounded-2xl bg-white/80 border border-slate-200/70 flex flex-col justify-between hover:border-white/20 transition-all"
                       >
                         <div>
                           <div className="flex items-center justify-between mb-3">
@@ -514,8 +514,8 @@ export default function CuentaPage() {
                               PLAN GRATUITO ACTIVO
                             </span>
                           </div>
-                          <h3 className="text-base font-black text-white mb-1">{meta.name}</h3>
-                          <p className="text-xs text-[#94A3B8] font-light mb-4">{meta.tagline}</p>
+                          <h3 className="text-base font-black text-slate-900 mb-1">{meta.name}</h3>
+                          <p className="text-xs text-slate-500 font-light mb-4">{meta.tagline}</p>
                         </div>
 
                         <div className="space-y-2">
@@ -523,7 +523,7 @@ export default function CuentaPage() {
                             href={meta.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 text-center rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-white transition-all block"
+                            className="w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-white/[0.12] border border-slate-200 text-xs font-bold text-slate-900 transition-all block"
                           >
                             Entrar a {meta.name} &rarr;
                           </a>
@@ -539,9 +539,9 @@ export default function CuentaPage() {
 
         {/* Discoverable products / update paths */}
         {activeTab === "services" && discoverableProducts.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-white/[0.06]">
+          <div className="mt-12 pt-8 border-t border-slate-200/70">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-black text-white/50 tracking-widest uppercase flex items-center gap-2">
+              <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-purple-400" />
                 <span>Descubrir y Contratar Servicios</span>
               </h2>
@@ -551,21 +551,21 @@ export default function CuentaPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {discoverableProducts.map((product) => (
-                <div key={product.id} className="p-6 rounded-2xl bg-[#0B0B10] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all">
+                <div key={product.id} className="p-6 rounded-2xl bg-white/80 border border-slate-200/70 flex flex-col justify-between hover:border-white/20 transition-all">
                   <div>
-                    <h3 className="text-base font-black text-white mb-1">{product.name}</h3>
-                    <p className="text-xs text-[#94A3B8] font-light mb-3">{product.tagline}</p>
-                    <span className="inline-flex px-2.5 py-1 rounded-full bg-white/[0.04] text-[#94A3B8] text-[10px] font-bold border border-white/10">
+                    <h3 className="text-base font-black text-slate-900 mb-1">{product.name}</h3>
+                    <p className="text-xs text-slate-500 font-light mb-3">{product.tagline}</p>
+                    <span className="inline-flex px-2.5 py-1 rounded-full bg-white/[0.04] text-slate-500 text-[10px] font-bold border border-slate-200">
                       {product.status === "AVAILABLE" ? "Disponible" : product.status}
                     </span>
                   </div>
                   <div className="mt-4 space-y-2">
                     {product.status === "AVAILABLE" ? (
-                      <a href="https://pay.moderno.com.ar/" target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-white transition-all">
+                      <a href="https://pay.moderno.com.ar/" target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-white/[0.12] border border-slate-200 text-xs font-bold text-slate-900 transition-all">
                         Contratar en Moderno Pay →
                       </a>
                     ) : (
-                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-white transition-all">
+                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="block w-full py-2.5 text-center rounded-xl bg-slate-100 hover:bg-white/[0.12] border border-slate-200 text-xs font-bold text-slate-900 transition-all">
                         Ver Estado del Proyecto →
                       </a>
                     )}
@@ -579,17 +579,17 @@ export default function CuentaPage() {
         {/* Tab 2: Facturación */}
         {activeTab === "billing" && (
           <div className="space-y-6 max-w-4xl">
-            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
-              <h3 className="text-lg font-black text-white mb-1">Método de Pago</h3>
-              <p className="text-xs text-[#94A3B8] font-light mb-6">
+            <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70">
+              <h3 className="text-lg font-black text-slate-900 mb-1">Método de Pago</h3>
+              <p className="text-xs text-slate-500 font-light mb-6">
                 Gestión de pagos y medios de cobro asociados a tu cuenta.
               </p>
 
-              <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center mb-6">
-                <p className="text-xs text-[#94A3B8]">
+              <div className="p-6 rounded-xl bg-slate-50 border border-slate-200/70 text-center mb-6">
+                <p className="text-xs text-slate-500">
                   No posees métodos de pago guardados actualmente.
                 </p>
-                <p className="text-[11px] text-white/40 mt-1">
+                <p className="text-[11px] text-slate-400 mt-1">
                   Tu método de pago se asociará de forma segura cuando contrates un plan en la plataforma.
                 </p>
               </div>
@@ -605,9 +605,9 @@ export default function CuentaPage() {
             </div>
 
             {/* Facturas Recientes */}
-            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
-              <h3 className="text-lg font-black text-white mb-2">Historial de Facturas & Recibos</h3>
-              <p className="text-xs text-[#94A3B8] font-light mb-6">
+            <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70">
+              <h3 className="text-lg font-black text-slate-900 mb-2">Historial de Facturas & Recibos</h3>
+              <p className="text-xs text-slate-500 font-light mb-6">
                 Comprobantes oficiales emitidos por tus suscripciones y servicios.
               </p>
 
@@ -618,19 +618,19 @@ export default function CuentaPage() {
               )}
 
               {isLoadingInvoices ? (
-                <div className="p-8 text-center text-xs font-mono text-[#94A3B8]">
+                <div className="p-8 text-center text-xs font-mono text-slate-500">
                   <span className="inline-block w-4 h-4 border-2 border-[#4c8dff] border-t-transparent rounded-full animate-spin mr-2" />
                   Consultando facturas en Supabase...
                 </div>
               ) : invoices.length === 0 ? (
-                <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#94A3B8]">
+                <div className="p-6 rounded-xl bg-slate-50 border border-slate-200/70 text-center text-xs text-slate-500">
                   No registras facturas emitidas en tu cuenta.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                      <tr className="border-b border-slate-200/70 text-[10px] font-black uppercase tracking-widest text-slate-500">
                         <th className="py-3 px-4">Comprobante</th>
                         <th className="py-3 px-4">Servicio / Plan</th>
                         <th className="py-3 px-4">Período</th>
@@ -640,18 +640,18 @@ export default function CuentaPage() {
                     </thead>
                     <tbody className="divide-y divide-white/[0.04]">
                       {invoices.map((inv) => (
-                        <tr key={inv.id} className="hover:bg-white/[0.02]">
-                          <td className="py-3.5 px-4 font-mono text-white font-bold">
+                        <tr key={inv.id} className="hover:bg-slate-50">
+                          <td className="py-3.5 px-4 font-mono text-slate-900 font-bold">
                             {inv.invoice_number}
                           </td>
-                          <td className="py-3.5 px-4 text-white">
+                          <td className="py-3.5 px-4 text-slate-900">
                             <span className="font-bold">{inv.product_id}</span>
-                            <span className="text-[10px] text-[#94A3B8] font-mono ml-2 uppercase">({inv.tier})</span>
+                            <span className="text-[10px] text-slate-500 font-mono ml-2 uppercase">({inv.tier})</span>
                           </td>
-                          <td className="py-3.5 px-4 text-[#94A3B8] text-[11px]">
+                          <td className="py-3.5 px-4 text-slate-500 text-[11px]">
                             {new Date(inv.billing_period_start).toLocaleDateString("es-AR")} - {new Date(inv.billing_period_end).toLocaleDateString("es-AR")}
                           </td>
-                          <td className="py-3.5 px-4 font-bold text-white">
+                          <td className="py-3.5 px-4 font-bold text-slate-900">
                             ${(inv.amount_cents / 100).toFixed(2)} {inv.currency}
                           </td>
                           <td className="py-3.5 px-4">
@@ -679,9 +679,9 @@ export default function CuentaPage() {
         {activeTab === "licenses" && (
           <div className="space-y-8 max-w-4xl">
             {/* Validador de Licencia Offline / Online */}
-            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
-              <h3 className="text-lg font-black text-white mb-1">Activar o Validar Licencia</h3>
-              <p className="text-xs text-[#94A3B8] font-light mb-6">
+            <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70">
+              <h3 className="text-lg font-black text-slate-900 mb-1">Activar o Validar Licencia</h3>
+              <p className="text-xs text-slate-500 font-light mb-6">
                 Ingresa una clave de producto para verificar su autenticidad y vincularla a tu hardware.
               </p>
 
@@ -691,7 +691,7 @@ export default function CuentaPage() {
                   placeholder="MOD-CLEANER-XXXX-XXXX-XXXX"
                   value={verifyKeyInput}
                   onChange={(e) => setVerifyKeyInput(e.target.value.toUpperCase())}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-[#4c8dff] tracking-wider"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-slate-200 text-slate-900 font-mono text-xs focus:outline-none focus:border-[#4c8dff] tracking-wider"
                   required
                 />
                 <button
@@ -717,9 +717,9 @@ export default function CuentaPage() {
             </div>
 
             {/* Listado de Licencias Propias */}
-            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
+            <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-black text-white">Mis Claves de Licencia</h3>
+                <h3 className="text-lg font-black text-slate-900">Mis Claves de Licencia</h3>
                 <span className="text-xs font-mono text-[#4c8dff]">
                   {userLicenses.length} {userLicenses.length === 1 ? "Licencia" : "Licencias"}
                 </span>
@@ -732,19 +732,19 @@ export default function CuentaPage() {
               )}
 
               {isLoadingLicenses ? (
-                <div className="p-8 text-center text-xs font-mono text-[#94A3B8]">
+                <div className="p-8 text-center text-xs font-mono text-slate-500">
                   <span className="inline-block w-4 h-4 border-2 border-[#4c8dff] border-t-transparent rounded-full animate-spin mr-2" />
                   Consultando licencias en Supabase...
                 </div>
               ) : userLicenses.length === 0 ? (
-                <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#94A3B8]">
+                <div className="p-6 rounded-xl bg-slate-50 border border-slate-200/70 text-center text-xs text-slate-500">
                   No registras licencias de software vinculadas a tu cuenta.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-[#94A3B8]">
+                      <tr className="border-b border-slate-200/70 text-[10px] font-black uppercase tracking-widest text-slate-500">
                         <th className="py-3 px-4">Clave</th>
                         <th className="py-3 px-4">Producto</th>
                         <th className="py-3 px-4">Activaciones</th>
@@ -753,15 +753,15 @@ export default function CuentaPage() {
                     </thead>
                     <tbody className="divide-y divide-white/[0.04]">
                       {userLicenses.map((lic) => (
-                        <tr key={lic.id} className="hover:bg-white/[0.02]">
+                        <tr key={lic.id} className="hover:bg-slate-50">
                           <td className="py-3.5 px-4 font-mono text-[#4c8dff] font-bold select-all">
                             {lic.license_key}
                           </td>
-                          <td className="py-3.5 px-4 text-white">
+                          <td className="py-3.5 px-4 text-slate-900">
                             <span className="font-bold uppercase">{lic.product_id}</span>
-                            <span className="text-[10px] text-[#94A3B8] font-mono ml-2 uppercase">({lic.tier})</span>
+                            <span className="text-[10px] text-slate-500 font-mono ml-2 uppercase">({lic.tier})</span>
                           </td>
-                          <td className="py-3.5 px-4 text-white font-mono">
+                          <td className="py-3.5 px-4 text-slate-900 font-mono">
                             {lic.current_activations} / {lic.max_activations}
                           </td>
                           <td className="py-3.5 px-4">
@@ -788,9 +788,9 @@ export default function CuentaPage() {
         {/* Tab 3: Seguridad */}
         {activeTab === "security" && (
           <div className="space-y-6 max-w-4xl">
-            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
-              <h3 className="text-lg font-black text-white mb-1">Credenciales & Autenticación</h3>
-              <p className="text-xs text-[#94A3B8] font-light mb-6">
+            <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70">
+              <h3 className="text-lg font-black text-slate-900 mb-1">Credenciales & Autenticación</h3>
+              <p className="text-xs text-slate-500 font-light mb-6">
                 Configuración de seguridad administrada mediante Supabase Auth central.
               </p>
 
@@ -806,16 +806,16 @@ export default function CuentaPage() {
               )}
 
               <div className="space-y-4">
-                <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                <div className="p-5 rounded-xl bg-slate-50 border border-slate-200/70">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">Autenticación de Dos Factores (MFA TOTP)</span>
+                        <span className="text-xs font-bold text-slate-900">Autenticación de Dos Factores (MFA TOTP)</span>
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                             mfaFactorsCount && mfaFactorsCount > 0
                               ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                              : "bg-white/[0.04] text-white/50 border border-white/10"
+                              : "bg-white/[0.04] text-slate-400 border border-slate-200"
                           }`}
                         >
                           {mfaFactorsCount === null
@@ -825,7 +825,7 @@ export default function CuentaPage() {
                             : "NO CONFIGURADO"}
                         </span>
                       </div>
-                      <span className="text-[11px] text-[#94A3B8] font-light mt-1 block">
+                      <span className="text-[11px] text-slate-500 font-light mt-1 block">
                         Protege tu cuenta con Google Authenticator, 1Password o Authy mediante Supabase MFA.
                       </span>
                     </div>
@@ -853,7 +853,7 @@ export default function CuentaPage() {
                             setEnrollData(null);
                             setVerifyCode("");
                           }}
-                          className="text-xs text-[#94A3B8] hover:text-white"
+                          className="text-xs text-slate-500 hover:text-slate-900"
                         >
                           Cancelar
                         </button>
@@ -879,16 +879,16 @@ export default function CuentaPage() {
 
                         <div className="space-y-4">
                           <div>
-                            <span className="text-[11px] text-[#94A3B8] block mb-1">
+                            <span className="text-[11px] text-slate-500 block mb-1">
                               Clave secreta manual (si no puedes escanear el QR):
                             </span>
-                            <div className="p-2.5 rounded-lg bg-white/[0.04] border border-white/10 font-mono text-xs text-[#4c8dff] break-all select-all">
+                            <div className="p-2.5 rounded-lg bg-white/[0.04] border border-slate-200 font-mono text-xs text-[#4c8dff] break-all select-all">
                               {enrollData.secret}
                             </div>
                           </div>
 
                           <form onSubmit={handleVerifyEnroll} className="space-y-3">
-                            <label className="text-[11px] text-white font-bold block">
+                            <label className="text-[11px] text-slate-900 font-bold block">
                               Ingresa el código de 6 dígitos generado por tu app:
                             </label>
                             <div className="flex gap-2">
@@ -898,7 +898,7 @@ export default function CuentaPage() {
                                 placeholder="000000"
                                 value={verifyCode}
                                 onChange={(e) => setVerifyCode(e.target.value)}
-                                className="flex-1 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-[#4c8dff]"
+                                className="flex-1 px-3 py-2 rounded-xl bg-white/[0.05] border border-slate-200 text-slate-900 font-mono text-center tracking-widest text-lg focus:outline-none focus:border-[#4c8dff]"
                                 required
                               />
                               <button
@@ -917,22 +917,22 @@ export default function CuentaPage() {
 
                   {/* Factores TOTP ya activos */}
                   {factors.length > 0 && (
-                    <div className="mt-5 border-t border-white/[0.06] pt-4 space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#94A3B8] block mb-2">
+                    <div className="mt-5 border-t border-slate-200/70 pt-4 space-y-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">
                         Factores Verificados Activos
                       </span>
                       {factors.map((f) => (
                         <div
                           key={f.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]"
+                          className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200/70"
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-base">📱</span>
                             <div>
-                              <span className="text-xs font-bold text-white block">
+                              <span className="text-xs font-bold text-slate-900 block">
                                 {f.friendly_name || "Authenticator App"}
                               </span>
-                              <span className="text-[10px] font-mono text-[#94A3B8]">
+                              <span className="text-[10px] font-mono text-slate-500">
                                 ID: {f.id} • Creado: {new Date(f.created_at).toLocaleDateString("es-AR")}
                               </span>
                             </div>
@@ -950,10 +950,10 @@ export default function CuentaPage() {
                   )}
                 </div>
 
-                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-xs font-bold text-white block">Contraseña de Cuenta</span>
-                    <span className="text-[11px] text-[#94A3B8] font-light">
+                    <span className="text-xs font-bold text-slate-900 block">Contraseña de Cuenta</span>
+                    <span className="text-[11px] text-slate-500 font-light">
                       Protegida y cifrada en los servidores de autenticación central.
                     </span>
                     {passwordResetStatus && (
@@ -964,7 +964,7 @@ export default function CuentaPage() {
                   </div>
                   <button
                     onClick={handlePasswordReset}
-                    className="px-4 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-white cursor-pointer self-start sm:self-auto"
+                    className="px-4 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-slate-200 text-xs font-bold text-slate-900 cursor-pointer self-start sm:self-auto"
                   >
                     Restablecer Contraseña
                   </button>
@@ -973,13 +973,13 @@ export default function CuentaPage() {
             </div>
 
             {/* Sesión Activa */}
-            <div className="p-8 rounded-2xl bg-[#0B0B10] border border-white/[0.08]">
-              <h3 className="text-lg font-black text-white mb-4">Sesión Activa</h3>
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between text-xs">
+            <div className="p-8 rounded-2xl bg-white/80 border border-slate-200/70">
+              <h3 className="text-lg font-black text-slate-900 mb-4">Sesión Activa</h3>
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">🔐</span>
                   <div>
-                    <span className="font-bold text-white block">Sesión Central Supabase</span>
+                    <span className="font-bold text-slate-900 block">Sesión Central Supabase</span>
                     <span className="text-[10px] font-mono text-emerald-400">
                       Usuario ID: {user.id}
                     </span>
