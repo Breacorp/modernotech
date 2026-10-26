@@ -1,4 +1,14 @@
-![Moderno Tech Logo](https://raw.githubusercontent.com/Breacorp/modernotech/main/public/logo.png)
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/Breacorp/modernotech/main/public/logo.png" alt="Moderno Tech Logo" width="220" />
+
+# Moderno Tech
+
+### Ecosistema Digital Unificado
+
+</div>
+
+---
 
 # Moderno Tech — Ecosistema Digital Unificado
 
