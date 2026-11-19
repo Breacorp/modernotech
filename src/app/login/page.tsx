@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,6 +36,27 @@ export default function LoginPage() {
       window.location.href = "/cuenta";
     } catch (err: any) {
       setErrorMessage(err.message || "Error al conectar con el servidor de autenticación");
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setErrorMessage("Ingresá tu correo electrónico para recibir el enlace de recuperación.");
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    setInfoMessage(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/cuenta`,
+      });
+      if (error) throw error;
+      setInfoMessage("Te enviamos un enlace a tu correo para restablecer tu contraseña.");
+    } catch (err: any) {
+      setErrorMessage(err?.message || "No se pudo enviar el correo de recuperación.");
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -173,9 +195,18 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#9aa0a6] block">
-                  Contraseña
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-mono text-[#9aa0a6] block">
+                    Contraseña
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-[11px] font-mono text-[#4285f4] hover:underline"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
                 <div className="relative flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -203,6 +234,12 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
+
+              {infoMessage && (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 text-xs text-emerald-300">
+                  {infoMessage}
+                </div>
+              )}
 
               <button
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4285f4] disabled:pointer-events-none disabled:opacity-40 active:scale-[0.98] hover:bg-[#1b66c9] px-4 py-2 w-full mt-2 h-10 rounded-xl bg-gradient-to-r from-[#4285f4] to-[#1a73e8] hover:from-[#1a73e8] hover:to-[#1557b0] text-white text-xs font-semibold shadow-md shadow-[#4285f4]/20"

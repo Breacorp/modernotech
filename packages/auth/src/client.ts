@@ -1,17 +1,12 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const FALLBACK_SUPABASE_URL = 'https://rcskjdksimcfkdjzxara.supabase.co';
-const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjc2tqZGtzaW1jZmtkanp4YXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NzEwMjMsImV4cCI6MjA5MzA0NzAyM30.lD3h-1K0uz3O9QtGlZeQH_WMuyctN_cwjEiFSBHT3ZQ';
+export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 
-export const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('http')
-    ? process.env.NEXT_PUBLIC_SUPABASE_URL
-    : FALLBACK_SUPABASE_URL;
+export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
 
-export const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.startsWith('eyJ')
-    ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    : FALLBACK_SUPABASE_ANON_KEY;
+if (typeof window !== 'undefined' && SUPABASE_URL === 'https://placeholder.supabase.co') {
+  console.warn('[ModernoAuth] NEXT_PUBLIC_SUPABASE_URL is not configured.');
+}
 
 export function getSharedCookieDomain(): string | undefined {
   if (typeof window === 'undefined') return undefined;

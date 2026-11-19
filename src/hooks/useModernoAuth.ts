@@ -206,6 +206,7 @@ export const ModernoAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setEntitlements([]);
   }, []);
 
+
   const value = useMemo<ModernoAuthContextValue>(() => {
     const activeServicesCount = entitlements.filter(
       (item) => item.status === "active"
