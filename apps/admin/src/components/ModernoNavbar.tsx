@@ -7,6 +7,7 @@ import { useModernoAuth } from "../hooks/useModernoAuth";
 
 const NAV_LINKS = [
   { label: "Ecosistema", href: "/#ecosistema" },
+  { label: "Ads", href: "/ads" },
   { label: "Compañía", href: "/#compania" },
   { label: "Ayuda", href: "/ayuda" },
 ];
