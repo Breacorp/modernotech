@@ -7,6 +7,8 @@ import { useModernoAuth } from "../hooks/useModernoAuth";
 
 const NAV_LINKS = [
   { label: "Ecosistema", href: "/#ecosistema" },
+  { label: "Precios", href: "/pricing" },
+  { label: "Pay", href: "https://pay.moderno.com.ar" },
   { label: "Ads", href: "/ads" },
   { label: "Compañía", href: "/#compania" },
   { label: "Ayuda", href: "/ayuda" },

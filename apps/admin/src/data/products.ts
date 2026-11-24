@@ -197,7 +197,7 @@ export const PRODUCTS_REGISTRY: ProductItem[] = [
     description:
       "Infraestructura de pagos para productos y servicios del ecosistema.",
     area: "business",
-    status: "COMING SOON",
+    status: "AVAILABLE",
     url: "https://pay.moderno.com.ar",
     icon: "credit-card",
     order: 14,
