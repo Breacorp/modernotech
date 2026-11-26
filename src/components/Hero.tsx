@@ -18,8 +18,10 @@ export const Hero: React.FC = () => {
           </h1>
 
           <p className="mt-7 max-w-xl text-pretty text-base font-light leading-relaxed text-[var(--moderno-text-muted)] sm:text-lg">
-            Diseñamos software, inteligencia artificial y herramientas
-            conectadas para personas y empresas.
+            Diseñamos plataformas SaaS, inteligencia artificial e
+            infraestructura conectada. Usá nuestros servicios o lanzá tu propia
+            empresa tecnológica con tu marca, tus precios y tus clientes, sin
+            desarrollar nada.
           </p>
 
           <div className="mt-9">

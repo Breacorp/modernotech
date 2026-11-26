@@ -2,6 +2,7 @@ import React from "react";
 import { ModernoBackground } from "../components/ModernoBackground";
 import { ModernoNavbar } from "../components/ModernoNavbar";
 import { Hero } from "../components/Hero";
+import { BusinessModelSection } from "../components/BusinessModelSection";
 import { EcosystemOverview } from "../components/EcosystemOverview";
 import { ProductCatalog } from "../components/ProductCatalog";
 import { PhilosophySection } from "../components/PhilosophySection";
@@ -20,6 +21,7 @@ export default function Home() {
 
       <main id="main-content" tabIndex={-1} className="relative z-10 outline-none">
         <Hero />
+        <BusinessModelSection />
         <EcosystemOverview />
         <ProductCatalog />
         <PhilosophySection />
